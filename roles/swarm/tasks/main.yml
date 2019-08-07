@@ -5,29 +5,43 @@
   changed_when: false
 
 
-- name: "Create primary swarm manager"
-  shell: docker swarm init --advertise-addr {{ ansible_eth0['ipv4']['address'] }}
+- name: "Init a new swarm with default parameters"
+  docker_swarm:
+    state: present
+    advertise_addr: "{{ hostvars[groups.swarm_manager_prime[0]]['ansible_eth0']['ipv4']['address'] }}"
   when: "docker_info.stdout.find('Swarm: inactive') != -1 and inventory_hostname in groups.swarm_manager_prime"
 
-- name: "Get docker swarm manager token"
-  shell: docker swarm join-token -q manager
-  register: manager_token
-  when: "inventory_hostname in groups.swarm_manager_prime"
+- name: Update swarm configuration
+  docker_swarm:
+    state: present
+    election_tick: 15
+  when: "docker_info.stdout.find('Swarm: inactive') != -1 and inventory_hostname in groups.swarm_manager_prime"
 
-- name: "Get docker swarm worker token"
-  shell: docker swarm join-token -q worker
-  register: worker_token
+- name: Inspect swarm
+  docker_swarm_info:
+    nodes: no
+    verbose_output: yes
+  register: result
   when: "inventory_hostname in groups.swarm_manager_prime"
 
 - name: "Join as a manager"
-  shell: "docker swarm join --token {{ hostvars[groups.swarm_manager_prime[0]]['manager_token']['stdout'] }} {{ hostvars[groups.swarm_manager_prime[0]]['ansible_eth0']['ipv4']['address'] }}:2377"
+  docker_swarm:
+    state: join
+    join_token: "{{ hostvars[groups.swarm_manager_prime[0]]['result'].swarm_facts.JoinTokens.Manager }}"
+    advertise_addr: "eth0:4567"
+    remote_addrs: ["{{ hostvars[groups.swarm_manager_prime[0]]['ansible_eth0']['ipv4']['address'] }}:2377" ]
   retries: 3
-  delay: 20
+  delay: 15
   when: "docker_info.stdout.find('Swarm: inactive') != -1  and inventory_hostname in groups.swarm_managers"
 
-
 - name: "Join as a worker"
-  shell: "docker swarm join --token {{ hostvars[groups.swarm_manager_prime[0]]['worker_token']['stdout'] }} {{ hostvars[groups.swarm_manager_prime[0]]['ansible_eth0']['ipv4']['address'] }}:2377"
+  #vars:
+    #swarm_managers: "{{ groups.swarm_managers | map('extract', hostvars, ['ansible_eth0', 'ipv4', 'address']) | join(':2377,')}}"
+  docker_swarm:
+    state: join
+    join_token: "{{ hostvars[groups.swarm_manager_prime[0]]['result'].swarm_facts.JoinTokens.Worker }}"
+    advertise_addr: "eth0:4567"
+    remote_addrs: "{{ hostvars[groups.swarm_manager_prime[0]]['ansible_eth0']['ipv4']['address'] }}"
   retries: 3
   delay: 20
   when: "docker_info.stdout.find('Swarm: inactive') != -1 and inventory_hostname in groups.swarm_workers"
