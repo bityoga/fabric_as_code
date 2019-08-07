@@ -1,0 +1,55 @@
+---
+
+- name: Set up the Docker CE APT GPG key
+  become: yes
+  apt_key: 
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: Set up the Docker CE APT repository
+  become: yes
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/{{ansible_distribution|lower}} {{ansible_distribution_release}} stable
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: Set up the Docker CE YUM repository
+  become: yes
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docer-ce.repo
+  when: ansible_os_family == 'RedHat'
+
+- name: Install Docker
+  become: yes
+  package:
+    name: docker-ce
+    state: present
+    update_cache: yes
+
+- name: Start Docker service
+  become: yes
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: 'Create a user'
+  become: yes
+  user:
+    name: "{{ username }}"
+    state: present
+
+- name: 'Create docker group'
+  become: yes
+  group:
+    name: docker
+    state: present
+
+- name: 'Add user to group docker'
+  become: yes
+  user:
+    name: "{{ username }}"
+    groups: docker
+    append: yes

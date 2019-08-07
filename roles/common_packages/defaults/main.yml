@@ -1,0 +1,24 @@
+---
+# Additional pakages to be installed
+debian_package_list:
+  - apt-transport-https
+  - ca-certificates 
+  - curl 
+  - gnupg2 
+  - software-properties-common
+  - jq
+  - python3-pip
+  - rsync
+
+redhat_package_list:
+  - yum-utils
+  - device-mapper-persistent-data
+  - lvm2
+  - epel-release
+  - jq
+  - python-pip
+  - rsync
+
+pip_packages:
+  - docker
+

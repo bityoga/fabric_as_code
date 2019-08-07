@@ -1,0 +1,11 @@
+---
+
+# ansible-playbook -v spawn_swarm.yml -u root
+
+- name: Create and spawn a docker swarm
+  hosts: all
+  gather_facts: true
+  become: yes
+  become_user: docker
+  roles:
+    - swarm

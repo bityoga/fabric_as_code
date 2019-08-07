@@ -1,0 +1,12 @@
+---
+
+# ansible-playbook -v initialize_hosts.yml -u root
+
+- name: Initialize the host machines
+  hosts: all
+  gather_facts: true
+  vars:
+    username: docker
+  roles:
+    - common_packages
+    - docker
