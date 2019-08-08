@@ -14,6 +14,27 @@
     update_cache: yes
   when: ansible_os_family == 'RedHat'
 
+- name: Set up the golang APT repository
+  become: yes
+  apt_repository:
+    repo: ppa:longsleep/golang-backports
+    state: present
+  when: ansible_os_family == 'Debian'  
+
+- name: Set up the golang YUM GPG key
+  become: yes
+  rpm_key: 
+    key: https://mirror.go-repo.io/centos/RPM-GPG-KEY-GO-REPO
+    state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: Set up the Docker CE YUM repository
+  become: yes
+  get_url:
+    url: https://mirror.go-repo.io/centos/go-repo.repo
+    dest: /etc/yum.repos.d/go-repo.repo
+  when: ansible_os_family == 'RedHat'
+
 - name: Install prerequisites for Debian distros
   become: yes
   apt:
@@ -35,3 +56,41 @@
   pip:
     name: "{{ item }}"
   loop: "{{ pip_packages }}"
+
+- name: 'Create a user'
+  become: yes
+  user:
+    name: "{{ docker_username }}"
+    state: present
+
+- name: 'Create docker group'
+  become: yes
+  group:
+    name: "{{ docker_group }}"
+    state: present
+
+- name: 'Add user to group docker'
+  become: yes
+  user:
+    name: "{{ docker_username }}"
+    groups: "{{ docker_group }}"
+    append: yes
+
+- name: 'Create a user'
+  become: yes
+  user:
+    name: "{{ hlf_username }}"
+    state: present
+
+- name: 'Create user group'
+  become: yes
+  group:
+    name: "{{ hlf_group }}"
+    state: present
+
+- name: 'Add user to group hlf'
+  become: yes
+  user:
+    name: "{{ hlf_username }}"
+    groups: "{{ hlf_group }}"
+    append: yes

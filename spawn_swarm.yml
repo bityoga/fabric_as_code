@@ -4,8 +4,8 @@
 
 - name: Create and spawn a docker swarm
   hosts: all
-  gather_facts: true
+  gather_facts: yes
   become: yes
-  become_user: docker
+  become_user: "{{ docker_username }}"
   roles:
     - swarm

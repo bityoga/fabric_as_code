@@ -9,6 +9,9 @@ debian_package_list:
   - jq
   - python3-pip
   - rsync
+  - golang-go
+  - libtool
+  - libltdl-dev
 
 redhat_package_list:
   - yum-utils
@@ -18,6 +21,9 @@ redhat_package_list:
   - jq
   - python-pip
   - rsync
+  - golang
+  - libtool
+  - libtool-ltdl-devel
 
 pip_packages:
   - docker

@@ -35,21 +35,3 @@
     state: started
     enabled: yes
 
-- name: 'Create a user'
-  become: yes
-  user:
-    name: "{{ username }}"
-    state: present
-
-- name: 'Create docker group'
-  become: yes
-  group:
-    name: docker
-    state: present
-
-- name: 'Add user to group docker'
-  become: yes
-  user:
-    name: "{{ username }}"
-    groups: docker
-    append: yes

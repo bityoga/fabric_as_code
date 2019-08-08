@@ -4,9 +4,7 @@
 
 - name: Initialize the host machines
   hosts: all
-  gather_facts: true
-  vars:
-    username: docker
+  gather_facts: yes
   roles:
     - common_packages
     - docker

@@ -45,3 +45,15 @@
   retries: 3
   delay: 20
   when: "docker_info.stdout.find('Swarm: inactive') != -1 and inventory_hostname in groups.swarm_workers"
+
+- name: "Create an Overlay Docker Network"
+  docker_network:    
+    name: "hlfnet"
+    driver: "overlay"
+    attachable: yes
+  when: "inventory_hostname in groups.swarm_manager_prime"
+
+
+
+
+
