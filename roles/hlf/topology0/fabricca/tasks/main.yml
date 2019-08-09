@@ -1,0 +1,20 @@
+---
+
+- name: yyy
+  debug:
+    msg:
+      - "{{ hostname }}"
+      - "{{ ports }}"
+      - "{{ environment_vars }}"
+      - "{{ fabric_ca_image }}"
+      - "{{ rca_username }}"
+      - "{{rca_password}}"
+
+- name: Fabric CA - " {{ hostname }}"
+  docker_swarm_service:
+    name: "{{ hostname }}"
+    image: "{{ fabric_ca_image }}"
+    command: sleep
+    args:
+      - "3600"
+    env: "{{ environment_vars }}"

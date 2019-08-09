@@ -1,0 +1,6 @@
+---
+hostname: hlfrca
+ports:
+  - "7054:7054"
+environment_vars:
+  - "FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server"

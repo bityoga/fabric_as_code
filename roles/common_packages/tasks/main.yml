@@ -92,5 +92,21 @@
   become: yes
   user:
     name: "{{ hlf_username }}"
-    groups: "{{ hlf_group }}"
+    groups: 
+      - "{{ hlf_group }}"
+      - "{{ docker_group }}"
     append: yes
+
+- name: Set GOPATH ENV variable
+  lineinfile: 
+    dest: /home/{{hlf_username}}/.bashrc
+    insertafter: EOF
+    line: "export GOPATH=/home/{{hlf_username}}/go"
+
+- name: Creates GOPATH directory
+  file:
+    path: /home/{{hlf_username}}/go
+    state: directory
+    owner: "{{hlf_username}}"
+    group: "{{hlf_group}}"
+    mode: 0775

@@ -1,0 +1,20 @@
+---
+
+# ansible-playbook -v deploy_topology.yml -u root
+
+- name: Spawn a Hyperledger Fabric Topology
+  hosts: swarm_manager_prime
+  gather_facts: yes
+  become: yes
+  become_user: "{{ hlf_username }}"
+  vars:
+    hlf_topology: "topology0"
+    fabric_ca_image: "hyperledger/fabric-ca:1.4"
+    rca_username: "radmin"
+    rca_password: "radminpw"
+    ica_agent_username: "aiadmin"
+    ica_agent_password: "aiadminpw"
+    ica_user_username: "uiadmin"
+    ica_user_password: "uiadminpw"
+  roles:
+    - hlf/{{ hlf_topology }}/fabricca
