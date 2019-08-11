@@ -1,20 +1,50 @@
 ---
 
-- name: yyy
-  debug:
-    msg:
-      - "{{ hostname }}"
-      - "{{ ports }}"
-      - "{{ environment_vars }}"
-      - "{{ fabric_ca_image }}"
-      - "{{ rca_username }}"
-      - "{{rca_password}}"
+# HLF Services for Topology 0 with
+  # 1. 1x Root CA [replicas = 1]
+  # 2. 2x ntermediate CAs
+    # 2.1. 1x Agent: registers agents such and peers, orderers and others [replicas = 1]
+    # 2.2. 1x User: registers users of Blockchain application [replicas =2]
+  # 3. 1x PostGres SQL databases for the intermediate cas
+  # 4. 1x Orderer with RAFT [replicas = 2]
+  # 5. 2x Peers
+    # 5.1. 1x Commiter, Endorser peer
+    # 5.2  1x Anchor peer
+  # 6. 2x CouchDB for the peer nodes. Note: Each CouchDB for relevent peers needs to be present in the same machine
 
-- name: Fabric CA - " {{ hostname }}"
+  # We create relevent folder structure in S3FS mount locally for service {{ rca.name }}
+- name: Create Fabric CA Server folders in hlft-store, if it dont exists
+  become: yes
+  file: 
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: 0750
+  loop:
+        - {path: "/home/{{ hlf_username }}/hlft-store/{{hlf_topology}}", owner: "{{ hlf_username}}", group: "{{ hlf_group}}"}
+        - {path: "/home/{{ hlf_username }}/hlft-store/{{hlf_topology}}/{{rca.name}}", owner: "{{rca.name}}", group: "{{ hlf_group}}"}
+
+  # Create & Start service {{ rca.name }} 
+- name: Fabric CA - " {{ rca.name }}"
+  become: yes
+  become_user: "{{ hlf_username}}"
   docker_swarm_service:
-    name: "{{ hostname }}"
-    image: "{{ fabric_ca_image }}"
-    command: sleep
+    user: "{{ rca.name }}"     
+    name: "{{ rca.name }}"
+    hostname: "{{ rca.name }}"
+    networks:
+      - "{{swarm_network}}"
+    image: "{{rca.name}}:{{rca.tag}}"
+    command: "bash -c"
+    mounts:
+      - source: "/home/{{ hlf_username}}/hlft-store/{{hlf_topology}}/{{rca.name}}"
+        target: "/home/{{rca.name}}/fabric-rca-server"
+        type: bind
+    env:
+      - "{{ envvars.fabric_ca_home }}"        
     args:
-      - "3600"
-    env: "{{ environment_vars }}"
+      - "fabric-ca-server start -b {{ rca_username }}:{{rca_password}}"
+
+
+    

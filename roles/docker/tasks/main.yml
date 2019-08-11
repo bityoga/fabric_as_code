@@ -1,5 +1,7 @@
 ---
 
+# Setup docker on each node
+  # Setup docker repos
 - name: Set up the Docker CE APT GPG key
   become: yes
   apt_key: 
@@ -21,6 +23,7 @@
     dest: /etc/yum.repos.d/docer-ce.repo
   when: ansible_os_family == 'RedHat'
 
+  # Install docker on each machine and start the service
 - name: Install Docker
   become: yes
   package:

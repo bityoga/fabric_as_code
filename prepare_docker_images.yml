@@ -1,0 +1,9 @@
+---
+
+# ansible-playbook -v prepare_docker_images.yml -u root
+
+- name: Pull and Build Relevent Docker Images
+  hosts: all
+  gather_facts: no
+  roles:
+    - images

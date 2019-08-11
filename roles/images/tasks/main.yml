@@ -1,0 +1,37 @@
+---
+
+# Pull all relevent HLF images that would be used to create docker services, build them according to reqirements and commit them locally to each node
+
+ - name: Stop & Remove Container {{ item.name }}, if it exist
+   become: yes
+   docker_container:
+     name: "{{ item.name }}"
+     state: absent
+   with_items:
+    - "{{fabric_images}}"
+
+ - name: Pull & Build Docker Image {{ item.image }}:{{ item.tag }}
+   become: yes
+   docker_container:
+      name: "{{ item.name }}"
+      image: "{{ item.image }}:{{ item.tag }}"
+      state: started
+      recreate: yes
+      command: bash -c "groupadd -g {{item.gid}} {{item.group}};
+        useradd -m -d /home/{{item.name}} -K UMASK=0027 -u {{item.uid}} -g {{item.gid}} {{item.name}};"
+   with_items:
+    - "{{fabric_images}}"
+
+ - name: Commit container {{item.name}} as {{item.name}}:{{item.tag}}
+   become: yes
+   shell: "docker commit {{item.name}} {{item.name}}:{{item.tag}}"
+   with_items:
+    - "{{fabric_images}}"   
+    
+ - name: Stop & Remove Container {{item.name}}, if it exist
+   become: yes
+   docker_container:
+     name: "{{item.name}}"
+     state: absent
+   with_items:
+    - "{{fabric_images}}"

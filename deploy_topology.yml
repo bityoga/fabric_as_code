@@ -4,12 +4,9 @@
 
 - name: Spawn a Hyperledger Fabric Topology
   hosts: swarm_manager_prime
-  gather_facts: yes
-  become: yes
-  become_user: "{{ hlf_username }}"
+  gather_facts: no
   vars:
-    hlf_topology: "topology0"
-    fabric_ca_image: "hyperledger/fabric-ca:1.4"
+    hlf_topology: "topology0"    
     rca_username: "radmin"
     rca_password: "radminpw"
     ica_agent_username: "aiadmin"

@@ -1,0 +1,47 @@
+---
+
+# Setup S3FS as local mount on each node
+
+  # Set location for the passwd file containing key and secret for S3FS
+- name: Store S3FS Digital Ocean spaces access details
+  become: yes
+  become_user: "{{ hlf_username }}"
+  copy:
+    dest: /home/{{ hlf_username }}/.passwd-s3fs
+    content: "{{ S3FS_KEY }}:{{ S3FS_SECRET }}"
+    owner: "{{ hlf_username}}"
+    group: "{{ hlf_group}}"
+    mode: 0400
+
+# Check if S3FS is already mounted, if yes, unmount it
+- name: Unmount S3FS if already mounted
+  become: yes
+  mount:
+    path: /home/{{ hlf_username }}/hlft-store
+    state: unmounted
+
+# Remove the local mount point folder, if it exists, so that we get the right permissions everytime
+- name: Remove Mount Point
+  become: yes
+  file:
+    path: /home/{{ hlf_username }}/hlft-store
+    state: absent
+
+# Create the local mount point on each node for S3FS mount
+- name: Create Mount Point
+  become: yes
+  become_user: "{{ hlf_username }}"
+  file:
+    path: /home/{{ hlf_username }}/hlft-store
+    state: directory
+    owner: "{{ hlf_username}}"
+    group: "{{ hlf_group}}"
+    mode: 0750
+
+# Mount S3FS on each node
+- name: Mount S3FS from Digital Ocean
+  become: yes
+  become_user: "{{ hlf_username }}"
+  command: "{{ item }}"
+  loop:
+    - "s3fs hlft-store /home/{{ hlf_username }}/hlft-store -o url={{S3FS_URL}} -o allow_other -o mp_umask='uid='{{ hlf_uid }}',gid='{{ hlf_gid }} -o use_cache=/tmp -o passwd_file=/home/{{ hlf_username}}/.passwd-s3fs"

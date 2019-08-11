@@ -1,5 +1,22 @@
-docker_username: "docker"
+---
+
 docker_group: "docker"
+docker_gid: "2001"
 
 hlf_username: "hlf"
+hlf_uid: "2002"
 hlf_group: "hlf"
+hlf_gid: "2002"
+
+
+swarm_network: "hlfnet"
+
+S3FS_URL: "https://fra1.digitaloceanspaces.com"
+S3FS_KEY: "5JWX4EJM5OCRY7AATWYU"
+S3FS_SECRET: "3cM8A1JI/ZaP0+qZ//hbzcT2PUkPsXMMbzFiaOrphTA"
+
+# Fabric Images and Services
+rca: { image: "hyperledger/fabric-ca", tag: "1.4", name: "rca", uid: "3001", gid: "{{hlf_gid}}", group: "{{hlf_group}}" }
+
+services:
+  - "{{rca}}"

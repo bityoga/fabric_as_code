@@ -1,5 +1,8 @@
 ---
 
+# Docker Swarm would be nodes setup
+
+  # Update & Upgrade the nodes
 - name: Update and upgrade apt packages
   become: yes
   apt:
@@ -13,7 +16,8 @@
     #upgrade: yes
     update_cache: yes
   when: ansible_os_family == 'RedHat'
-
+  
+  # Setup relevent repos
 - name: Set up the golang APT repository
   become: yes
   apt_repository:
@@ -35,6 +39,7 @@
     dest: /etc/yum.repos.d/go-repo.repo
   when: ansible_os_family == 'RedHat'
 
+  # Install the packages specified in defaults/main.yml
 - name: Install prerequisites for Debian distros
   become: yes
   apt:
@@ -53,42 +58,35 @@
   when: ansible_os_family == 'RedHat'
 
 - name: Install docker driver for python.
+  become: yes
   pip:
     name: "{{ item }}"
   loop: "{{ pip_packages }}"
 
-- name: 'Create a user'
-  become: yes
-  user:
-    name: "{{ docker_username }}"
-    state: present
 
-- name: 'Create docker group'
+  # Create system users and groups on each node, that would be used to spawn swarm and  deploy hlf services
+- name: Create group {{ docker_group }}
   become: yes
   group:
     name: "{{ docker_group }}"
+    gid: "{{ docker_gid }}"
     state: present
 
-- name: 'Add user to group docker'
-  become: yes
-  user:
-    name: "{{ docker_username }}"
-    groups: "{{ docker_group }}"
-    append: yes
-
-- name: 'Create a user'
+- name: Create user {{ hlf_username }}
   become: yes
   user:
     name: "{{ hlf_username }}"
+    uid: "{{ hlf_uid }}"
     state: present
 
-- name: 'Create user group'
+- name: Create group {{ hlf_group }}
   become: yes
   group:
     name: "{{ hlf_group }}"
+    gid: "{{ hlf_gid }}"
     state: present
 
-- name: 'Add user to group hlf'
+- name: Add {{ hlf_username }} to group {{ hlf_group }}
   become: yes
   user:
     name: "{{ hlf_username }}"
@@ -97,16 +95,53 @@
       - "{{ docker_group }}"
     append: yes
 
+# Giving rx rights to other group members, so that they will be able to read into the folder
+- name: Give user {{ hlf_username }} HOME dir rx rights to group {{ hlf_group }}
+  become: yes
+  file:
+    path: "/home/{{ hlf_username }}"
+    state: directory
+    owner: "{{ hlf_username }}"
+    group: "{{ hlf_group }}"
+    mode: 0750
+
+# Creating Service Users on swarm manager prime
+- name: Create Service Uses {{item.name}}
+  become: yes
+  user:
+    name: "{{ item.name }}"
+    uid: "{{ item.uid }}"
+    group: "{{ hlf_group }}"
+    state: present
+  with_items:
+    - "{{services}}"
+  when: "inventory_hostname in groups.swarm_manager_prime"
+
+
+  # Docker Swarm & Services modules needs the GOLANG GOPATH to be set
 - name: Set GOPATH ENV variable
+  become: yes
+  become_user: "{{hlf_username}}"
   lineinfile: 
     dest: /home/{{hlf_username}}/.bashrc
     insertafter: EOF
-    line: "export GOPATH=/home/{{hlf_username}}/go"
+    line: "export GOPATH=/home/{{hlf_username}}/.go"
 
-- name: Creates GOPATH directory
+- name: Creates GOPATH workspace directory
+  become: yes
+  become_user: "{{hlf_username}}"
   file:
-    path: /home/{{hlf_username}}/go
+    path: /home/{{hlf_username}}/.go
     state: directory
     owner: "{{hlf_username}}"
     group: "{{hlf_group}}"
     mode: 0775
+
+  # In order for S3FS filesystem to be mounted into docker services from local mounts, user_allow_other option needs to be set in /etc/fuse.conf
+- name: Set user_allow_other option in /etc/fuse.conf
+  become: yes
+  become_user: "root"
+  lineinfile: 
+    dest: /etc/fuse.conf
+    insertafter: EOF
+    line: "user_allow_other"

@@ -1,4 +1,5 @@
 ---
+
 # Additional pakages to be installed
 debian_package_list:
   - apt-transport-https
@@ -12,6 +13,7 @@ debian_package_list:
   - golang-go
   - libtool
   - libltdl-dev
+  - s3fs
 
 redhat_package_list:
   - yum-utils
@@ -24,6 +26,7 @@ redhat_package_list:
   - golang
   - libtool
   - libtool-ltdl-devel
+  - s3fs-fuse
 
 pip_packages:
   - docker
