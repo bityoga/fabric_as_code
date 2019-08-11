@@ -27,11 +27,11 @@
         - {path: "/home/{{ hlf_username }}/hlft-store/{{hlf_topology}}/{{aica.name}}", owner: "{{aica.name}}", group: "{{ hlf_group}}"}
 
   
-  # Setting up {{rca.name}} ENV variable
-- name: Set {{rca.name}} ENV variable
+  # Setting up {{rca.name}} HOME variable
+- name: Set {{rca.name}} HOME variable
   set_fact:
-    env_vars: "{{[FABRIC_CA_HOME=/home/{{rca.name}}/fabric-ca] + fabriccaenvvars}}"
-      
+    ca_home: "FABRIC_CA_HOME=/home/{{rca.name}}/fabric-ca"
+
   # Create & Start service {{ rca.name }} 
 - name: Fabric CA - " {{ rca.name }}"
   become: yes
@@ -48,30 +48,34 @@
       - source: "/home/{{ hlf_username}}/hlft-store/{{hlf_topology}}/{{rca.name}}"
         target: "/home/{{rca.name}}/fabric-ca"
         type: bind
-    env: envvars
+    env: "{{[ca_home] + fabriccaenvvars}}"
+    args:
+      - "fabric-ca-server start -b {{ rca_username }}:{{rca_password}}"
+
+  # Setting up {{rca.name}} HOME variable
+- name: Set {{aica.name}} HOME variable
+  set_fact:
+    ca_home: "FABRIC_CA_HOME=/home/{{aica.name}}/fabric-ca"
+
+  # Create & Start service {{ aica.name }} 
+- name: Fabric CA - " {{ aica.name }}"
+  become: yes
+  become_user: "{{ hlf_username}}"
+  docker_swarm_service:
+    user: "{{ aica.name }}"     
+    name: "{{ aica.name }}"
+    hostname: "{{ aica.name }}"
+    networks:
+      - "{{swarm_network}}"
+    image: "{{aica.name}}:{{aica.tag}}"
+    command: "bash -c"
+    mounts:
+      - source: "/home/{{ hlf_username}}/hlft-store/{{hlf_topology}}/{{aica.name}}"
+        target: "/home/{{aica.name}}/fabric-ca"
+        type: bind
+    env: "{{[ca_home] + fabriccaenvvars}}"
     args:
       - "sleep 30000"
-      #- "fabric-ca-server start -b {{ rca_username }}:{{rca_password}}"
+      #- "fabric-ca-server start -b {{ aica_username }}:{{aica_password}}"
 
-#   # Create & Start service {{ aica.name }} 
-# - name: Fabric CA - " {{ aica.name }}"
-#   become: yes
-#   become_user: "{{ hlf_username}}"
-#   docker_swarm_service:
-#     user: "{{ aica.name }}"     
-#     name: "{{ aica.name }}"
-#     hostname: "{{ aica.name }}"
-#     networks:
-#       - "{{swarm_network}}"
-#     image: "{{aica.name}}:{{aica.tag}}"
-#     command: "bash -c"
-#     mounts:
-#       - source: "/home/{{ hlf_username}}/hlft-store/{{hlf_topology}}/{{aica.name}}"
-#         target: "/home/{{aica.name}}/fabric-ca"
-#         type: bind
-#     env: "{{ FABRIC_CA_HOME=/home/{{aica.name}}/fabric-ca + envvars }}"
-#     args:
-#       - "sleep 30000"
-#       #- "fabric-ca-server start -b {{ aica_username }}:{{aica_password}}"
-
-    
+    #fabric-ca-server start -b admin:adminpw -u http://radmin:radminpw@rca:7054
