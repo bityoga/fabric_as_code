@@ -8,3 +8,4 @@
   roles:
     - common_packages
     - docker
+    - post_installation

@@ -17,6 +17,10 @@ S3FS_SECRET: "3cM8A1JI/ZaP0+qZ//hbzcT2PUkPsXMMbzFiaOrphTA"
 
 # Fabric Images and Services
 rca: { image: "hyperledger/fabric-ca", tag: "1.4", name: "rca", uid: "3001", gid: "{{hlf_gid}}", group: "{{hlf_group}}" }
+aica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "aica", uid: "3002", gid: "{{hlf_gid}}", group: "{{hlf_group}}" }
+uica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "uica", uid: "3003", gid: "{{hlf_gid}}", group: "{{hlf_group}}" }
 
 services:
   - "{{rca}}"
+  - "{{aica}}"
+  - "{{uica}}"

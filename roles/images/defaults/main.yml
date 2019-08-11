@@ -2,4 +2,6 @@
 
 fabric_images: 
   - "{{rca}}"
+  - "{{aica}}"
+  - "{{uica}}"
   

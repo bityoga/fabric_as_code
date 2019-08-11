@@ -2,5 +2,7 @@
 ports:
   - "7054:7054"
 # Environment Variables for HLF containers
-envvars:
-  fabric_ca_home: "FABRIC_CA_HOME=/home/{{rca.name}}/fabric-rca-server"
+fabriccaenvvars:  
+  - "FABRIC_CA_SERVER_TLS_ENABLED=true"
+  - "FABRIC_CA_SERVER_TLS_CLIENTAUTHREQUIRED=true"
+  - "FABRIC_CA_SERVER_REFISTRY.MAXENROLLMENTS=-1"

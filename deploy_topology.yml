@@ -9,9 +9,9 @@
     hlf_topology: "topology0"    
     rca_username: "radmin"
     rca_password: "radminpw"
-    ica_agent_username: "aiadmin"
-    ica_agent_password: "aiadminpw"
-    ica_user_username: "uiadmin"
-    ica_user_password: "uiadminpw"
+    aica_username: "aiadmin"
+    aica_password: "aiadminpw"
+    uica_username: "uiadmin"
+    uica_password: "uiadminpw"
   roles:
     - hlf/{{ hlf_topology }}/fabricca
