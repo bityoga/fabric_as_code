@@ -1,8 +1,0 @@
----
-ports:
-  - "7054:7054"
-# Environment Variables for HLF containers
-fabriccaenvvars:  
-  - "FABRIC_CA_SERVER_TLS_ENABLED=true"
-  - "FABRIC_CA_SERVER_TLS_CLIENTAUTHREQUIRED=false"
-  - "FABRIC_CA_SERVER_REGISTRY_MAXENROLLMENTS=-1"

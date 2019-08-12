@@ -26,56 +26,39 @@
         - {path: "/home/{{ hlf_username }}/hlft-store/{{hlf_topology}}/{{rca.name}}", owner: "{{rca.name}}", group: "{{ hlf_group}}"}
         - {path: "/home/{{ hlf_username }}/hlft-store/{{hlf_topology}}/{{aica.name}}", owner: "{{aica.name}}", group: "{{ hlf_group}}"}
 
-  
-  # Setting up {{rca.name}} HOME variable
-- name: Set {{rca.name}} HOME variable
-  set_fact:
-    ca_home: "FABRIC_CA_HOME=/home/{{rca.name}}/fabric-ca"
+ # Copy relevent config files to s3fs directories for the docker services
+- name: Config templating
+  become: yes
+  vars:
+    ca_config: "{{item}}"
+  template:
+    src: fabric-ca-server-config.yaml.j2
+    dest: "/home/{{ hlf_username }}/hlft-store/{{hlf_topology}}/{{item.name}}/fabric-ca-server-config.yaml"
+    owner: "{{ item.name }}"
+    group: "{{ item.group }}"
+    mode: 0600
+  loop: "{{cas}}"
 
-  # Create & Start service {{ rca.name }} 
-- name: Fabric CA - " {{ rca.name }}"
+  # Create & Start service {{ item.name }} 
+- name: Fabric CA - {{ item.name }}
   become: yes
   become_user: "{{ hlf_username}}"
+  vars:
+    ca_home: "FABRIC_CA_HOME=/home/{{item.name}}/fabric-ca"
   docker_swarm_service:
-    user: "{{ rca.name }}"     
-    name: "{{ rca.name }}"
-    hostname: "{{ rca.name }}"
+    user: "{{ item.name }}"     
+    name: "{{ item.name }}"
+    hostname: "{{ item.name }}"
     networks:
       - "{{swarm_network}}"
-    image: "{{rca.name}}:{{rca.tag}}"
+    image: "{{item.name}}:{{item.tag}}"
     command: "bash -c"
     mounts:
-      - source: "/home/{{ hlf_username}}/hlft-store/{{hlf_topology}}/{{rca.name}}"
-        target: "/home/{{rca.name}}/fabric-ca"
+      - source: "/home/{{ hlf_username}}/hlft-store/{{hlf_topology}}/{{item.name}}"
+        target: "/home/{{item.name}}/fabric-ca"
         type: bind
-    env: "{{[ca_home] + fabriccaenvvars}}"
+    env: "{{ca_home}}"
     args:
-      - "fabric-ca-server start -b {{ rca_username }}:{{rca_password}}"
+      - "{{item.commands}}"
+  loop: "{{cas}}"
 
-  # Setting up {{rca.name}} HOME variable
-- name: Set {{aica.name}} HOME variable
-  set_fact:
-    ca_home: "FABRIC_CA_HOME=/home/{{aica.name}}/fabric-ca"
-
-  # Create & Start service {{ aica.name }} 
-- name: Fabric CA - " {{ aica.name }}"
-  become: yes
-  become_user: "{{ hlf_username}}"
-  docker_swarm_service:
-    user: "{{ aica.name }}"     
-    name: "{{ aica.name }}"
-    hostname: "{{ aica.name }}"
-    networks:
-      - "{{swarm_network}}"
-    image: "{{aica.name}}:{{aica.tag}}"
-    command: "bash -c"
-    mounts:
-      - source: "/home/{{ hlf_username}}/hlft-store/{{hlf_topology}}/{{aica.name}}"
-        target: "/home/{{aica.name}}/fabric-ca"
-        type: bind
-    env: "{{[ca_home] + fabriccaenvvars}}"
-    args:
-      - "sleep 30000"
-      #- "fabric-ca-server start -b {{ aica_username }}:{{aica_password}}"
-
-    #fabric-ca-server start -b admin:adminpw -u http://radmin:radminpw@rca:7054

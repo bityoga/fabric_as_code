@@ -37,10 +37,10 @@
 #############################################################################
 
 # Version of config file
-version: {{ca_version}}
+version: {{ca_config.ca.version}}
 
 # Server's listening port (default: 7054)
-port: 7054
+port: {{ca_config.ca.port}}
 
 # Cross-Origin Resource Sharing (CORS)
 cors:
@@ -66,12 +66,12 @@ crlsizelimit: 512000
 #############################################################################
 tls:
   # Enable TLS (default: false)
-  enabled: false
+  enabled: {{ca_config.ca.tls_enabled}}
   # TLS for the server's listening port
   certfile:
   keyfile:
   clientauth:
-    type: noclientcert
+    type: {{ca_config.ca.tls_clientauth_type}}
     certfiles:
 
 #############################################################################
@@ -86,7 +86,7 @@ tls:
 #############################################################################
 ca:
   # Name of this CA
-  name:
+  name: {{ca_config.name}}
   # Key file (is only used to import a private key into BCCSP)
   keyfile:
   # Certificate file (default: ca-cert.pem)
@@ -125,19 +125,19 @@ crl:
 registry:
   # Maximum number of times a password/secret can be reused for enrollment
   # (default: -1, which means there is no limit)
-  maxenrollments: {{ca_maxenrollments}}
+  maxenrollments: {{ca_config.ca.maxenrollments}}
 
   # Contains identity information which is used when LDAP is disabled
   identities:
-     - name: <<<adminUserName>>>
-       pass: <<<adminPassword>>>
+     - name: ""
+       pass: ""
        type: client
        affiliation: ""
        attrs:
           hf.Registrar.Roles: "*"
           hf.Registrar.DelegateRoles: "*"
           hf.Revoker: true
-          hf.IntermediateCA: {{ca_allow_intermediate}}
+          hf.IntermediateCA: {{ca_config.ca.allow_intermediateca_registration}}
           hf.GenCRL: true
           hf.Registrar.Attributes: "*"
           hf.AffiliationMgr: true
@@ -243,8 +243,8 @@ ldap:
 # which are always stored in lower case.
 #############################################################################
 affiliations:
-   {{org}}:
-      - {{org}}
+   {{org.name}}:
+      - {{org.unit}}
 
 #############################################################################
 #  Signing section
@@ -304,22 +304,22 @@ signing:
 #     CA certificates though it can still issue end entity certificates.
 ###########################################################################
 csr:
-   cn: {{ca_cn}}
+   cn: {{ca_config.csr.cn}}
    keyrequest:
      algo: ecdsa
      size: 256
    names:
-      - C: NO
-        ST: "Rogaland"
-        L:
-        O: Hyperledger
-        OU: Fabric
+      - C: {{ca_config.csr.country}}
+        ST: {{ca_config.csr.state}}
+        L: {{ca_config.csr.city}}
+        O: {{org.name}}
+        OU: {{org.unit}}
    hosts:
-     - <<<MYHOST>>>
+     - {{ca_config.name}}
      - localhost
    ca:
       expiry: 131400h
-      pathlength: <<<PATHLENGTH>>>
+      pathlength: {{ca_config.ca.pathlength}}
 
 ###########################################################################
 # Each CA can issue both X509 enrollment certificate as well as Idemix

@@ -21,11 +21,32 @@ swarm_network: "hlfnet"
 S3FS_URL: "https://fra1.digitaloceanspaces.com"
 S3FS_KEY: "5JWX4EJM5OCRY7AATWYU"
 S3FS_SECRET: "3cM8A1JI/ZaP0+qZ//hbzcT2PUkPsXMMbzFiaOrphTA"
+  
 
 # Fabric Images and Services
-rca: { image: "hyperledger/fabric-ca", tag: "1.4", name: "rca", uid: "3001", gid: "{{hlf_gid}}", group: "{{hlf_group}}" }
-aica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "aica", uid: "3002", gid: "{{hlf_gid}}", group: "{{hlf_group}}" }
-uica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "uica", uid: "3003", gid: "{{hlf_gid}}", group: "{{hlf_group}}" }
+rca: { image: "hyperledger/fabric-ca", tag: "1.4", name: "rca",
+ uid: "3001", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
+ ca: { version: "0.1", maxenrollments: -1, allow_intermediateca_registration: true, pathlength: 1, port: 7054,
+       tls_enabled: false, tls_clientauth_type: "noclientcert"},
+ csr: {cn: "rca", country: "Norway", state: "Rogaland", city: "Stavanger"},
+ commands: "fabric-ca-server start -b xxx:yyy"
+ }
+
+aica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "aica", 
+uid: "3002", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
+ ca: { version: "0.1", maxenrollments: -1, allow_intermediateca_registration: false, pathlength: 0, port: 7054,
+       tls_enabled: false, tls_clientauth_type: "noclientcert"},
+ csr: {cn: "", country: "Norway", state: "Rogaland", city: "Stavanger"},
+ commands: "sleep 30000"
+ }
+
+uica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "uica", 
+uid: "3003", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
+ ca: { version: "0.1", maxenrollments: 1, allow_intermediateca_registration: false, pathlength: 0, port: 7054,
+       tls_enabled: false, tls_clientauth_type: "noclientcert"},
+ csr: {cn: "", country: "Norway", state: "Rogaland", city: "Stavanger"},
+ commands: "30000"
+ }
 
 services:
   - "{{rca}}"
@@ -33,12 +54,7 @@ services:
   - "{{uica}}"
 
 # Hyperledger Fabric CA related variables
-ca:
-  version: "0.1"
-  cn: "hlf"
-  country: "Norway"
-  state: "Rogaland"
-  city: "Stavanger"
-  maxenrollments: -1
-  allow_intermediate: true
-  host: ""
+cas:
+  - "{{rca}}"
+  - "{{aica}}"
+  #- "{{uica}}"
