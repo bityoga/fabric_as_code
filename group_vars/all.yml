@@ -29,7 +29,8 @@ rca: { image: "hyperledger/fabric-ca", tag: "1.4", name: "rca",
  ca: { version: "0.1", maxenrollments: -1, allow_intermediateca_registration: true, pathlength: 1, port: 7054,
        tls_enabled: false, tls_clientauth_type: "noclientcert"},
  csr: {cn: "rca", country: "Norway", state: "Rogaland", city: "Stavanger"},
- commands: "fabric-ca-server start -b xxx:yyy"
+ commands: "sleep 30000"
+ #"fabric-ca-server start -b \"xxx:xxx;\""
  }
 
 aica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "aica", 
