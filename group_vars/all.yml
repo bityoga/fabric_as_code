@@ -13,6 +13,13 @@ hlf_uid: "2002"
 hlf_group: "hlf"
 hlf_gid: "2002"
 
+rca_user: "rca"
+rca_uid: "3001"
+aica_user: "aica"
+aica_uid: "3002"
+uica_user: "uica"
+uica_uid: "3003"
+
 # Name of the swarm network that would host the services
 swarm_network: "hlfnet"
 
@@ -24,8 +31,8 @@ S3FS_SECRET: "3cM8A1JI/ZaP0+qZ//hbzcT2PUkPsXMMbzFiaOrphTA"
   
 
 # Fabric Images and Services
-rca: { image: "hyperledger/fabric-ca", tag: "1.4", name: "rca",
- uid: "3001", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
+rca: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{rca_user}}", replicas: 1,
+ uid: "{{rca_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
  ca: { version: "0.1", maxenrollments: -1, allow_intermediateca_registration: true, pathlength: 1, port: 7054,
        username: "{{rca_username}}", password: "{{rca_password}}", affiliation: "{{org.name}}.{{org.unit}}", parent: "",
        tls_enabled: true, tls_clientauth_type: "noclientcert"},
@@ -33,28 +40,28 @@ rca: { image: "hyperledger/fabric-ca", tag: "1.4", name: "rca",
  commands: "fabric-ca-server start"
  }
 
-aica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "aica", 
-uid: "3002", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
- ca: { version: "0.1", maxenrollments: -1, allow_intermediateca_registration: false, pathlength: 0, port: 7054,
+aica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{aica_user}}", replicas: 1,
+uid: "{{aica_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
+ ca: { version: "0.1", maxenrollments: -1, allow_intermediateca_registration: false, pathlength: 0, port: 7055,
        username: "{{aica_username}}", password: "{{aica_password}}", affiliation: "{{org.name}}.{{org.unit}}", parent: "{{rca.name}}",     
        tls_enabled: true, tls_clientauth_type: "noclientcert"},
  csr: {cn: "", country: "NO", state: "Rogaland", city: "Stavanger"},
- commands: "fabric-ca-server start -u https://radmin:radminpw@rca:7054 --intermediate.tls.certfiles /home/aica/fabric-ca/ca-parent-cert.pem"
+ commands: "fabric-ca-server start -u https://{{rca_username}}:{{rca_password}}@rca:{{rca.ca.port}} --intermediate.tls.certfiles /home/aica/fabric-ca/ca-{{rca.name}}-cert.pem"
  }
 
-uica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "uica", 
-uid: "3003", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
- ca: { version: "0.1", maxenrollments: 1, allow_intermediateca_registration: false, pathlength: 0, port: 7054,
+uica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{uica_user}}", replicas: 1,
+uid: "{{uica_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
+ ca: { version: "0.1", maxenrollments: 1, allow_intermediateca_registration: false, pathlength: 0, port: 7056,
        username: "{{uica_username}}", password: "{{uica_password}}", affiliation: "{{org.name}}.{{org.unit}}", parent: "{{rca.name}}",
        tls_enabled: false, tls_clientauth_type: "noclientcert"},
  csr: {cn: "", country: "NO", state: "Rogaland", city: "Stavanger"},
- commands: "fabric-ca-server start -u http://{{rca_username}}:{{rca_password}}@{{rca.name}}:{{rca.ca.port}}" 
+ commands: "fabric-ca-server start -u https://{{rca_username}}:{{rca_password}}@rca:{{rca.ca.port}} --intermediate.tls.certfiles /home/aica/fabric-ca/ca-{{rca.name}}-cert.pem" 
  }
 
 services:
-  - "{{rca}}"
-  - "{{aica}}"
-  #- "{{uica}}"
+  - { name: "{{rca_user}}", uid: "{{rca_uid}}" }
+  - { name: "{{aica_user}}", uid: "{{aica_uid}}" }
+  #- { name: "{{uica_user}}", uid: "{{uica_uid}}" }
 
 # Hyperledger Fabric CA related variables
 cas:

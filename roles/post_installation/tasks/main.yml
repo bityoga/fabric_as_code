@@ -8,18 +8,18 @@
     gid: "{{ docker_gid }}"
     state: present
 
-- name: Create user {{ hlf_username }}
-  become: yes
-  user:
-    name: "{{ hlf_username }}"
-    uid: "{{ hlf_uid }}"
-    state: present
-
 - name: Create group {{ hlf_group }}
   become: yes
   group:
     name: "{{ hlf_group }}"
     gid: "{{ hlf_gid }}"
+    state: present
+
+- name: Create user {{ hlf_username }}
+  become: yes
+  user:
+    name: "{{ hlf_username }}"
+    uid: "{{ hlf_uid }}"
     state: present
 
 - name: Add {{ hlf_username }} to group {{ hlf_group }}
@@ -41,7 +41,7 @@
     group: "{{ hlf_group }}"
     mode: 0750
 
-# Creating Service Users on swarm manager prime
+# Creating Service Users on each host machine
 - name: Create Service Uses {{item.name}}
   become: yes
   user:
@@ -51,8 +51,6 @@
     state: present
   with_items:
     - "{{services}}"
-  when: "inventory_hostname in groups.swarm_manager_prime"
-
 
   # Docker Swarm & Services modules needs the GOLANG GOPATH to be set
 - name: Set GOPATH ENV variable

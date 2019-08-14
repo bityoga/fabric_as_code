@@ -16,7 +16,9 @@
 
 - name: Clean Fabric CA Server folders in hlft-store, if they exisits
   become: yes
-  shell: "rm -rf {{item}}"
+  file: 
+    path: "{{item}}"
+    state: absent
   loop:        
         - "/home/{{ hlf_username }}/hlft-store/{{hlf_topology}}/{{rca.name}}"
         - "/home/{{ hlf_username }}/hlft-store/{{hlf_topology}}/{{aica.name}}"
@@ -45,7 +47,10 @@
     owner: "{{ item.name }}"
     group: "{{ item.group }}"
     mode: 0600
-  loop: "{{cas}}"
+    force: yes
+  loop:
+    - "{{rca}}"
+    - "{{aica}}"
 
   # Create & Start service root ca 
 - name: Fabric CA - {{ item.name }}
@@ -71,9 +76,17 @@
   loop: 
   - "{{rca}}"
 
-# Pause for 15 seconds prior to starting the intermediate cas, so that we have the root ca stated and cert files generated
-- pause:
-    seconds: 25
+# TODO: AC - need to find a standard way to fo the following.
+# Pause starting the intermediate cas, so that we have the root ca stated and cert files generated
+- name: Wait until Root CA is running
+  command: "docker service ls -f name={{rca.name}}"
+  register: service_status
+  # Since there is only, one root service we are interested in, 
+    # we get the 2st line, skipping the header line. Next we are interested in the 4th column that has the replica info. 
+    # As the replica info is shown as started/all, we split it on / and that the 0th value
+  until: "service_status.stdout_lines[1].split()[3].split('/')[0] == rca.replicas|string" 
+  retries: 3
+  delay: 15
 
   # Create & Start service intermediate ca 
 - name: Fabric CA - {{ item.name }}
@@ -94,7 +107,7 @@
         target: "/home/{{item.name}}/fabric-ca"
         type: bind
       - source: "/home/{{ hlf_username}}/hlft-store/{{hlf_topology}}/{{item.ca.parent}}/ca-cert.pem"
-        target: "/home/{{item.name}}/fabric-ca/ca-parent-cert.pem"
+        target: "/home/{{item.name}}/fabric-ca/ca-{{item.ca.parent}}-cert.pem"
         type: bind
     env: "{{ca_home}}"
     args:
