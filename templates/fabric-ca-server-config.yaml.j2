@@ -129,10 +129,10 @@ registry:
 
   # Contains identity information which is used when LDAP is disabled
   identities:
-     - name:
-       pass:
+     - name: {{ca_config.ca.username}}
+       pass: {{ca_config.ca.password}}
        type: client
-       affiliation: {{org.name}}
+       affiliation: {{ca_config.ca.affiliation}}
        attrs:
           hf.Registrar.Roles: "*"
           hf.Registrar.DelegateRoles: "*"
