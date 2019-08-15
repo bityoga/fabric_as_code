@@ -22,7 +22,7 @@
     uid: "{{ hlf_uid }}"
     state: present
 
-- name: Add {{ hlf_username }} to group {{ hlf_group }}
+- name: Add {{ hlf_username }} to groups {{ hlf_group }} & {{ docker_group }}
   become: yes
   user:
     name: "{{ hlf_username }}"
@@ -74,7 +74,6 @@
   # In order for S3FS filesystem to be mounted into docker services from local mounts, user_allow_other option needs to be set in /etc/fuse.conf
 - name: Set user_allow_other option in /etc/fuse.conf
   become: yes
-  become_user: "root"
   lineinfile: 
     dest: /etc/fuse.conf
     insertafter: EOF

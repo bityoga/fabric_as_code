@@ -49,11 +49,11 @@
     mode: 0600
     force: yes
   loop:
-    - "{{rca}}"
-    - "{{aica}}"
+    - "{{ rca }}"
+    - "{{ aica }}"
 
   # Create & Start service root ca 
-- name: Fabric CA - {{ item.name }}
+- name: Fabric CA - {{ item }}
   become: yes
   become_user: "{{ hlf_username}}"
   vars:
@@ -65,6 +65,10 @@
     networks:
       - "{{swarm_network}}"
     image: "{{item.name}}:{{item.tag}}"
+    publish:
+      - published_port: "{{item.ca.port}}"
+        target_port: "7054"
+        protocol: "tcp"
     command: "bash -c"
     mounts:
       - source: "/home/{{ hlf_username}}/hlft-store/{{hlf_topology}}/{{item.name}}"
@@ -72,21 +76,18 @@
         type: bind
     env: "{{ca_home}}"
     args:
-      - "{{item.commands}}"
+      - "{{cacreds[item.name].commands}}"
+    force_update: yes
   loop: 
-  - "{{rca}}"
+    - "{{ rca }}"
 
-# TODO: AC - need to find a standard way to fo the following.
+
 # Pause starting the intermediate cas, so that we have the root ca stated and cert files generated
 - name: Wait until Root CA is running
-  command: "docker service ls -f name={{rca.name}}"
-  register: service_status
-  # Since there is only, one root service we are interested in, 
-    # we get the 2st line, skipping the header line. Next we are interested in the 4th column that has the replica info. 
-    # As the replica info is shown as started/all, we split it on / and that the 0th value
-  until: "service_status.stdout_lines[1].split()[3].split('/')[0] == rca.replicas|string" 
-  retries: 3
-  delay: 15
+  wait_for:
+    port: "{{rca.ca.port}}"
+    delay: 10
+    timeout: 60
 
   # Create & Start service intermediate ca 
 - name: Fabric CA - {{ item.name }}
@@ -101,6 +102,10 @@
     networks:
       - "{{swarm_network}}"
     image: "{{item.name}}:{{item.tag}}"
+    publish:
+      - published_port: "{{item.ca.port}}"
+        target_port: "7054"
+        protocol: "tcp"
     command: "bash -c"
     mounts:
       - source: "/home/{{ hlf_username}}/hlft-store/{{hlf_topology}}/{{item.name}}"
@@ -111,7 +116,8 @@
         type: bind
     env: "{{ca_home}}"
     args:
-      - "{{item.commands}}"
+      - "{{cacreds[item.name].commands}}"
+    force_update: yes
   loop: 
-  - "{{aica}}"
+    - "{{ aica }}"
 

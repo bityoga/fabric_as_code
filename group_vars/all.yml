@@ -34,37 +34,38 @@ S3FS_SECRET: "3cM8A1JI/ZaP0+qZ//hbzcT2PUkPsXMMbzFiaOrphTA"
 rca: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{rca_user}}", replicas: 1,
  uid: "{{rca_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
  ca: { version: "0.1", maxenrollments: -1, allow_intermediateca_registration: true, pathlength: 1, port: 7054,
-       username: "{{rca_username}}", password: "{{rca_password}}", affiliation: "{{org.name}}.{{org.unit}}", parent: "",
+       affiliation: "{{org.name}}.{{org.unit}}", parent: "",
        tls_enabled: true, tls_clientauth_type: "noclientcert"},
- csr: {cn: "rca", country: "NO", state: "Rogaland", city: "Stavanger"},
- commands: "fabric-ca-server start"
+ csr: {cn: "rca", country: "NO", state: "Rogaland", city: "Stavanger"}
  }
 
 aica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{aica_user}}", replicas: 1,
 uid: "{{aica_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
  ca: { version: "0.1", maxenrollments: -1, allow_intermediateca_registration: false, pathlength: 0, port: 7055,
-       username: "{{aica_username}}", password: "{{aica_password}}", affiliation: "{{org.name}}.{{org.unit}}", parent: "{{rca.name}}",     
+       affiliation: "{{org.name}}.{{org.unit}}", parent: "{{rca.name}}",     
        tls_enabled: true, tls_clientauth_type: "noclientcert"},
- csr: {cn: "", country: "NO", state: "Rogaland", city: "Stavanger"},
- commands: "fabric-ca-server start -u https://{{rca_username}}:{{rca_password}}@rca:{{rca.ca.port}} --intermediate.tls.certfiles /home/aica/fabric-ca/ca-{{rca.name}}-cert.pem"
+ csr: {cn: "", country: "NO", state: "Rogaland", city: "Stavanger"}
  }
 
 uica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{uica_user}}", replicas: 1,
 uid: "{{uica_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
  ca: { version: "0.1", maxenrollments: 1, allow_intermediateca_registration: false, pathlength: 0, port: 7056,
-       username: "{{uica_username}}", password: "{{uica_password}}", affiliation: "{{org.name}}.{{org.unit}}", parent: "{{rca.name}}",
+       affiliation: "{{org.name}}.{{org.unit}}", parent: "{{rca.name}}",
        tls_enabled: false, tls_clientauth_type: "noclientcert"},
- csr: {cn: "", country: "NO", state: "Rogaland", city: "Stavanger"},
- commands: "fabric-ca-server start -u https://{{rca_username}}:{{rca_password}}@rca:{{rca.ca.port}} --intermediate.tls.certfiles /home/aica/fabric-ca/ca-{{rca.name}}-cert.pem" 
+ csr: {cn: "", country: "NO", state: "Rogaland", city: "Stavanger"}
  }
 
-services:
-  - { name: "{{rca_user}}", uid: "{{rca_uid}}" }
-  - { name: "{{aica_user}}", uid: "{{aica_uid}}" }
-  #- { name: "{{uica_user}}", uid: "{{uica_uid}}" }
+cacreds: {
+      rca: {name: "{{rca.name}}", username: "{{rca_username}}", password: "{{rca_password}}",
+           commands: "fabric-ca-server start" },
+      aica: {name: "{{aica.name}}", username: "{{aica_username}}", password: "{{aica_password}}",
+            commands: "fabric-ca-server start -u https://{{rca_username}}:{{rca_password}}@rca:{{rca.ca.port}} --intermediate.tls.certfiles /home/aica/fabric-ca/ca-{{rca.name}}-cert.pem"},
+      uica: {name: "{{aica.name}}", username: "{{aica_username}}", password: "{{aica_password}}",
+            commands: "fabric-ca-server start -u https://{{rca_username}}:{{rca_password}}@rca:{{rca.ca.port}} --intermediate.tls.certfiles /home/aica/fabric-ca/ca-{{rca.name}}-cert.pem" }
+}
 
-# Hyperledger Fabric CA related variables
-cas:
+services:
   - "{{rca}}"
   - "{{aica}}"
   #- "{{uica}}"
+  

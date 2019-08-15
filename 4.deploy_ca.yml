@@ -1,6 +1,6 @@
 ---
 
-# ansible-playbook -v deploy_topology.yml -u root
+# ansible-playbook -v 4.deploy_ca.yml -u root
 
 - name: Spawn a Hyperledger Fabric Topology
   hosts: swarm_manager_prime

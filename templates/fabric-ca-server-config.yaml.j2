@@ -40,7 +40,7 @@
 version: {{ca_config.ca.version}}
 
 # Server's listening port (default: 7054)
-port: {{ca_config.ca.port}}
+port: 7054
 
 # Cross-Origin Resource Sharing (CORS)
 cors:
@@ -129,8 +129,8 @@ registry:
 
   # Contains identity information which is used when LDAP is disabled
   identities:
-     - name: {{ca_config.ca.username}}
-       pass: {{ca_config.ca.password}}
+     - name: {{cacreds[ca_config.name].username}}
+       pass: {{cacreds[ca_config.name].password}}
        type: client
        affiliation: {{ca_config.ca.affiliation}}
        attrs:
