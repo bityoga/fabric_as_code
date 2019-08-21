@@ -19,6 +19,8 @@ aica_user: "aica"
 aica_uid: "3002"
 uica_user: "uica"
 uica_uid: "3003"
+psql_user: "psql"
+psql_uid: "3004"
 
 # Name of the swarm network that would host the services
 swarm_network: "hlfnet"
@@ -55,17 +57,25 @@ uid: "{{uica_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
  csr: {cn: "", country: "NO", state: "Rogaland", city: "Stavanger"}
  }
 
+psql: { image: "postgres", tag: "12-alpine", name: "{{psql_user}}", replicas: 1,
+uid: "{{psql_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", tls_enabled: true, 
+listen_addresses: "localhost", port: 5432
+}
+
 cacreds: {
       rca: {name: "{{rca.name}}", username: "{{rca_username}}", password: "{{rca_password}}",
            commands: "fabric-ca-server start" },
       aica: {name: "{{aica.name}}", username: "{{aica_username}}", password: "{{aica_password}}",
             commands: "fabric-ca-server start -u https://{{rca_username}}:{{rca_password}}@rca:{{rca.ca.port}} --intermediate.tls.certfiles /home/aica/fabric-ca/ca-{{rca.name}}-cert.pem"},
       uica: {name: "{{aica.name}}", username: "{{aica_username}}", password: "{{aica_password}}",
-            commands: "fabric-ca-server start -u https://{{rca_username}}:{{rca_password}}@rca:{{rca.ca.port}} --intermediate.tls.certfiles /home/aica/fabric-ca/ca-{{rca.name}}-cert.pem" }
+            commands: "fabric-ca-server start -u https://{{rca_username}}:{{rca_password}}@rca:{{rca.ca.port}} --intermediate.tls.certfiles /home/aica/fabric-ca/ca-{{rca.name}}-cert.pem" },
+      psql: {name: "{{psql.name}}", username: "{{psql_username}}", password: "{{psql_password}}",
+            commands: "sleep 30000" }
 }
 
 services:
   - "{{rca}}"
   - "{{aica}}"
-  #- "{{uica}}"
+  - "{{uica}}"
+  - "{{psql}}"
   

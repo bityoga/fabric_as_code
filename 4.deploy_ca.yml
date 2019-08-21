@@ -6,12 +6,14 @@
   hosts: swarm_manager_prime
   gather_facts: no
   vars:
-    hlf_topology: "topology0"    
     rca_username: "radmin"
     rca_password: "radminpw"
     aica_username: "aiadmin"
     aica_password: "aiadminpw"
     uica_username: "uiadmin"
     uica_password: "uiadminpw"
+    psql_username: "padmin"
+    psql_password: "padminpw"
   roles:
-    - hlf/{{ hlf_topology }}/fabricca
+    #- hlf/fabricca
+    - hlf/postgres
