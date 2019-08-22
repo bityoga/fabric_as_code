@@ -19,7 +19,7 @@ aica_user: "aica"
 aica_uid: "3002"
 uica_user: "uica"
 uica_uid: "3003"
-psql_user: "psql"
+psql_user: "postgres"
 psql_uid: "3004"
 
 # Name of the swarm network that would host the services

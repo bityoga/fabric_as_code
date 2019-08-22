@@ -8,7 +8,7 @@
      name: "{{ item.name }}"
      state: absent
    with_items:
-    - "{{fabric_images}}"
+    - "{{services}}"
 
  - name: Pull & Build Docker Image {{ item.image }}:{{ item.tag }}
    become: yes
@@ -20,13 +20,13 @@
       command: bash -c "groupadd -g {{item.gid}} {{item.group}};
         useradd -m -d /home/{{item.name}} -K UMASK=0027 -u {{item.uid}} -g {{item.gid}} {{item.name}};"
    with_items:
-    - "{{fabric_images}}"
+    - "{{services}}"
 
  - name: Commit container {{item.name}} as {{item.name}}:{{item.tag}}
    become: yes
    shell: "docker commit {{item.name}} {{item.name}}:{{item.tag}}"
    with_items:
-    - "{{fabric_images}}"   
+    - "{{services}}"   
     
  - name: Stop & Remove Container {{item.name}}, if it exist
    become: yes
@@ -34,4 +34,4 @@
      name: "{{item.name}}"
      state: absent
    with_items:
-    - "{{fabric_images}}"
+    - "{{services}}"
