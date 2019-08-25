@@ -1,0 +1,34 @@
+---
+# ansible-playbook -v 001.spawn_droplets.yml
+
+- name: create droplets
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - digital_ocean_droplet:    
+        backups: no
+        image: "{{item.image}}"
+        ipv6: no
+        monitoring: yes
+        name: "{{item.name}}"
+        oauth_token: 2c7eab4408ccb4f5805e68030f0482f1f2120ed6e9c04e11bb9b227b58d0fbef
+        private_networking: no
+        region: "{{item.region}}"
+        size: "{{item.size}}"
+        ssh_keys: 20711668
+        state: present
+        unique_name: yes
+        wait: yes
+        wait_timeout: 300  
+      loop:
+        - {name: "hlft0", image: "49549315", region: "lon1", size: "s-1vcpu-1gb"} # Ubuntu 16.04.6 x64 20190713
+        #- {name: "hlft1", image: "34902021", region: "fra1", size: "s-1vcpu-1gb"} # CentOS 6.9 x64
+        #- {name: "hlft2", image: "49549315", region: "fra1", size: "s-1vcpu-1gb"} # Ubuntu 16.04.6 x64 20190713
+        #- {name: "hlft3", image: "34902021", region: "ams3", size: "s-1vcpu-1gb"} # CentOS 6.9 x64
+        #- {name: "hlft4", image: "49549315", region: "ams3", size: "s-1vcpu-1gb"} # Ubuntu 16.04.6 x64 20190713
+      register: droplets
+
+    - debug:
+        msg: "IP is {{ item.data.ip_address }} and hostname is {{ item.data.droplet.name }}"      
+      loop: "{{droplets.results}}"
