@@ -20,3 +20,8 @@
         - {name: "hlft3"}
         - {name: "hlft4"}
       register: droplets
+      
+    # Delete the host file if present
+    - file:
+        path: ./inventory/hosts
+        state: absent

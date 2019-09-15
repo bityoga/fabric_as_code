@@ -16,19 +16,37 @@
         private_networking: no
         region: "{{item.region}}"
         size: "{{item.size}}"
-        ssh_keys: 20711668
+        # curl -X GET -silent "https://api.digitalocean.com/v2/account/keys" -H "Authorization: Bearer 2c7eab4408ccb4f5805e68030f0482f1f2120ed6e9c04e11bb9b227b58d0fbef" to retrive the key
+        ssh_keys: [20711668, 25140548]
         state: present
         unique_name: yes
         wait: yes
         wait_timeout: 300  
       loop:
         - {name: "hlft0", image: "49549315", region: "lon1", size: "s-1vcpu-1gb"} # Ubuntu 16.04.6 x64 20190713
-        #- {name: "hlft1", image: "34902021", region: "fra1", size: "s-1vcpu-1gb"} # CentOS 6.9 x64
-        #- {name: "hlft2", image: "49549315", region: "fra1", size: "s-1vcpu-1gb"} # Ubuntu 16.04.6 x64 20190713
-        #- {name: "hlft3", image: "34902021", region: "ams3", size: "s-1vcpu-1gb"} # CentOS 6.9 x64
-        #- {name: "hlft4", image: "49549315", region: "ams3", size: "s-1vcpu-1gb"} # Ubuntu 16.04.6 x64 20190713
+        - {name: "hlft1", image: "34902021", region: "fra1", size: "s-1vcpu-1gb"} # CentOS 6.9 x64
+        - {name: "hlft2", image: "49549315", region: "fra1", size: "s-1vcpu-1gb"} # Ubuntu 16.04.6 x64 20190713
+        - {name: "hlft3", image: "34902021", region: "ams3", size: "s-1vcpu-1gb"} # CentOS 6.9 x64
+        - {name: "hlft4", image: "49549315", region: "ams3", size: "s-1vcpu-1gb"} # Ubuntu 16.04.6 x64 20190713
       register: droplets
 
     - debug:
         msg: "IP is {{ item.data.ip_address }} and hostname is {{ item.data.droplet.name }}"      
+      loop: "{{droplets.results}}"
+    
+    # Delete the host file if present
+    - file:
+        path: ./inventory/hosts
+        state: absent
+
+    # Copy to host template file to be placeholder for the new host ips
+    - copy:
+        src: ./inventory/hosts_template
+        dest: ./inventory/hosts        
+    
+    # Replace the host file with right host ips
+    - replace:
+        path: ./inventory/hosts  
+        regexp: "{{ item.data.droplet.name }}"
+        replace: "{{ item.data.droplet.name }} ansible_host={{ item.data.ip_address }}"
       loop: "{{droplets.results}}"

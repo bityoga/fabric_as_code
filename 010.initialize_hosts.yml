@@ -1,6 +1,6 @@
 ---
 
-# ansible-playbook -v 0.initialize_hosts.yml -u root
+# ansible-playbook -v 010.initialize_hosts.yml -u root
 
 - name: Initialize the host machines
   hosts: all
