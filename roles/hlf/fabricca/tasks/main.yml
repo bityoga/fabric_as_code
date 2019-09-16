@@ -14,7 +14,7 @@
 
   # We create relevent folder structure in S3FS mount locally for service {{ rca.name }}
 
-- name: Clean Fabric CA Server folders in hlft-store, if they exisits
+- name: Clean Fabric CA Server folders in hlft-store, if they exists
   become: yes
   file: 
     path: "{{item}}"

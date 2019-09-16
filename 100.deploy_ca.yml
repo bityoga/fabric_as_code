@@ -1,6 +1,6 @@
 ---
 
-# ansible-playbook -v 4.deploy_ca.yml -u root
+# ansible-playbook -v 100.deploy_ca.yml -u root
 
 - name: Spawn a Hyperledger Fabric Topology
   hosts: swarm_manager_prime
@@ -15,5 +15,5 @@
     psql_username: "padmin"
     psql_password: "padminpw"
   roles:
-    #- hlf/fabricca
-    - hlf/postgres
+    - hlf/fabricca
+    #- hlf/postgres

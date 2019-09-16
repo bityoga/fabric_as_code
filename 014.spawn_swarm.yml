@@ -1,6 +1,6 @@
 ---
 
-# ansible-playbook -v 3.spawn_swarm.yml -u root
+# ansible-playbook -v 014.spawn_swarm.yml -u root
 
 - name: Create and spawn a docker swarm
   hosts: all

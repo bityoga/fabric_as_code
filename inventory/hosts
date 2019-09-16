@@ -1,11 +1,11 @@
 [debian]
-hlft1 ansible_host=167.71.57.65
-hlft2 ansible_host=206.81.19.132
-hlft3 ansible_host=134.209.134.143
+hlft1 ansible_host=134.209.238.107
+hlft2 ansible_host=167.71.56.7
+hlft3 ansible_host=134.209.90.9
 
 [redhat]
-hlft0 ansible_host=159.65.53.247
-hlft4 ansible_host=134.209.133.146
+hlft0 ansible_host=165.22.122.142
+hlft4 ansible_host=134.209.85.131
 
 [all:children]
 swarm_manager_prime
@@ -13,13 +13,13 @@ swarm_managers
 swarm_workers
 
 [swarm_manager_prime]
-hlft0 ansible_host=159.65.53.247
+hlft0 ansible_host=165.22.122.142
 
 [swarm_managers]
-hlft0 ansible_host=159.65.53.247
-hlft1 ansible_host=167.71.57.65
+hlft0 ansible_host=165.22.122.142
+hlft1 ansible_host=134.209.238.107
 
 [swarm_workers]
-hlft2 ansible_host=206.81.19.132
-hlft3 ansible_host=134.209.134.143
-hlft4 ansible_host=134.209.133.146
+hlft2 ansible_host=167.71.56.7
+hlft3 ansible_host=134.209.90.9
+hlft4 ansible_host=134.209.85.131

@@ -8,12 +8,12 @@ debian_package_list:
   - gnupg2 
   - software-properties-common
   - jq
-  - python3-pip
   - rsync
   - golang-go
   - libtool
   - libltdl-dev
   - s3fs
+  - python3-pip
 
 redhat_package_list:
   - yum-utils
@@ -21,12 +21,12 @@ redhat_package_list:
   - lvm2
   - epel-release
   - jq
-  - python-pip
   - rsync
   - golang
   - libtool
   - libtool-ltdl-devel
   - s3fs-fuse
+  - python-pip
 
 pip_packages:
   - docker

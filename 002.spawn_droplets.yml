@@ -1,5 +1,5 @@
 ---
-# ansible-playbook -v 001.spawn_droplets.yml
+# ansible-playbook -v 002.spawn_droplets.yml
 
 - name: create droplets
   hosts: localhost
@@ -16,18 +16,20 @@
         private_networking: no
         region: "{{item.region}}"
         size: "{{item.size}}"
-        # curl -X GET -silent "https://api.digitalocean.com/v2/account/keys" -H "Authorization: Bearer 2c7eab4408ccb4f5805e68030f0482f1f2120ed6e9c04e11bb9b227b58d0fbef" to retrive the key
+        # curl -X GET -silent "https://api.digitalocean.com/v2/account/keys" -H "Authorization: Bearer 2c7eab4408ccb4f5805e68030f0482f1f2120ed6e9c04e11bb9b227b58d0fbef" # to retrive the key
+        # Will list all the ssh key pub keys, ids, fingerprint and other relevent information. Execute it on your terminal to retrive the required ssk_keys ids that would be able to ssh onto the droplets
+        # These ssh keys needs to be alrready created and present in digital ocean
         ssh_keys: [20711668, 25140548]
         state: present
         unique_name: yes
         wait: yes
         wait_timeout: 300  
       loop:
-        - {name: "hlft0", image: "49549315", region: "lon1", size: "s-1vcpu-1gb"} # Ubuntu 16.04.6 x64 20190713
-        - {name: "hlft1", image: "34902021", region: "fra1", size: "s-1vcpu-1gb"} # CentOS 6.9 x64
-        - {name: "hlft2", image: "49549315", region: "fra1", size: "s-1vcpu-1gb"} # Ubuntu 16.04.6 x64 20190713
-        - {name: "hlft3", image: "34902021", region: "ams3", size: "s-1vcpu-1gb"} # CentOS 6.9 x64
-        - {name: "hlft4", image: "49549315", region: "ams3", size: "s-1vcpu-1gb"} # Ubuntu 16.04.6 x64 20190713
+        - {name: "hlft0", image: "52083681", region: "lon1", size: "s-1vcpu-1gb"} # Ubuntu 16.04.6 (LTS) x64
+        - {name: "hlft1", image: "50903182", region: "fra1", size: "s-1vcpu-1gb"} # CentOS 7.6 x64
+        - {name: "hlft2", image: "52083681", region: "fra1", size: "s-1vcpu-1gb"} # Ubuntu 16.04.6 (LTS) x64
+        - {name: "hlft3", image: "50903182", region: "ams3", size: "s-1vcpu-1gb"} # CentOS 7.6 x64
+        - {name: "hlft4", image: "52083681", region: "ams3", size: "s-1vcpu-1gb"} # Ubuntu 16.04.6 (LTS) x64
       register: droplets
 
     - debug:
