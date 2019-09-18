@@ -1,5 +1,5 @@
 ---
-# ansible-playbook -v 001.despawn_droplets.yml
+# ansible-playbook -v -001.despawn_droplets.yml
 
 - name: create droplets
   hosts: localhost

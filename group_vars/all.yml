@@ -33,7 +33,7 @@ S3FS_SECRET: "3cM8A1JI/ZaP0+qZ//hbzcT2PUkPsXMMbzFiaOrphTA"
   
 
 # Fabric Images and Services
-rca: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{rca_user}}", replicas: 1,
+rca: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{rca_user}}", replicas: -1,
  uid: "{{rca_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
  ca: { version: "0.1", maxenrollments: -1, allow_intermediateca_registration: true, pathlength: 1, port: 7054,
        affiliation: "{{org.name}}.{{org.unit}}", parent: "",
@@ -41,7 +41,7 @@ rca: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{rca_user}}", replica
  csr: {cn: "rca", country: "NO", state: "Rogaland", city: "Stavanger"}
  }
 
-aica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{aica_user}}", replicas: 1,
+aica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{aica_user}}", replicas: -1,
 uid: "{{aica_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
  ca: { version: "0.1", maxenrollments: -1, allow_intermediateca_registration: false, pathlength: 0, port: 7055,
        affiliation: "{{org.name}}.{{org.unit}}", parent: "{{rca.name}}",     
@@ -49,15 +49,15 @@ uid: "{{aica_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
  csr: {cn: "", country: "NO", state: "Rogaland", city: "Stavanger"}
  }
 
-uica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{uica_user}}", replicas: 1,
+uica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{uica_user}}", replicas: 2,
 uid: "{{uica_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
  ca: { version: "0.1", maxenrollments: 1, allow_intermediateca_registration: false, pathlength: 0, port: 7056,
        affiliation: "{{org.name}}.{{org.unit}}", parent: "{{rca.name}}",
-       tls_enabled: false, tls_clientauth_type: "noclientcert"},
+       tls_enabled: true, tls_clientauth_type: "noclientcert"},
  csr: {cn: "", country: "NO", state: "Rogaland", city: "Stavanger"}
  }
 
-psql: { image: "postgres", tag: "12-alpine", name: "{{psql_user}}", replicas: 1,
+psql: { image: "postgres", tag: "12-alpine", name: "{{psql_user}}", replicas: -1,
 uid: "{{psql_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", tls_enabled: true, 
 listen_addresses: "localhost", port: 5432
 }

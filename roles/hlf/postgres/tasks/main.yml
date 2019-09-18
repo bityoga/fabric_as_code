@@ -45,6 +45,8 @@
     networks:
       - "{{swarm_network}}"
     image: "{{item.image}}:{{item.tag}}"
+    mode: replicated
+    replicas: "{{item.replicas}}"
     publish:
       - published_port: "{{item.port}}"
         target_port: "5432"

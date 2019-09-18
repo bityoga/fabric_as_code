@@ -31,10 +31,3 @@
     state: present
     update_cache: yes
 
-- name: Start Docker service
-  become: yes
-  service:
-    name: docker
-    state: started
-    enabled: yes
-

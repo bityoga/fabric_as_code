@@ -1,16 +1,10 @@
 ---
 
-# HLF Services  with
+# HLF CA Services  with
   # 1. 1x Root CA [replicas = 1]
-  # 2. 2x ntermediate CAs
+  # 2. 2x intermediate CAs
     # 2.1. 1x Agent: registers agents such and peers, orderers and others [replicas = 1]
-    # 2.2. 1x User: registers users of Blockchain application [replicas =2]
-  # 3. 1x PostGres SQL databases for the intermediate cas
-  # 4. 1x Orderer with RAFT [replicas = 2]
-  # 5. 2x Peers
-    # 5.1. 1x Commiter, Endorser peer
-    # 5.2  1x Anchor peer
-  # 6. 2x CouchDB for the peer nodes. Note: Each CouchDB for relevent peers needs to be present in the same machine
+    # 2.2. 2x User: registers users of Blockchain application [replicas =2]
 
   # We create relevent folder structure in S3FS mount locally for service {{ rca.name }}
 
@@ -22,6 +16,7 @@
   loop:        
         - "/home/{{ hlf_username }}/hlft-store/{{rca.name}}"
         - "/home/{{ hlf_username }}/hlft-store/{{aica.name}}"
+        - "/home/{{ hlf_username }}/hlft-store/{{uica.name}}"
 
 - name: Create Fabric CA Server folders in hlft-store
   become: yes
@@ -34,6 +29,7 @@
   loop:
         - {path: "/home/{{ hlf_username }}/hlft-store/{{rca.name}}", owner: "{{rca.name}}", group: "{{ hlf_group}}"}
         - {path: "/home/{{ hlf_username }}/hlft-store/{{aica.name}}", owner: "{{aica.name}}", group: "{{ hlf_group}}"}
+        - {path: "/home/{{ hlf_username }}/hlft-store/{{uica.name}}", owner: "{{uica.name}}", group: "{{ hlf_group}}"}
 
  # Copy relevent config files to s3fs directories for the docker services
 - name: Config templating
@@ -50,6 +46,7 @@
   loop:
     - "{{ rca }}"
     - "{{ aica }}"
+    - "{{ uica }}"
 
   # Create & Start service root ca 
 - name: Fabric CA - {{ item }}
@@ -63,7 +60,9 @@
     hostname: "{{ item.name }}"
     networks:
       - "{{swarm_network}}"
-    image: "{{item.image}}:{{item.tag}}"
+    image: "{{item.name}}:{{item.tag}}"
+    mode: replicated
+    replicas: "{{item.replicas}}"
     publish:
       - published_port: "{{item.ca.port}}"
         target_port: "7054"
@@ -100,7 +99,9 @@
     hostname: "{{ item.name }}"
     networks:
       - "{{swarm_network}}"
-    image: "{{item.image}}:{{item.tag}}"
+    image: "{{item.name}}:{{item.tag}}"
+    mode: replicated
+    replicas: "{{item.replicas}}"
     publish:
       - published_port: "{{item.ca.port}}"
         target_port: "7054"
@@ -119,4 +120,5 @@
     force_update: yes
   loop: 
     - "{{ aica }}"
+    - "{{ uica }}"
 

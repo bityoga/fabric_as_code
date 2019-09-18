@@ -4,6 +4,7 @@
 
  - name: Stop & Remove Container {{ item.name }}, if it exist
    become: yes
+   become_user: "{{ hlf_username }}"
    docker_container:
      name: "{{ item.name }}"
      state: absent
@@ -12,6 +13,7 @@
 
  - name: Pull & Build Docker Image {{ item.image }}:{{ item.tag }}
    become: yes
+   become_user: "{{ hlf_username }}"
    docker_container:
       name: "{{ item.name }}"
       image: "{{ item.image }}:{{ item.tag }}"
@@ -24,12 +26,14 @@
 
  - name: Commit container {{item.name}} as {{item.name}}:{{item.tag}}
    become: yes
+   become_user: "{{ hlf_username }}"
    shell: "docker commit {{item.name}} {{item.name}}:{{item.tag}}"
    with_items:
     - "{{services}}"   
     
  - name: Stop & Remove Container {{item.name}}, if it exist
    become: yes
+   become_user: "{{ hlf_username }}"
    docker_container:
      name: "{{item.name}}"
      state: absent

@@ -20,6 +20,7 @@
   user:
     name: "{{ hlf_username }}"
     uid: "{{ hlf_uid }}"
+    create_home: yes
     state: present
 
 - name: Add {{ hlf_username }} to groups {{ hlf_group }} & {{ docker_group }}
@@ -31,7 +32,7 @@
       - "{{ docker_group }}"
     append: yes
 
-# Giving rx rights to other group members, so that they will be able to read into the folder
+# Giving rx rights to other group members, so that they will be able to read into the hlf user home folder as it mount s3fs
 - name: Give user {{ hlf_username }} HOME dir rx rights to group {{ hlf_group }}
   become: yes
   file:
@@ -48,6 +49,7 @@
     name: "{{ item.name }}"
     uid: "{{ item.uid }}"
     group: "{{ hlf_group }}"
+    create_home: no
     state: present
   with_items:
     - "{{services}}"
@@ -78,3 +80,10 @@
     dest: /etc/fuse.conf
     insertafter: EOF
     line: "user_allow_other"
+
+- name: Start Docker service
+  become: yes  
+  service:
+    name: docker
+    state: started
+    enabled: yes

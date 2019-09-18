@@ -10,7 +10,7 @@
 
   # Initialize and set configuration for the prime manager
 - name: "Init a new swarm with default parameters"
-  become: no
+  become: yes
   become_user: "{{ hlf_username }}"
   docker_swarm:
     state: present
@@ -18,7 +18,7 @@
   when: "docker_info.stdout.find('Swarm: inactive') != -1 and inventory_hostname in groups.swarm_manager_prime"
 
 - name: Update swarm configuration
-  become: no
+  become: yes
   become_user: "{{ hlf_username }}"
   docker_swarm:
     state: present
@@ -27,7 +27,7 @@
 
   # Get the details about the swarm after manager prime is initialized, so that we can retrive the TOKENS for managers and workers
 - name: Inspect swarm
-  become: no
+  become: yes
   become_user: "{{ hlf_username }}"
   docker_swarm_info:
     nodes: no
@@ -36,7 +36,7 @@
 
   # Add managers to the swarm
 - name: "Join as a manager"
-  become: no
+  become: yes
   become_user: "{{ hlf_username }}"
   docker_swarm:
     state: join
@@ -49,7 +49,7 @@
 
   # Add workers to the swarm
 - name: "Join as a worker"
-  become: no
+  become: yes
   become_user: "{{ hlf_username }}"
   docker_swarm:
     state: join
@@ -62,7 +62,7 @@
   
   # Now we create a overlay network on prime manager for the HLF services that would be deployed to this swarm
 - name: "Create an Overlay Docker Network"
-  become: no
+  become: yes
   become_user: "{{ hlf_username }}"
   docker_network:    
     name: "{{ swarm_network }}"
