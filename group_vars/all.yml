@@ -6,7 +6,6 @@ org:
 
 # Users and groups that would be created on host machines, for creating a swarm and deplying hlf services
 docker_group: "docker"
-docker_gid: "2001"
 
 hlf_username: "hlf"
 hlf_uid: "2002"
@@ -19,8 +18,20 @@ aica_user: "aica"
 aica_uid: "3002"
 uica_user: "uica"
 uica_uid: "3003"
-psql_user: "postgres"
-psql_uid: "3004"
+orderer_user: "orderer"
+orderer_uid: "3004"
+epeer_user: "epeer"
+epeer_uid: "3006"
+cpeer_user: "cpeer"
+cpeer_uid: "3007"
+apeer_user: "apeer"
+apeer_uid: "3008"
+epeerdb_user: "epeerdb"
+epeerdb_uid: "4001"
+cpeerdb_user: "cpeerdb"
+cpeerdb_uid: "4002"
+apeerdb_user: "apeerdb"
+apeerdb_uid: "4003"
 
 # Name of the swarm network that would host the services
 swarm_network: "hlfnet"
@@ -30,7 +41,9 @@ swarm_network: "hlfnet"
 S3FS_URL: "https://fra1.digitaloceanspaces.com"
 S3FS_KEY: "5JWX4EJM5OCRY7AATWYU"
 S3FS_SECRET: "3cM8A1JI/ZaP0+qZ//hbzcT2PUkPsXMMbzFiaOrphTA"
-  
+
+sqlite: {type: "sqlite3", source: "fabric-ca-server.db"}
+
 
 # Fabric Images and Services
 rca: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{rca_user}}", replicas: -1,
@@ -38,7 +51,9 @@ rca: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{rca_user}}", replica
  ca: { version: "0.1", maxenrollments: -1, allow_intermediateca_registration: true, pathlength: 1, port: 7054,
        affiliation: "{{org.name}}.{{org.unit}}", parent: "",
        tls_enabled: true, tls_clientauth_type: "noclientcert"},
- csr: {cn: "rca", country: "NO", state: "Rogaland", city: "Stavanger"}
+ csr: {cn: "rca", country: "NO", state: "Rogaland", city: "Stavanger"}, 
+ path: "/home/{{ hlf_username }}/hlft-store/{{rca_user}}",
+ db: "{{sqlite}}"
  }
 
 aica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{aica_user}}", replicas: -1,
@@ -46,7 +61,9 @@ uid: "{{aica_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
  ca: { version: "0.1", maxenrollments: -1, allow_intermediateca_registration: false, pathlength: 0, port: 7055,
        affiliation: "{{org.name}}.{{org.unit}}", parent: "{{rca.name}}",     
        tls_enabled: true, tls_clientauth_type: "noclientcert"},
- csr: {cn: "", country: "NO", state: "Rogaland", city: "Stavanger"}
+ csr: {cn: "", country: "NO", state: "Rogaland", city: "Stavanger"}, 
+ path: "/home/{{ hlf_username }}/hlft-store/{{aica_user}}",
+ db: "{{sqlite}}"
  }
 
 uica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{uica_user}}", replicas: 2,
@@ -54,28 +71,77 @@ uid: "{{uica_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
  ca: { version: "0.1", maxenrollments: 1, allow_intermediateca_registration: false, pathlength: 0, port: 7056,
        affiliation: "{{org.name}}.{{org.unit}}", parent: "{{rca.name}}",
        tls_enabled: true, tls_clientauth_type: "noclientcert"},
- csr: {cn: "", country: "NO", state: "Rogaland", city: "Stavanger"}
+ csr: {cn: "", country: "NO", state: "Rogaland", city: "Stavanger"}, 
+ path: "/home/{{ hlf_username }}/hlft-store/{{uica_user}}",
+ db: "{{sqlite}}"
  }
 
-psql: { image: "postgres", tag: "12-alpine", name: "{{psql_user}}", replicas: -1,
-uid: "{{psql_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", tls_enabled: true, 
-listen_addresses: "localhost", port: 5432
+orderer: { image: "hyperledger/fabric-orderer", tag: "1.4", name: "{{orderer_user}}", replicas: -1,
+uid: "{{orderer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 6050,
+caname: "{{aica.name}}", anchorpeer: "{{apeer.name}}", anchorport: "{{apeer.port}}",
+path: "/home/{{ hlf_username }}/hlft-store/{{orderer_user}}", 
+commands: "sleep 30000"
+}
+
+epeer: { image: "hyperledger/fabric-peer", tag: "1.4", name: "{{epeer_user}}", replicas: -1,
+uid: "{{epeer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 7050,
+caname: "{{aica.name}}", bootstrap_peers: {"{{cpeer.name}}:{{cpeer.port}}", "{{apeer.name}}:{{apeer.port}}"},
+path: "/home/{{ hlf_username }}/hlft-store/{{epeer_user}}", 
+couchdbname: "epeerdb", couchdbport: "{{epeerdb.port}}",
+commands: "sleep 30000"
+}
+
+cpeer: { image: "hyperledger/fabric-peer", tag: "1.4", name: "{{cpeer_user}}", replicas: -1,
+uid: "{{cpeer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 8050,
+caname: "{{aica.name}}", bootstrap_peers: {"{{epeer.name}}:{{epeer.port}}", "{{apeer.name}}:{{apeer.port}}"},
+path: "/home/{{ hlf_username }}/hlft-store/{{cpeer_user}}", 
+couchdbname: "cpeerdb", couchdbport: "{{cpeerdb.port}}",
+commands: "sleep 30000"
+}
+
+apeer: { image: "hyperledger/fabric-peer", tag: "1.4", name: "{{apeer_user}}", replicas: -1,
+uid: "{{apeer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 9050,
+caname: "{{aica.name}}", bootstrap_peers: {"{{epeer.name}}:{{epeer.port}}", "{{cpeer.name}}:{{cpeer.port}}"},
+path: "/home/{{ hlf_username }}/hlft-store/{{apeer_user}}", 
+couchdbname: "apeerdb", couchdbport: "{{apeerdb.port}}",
+commands: "sleep 30000"
+}
+
+epeerdb: { image: "hyperledger/fabric-couchdb", tag: "0.4.15", name: "{{epeerdb_user}}", replicas: -1,
+uid: "{{epeerdb_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 7051,
+path: "/home/{{ hlf_username }}/hlft-store/{{epeerdb_user}}",
+commands: "/opt/couchdb/bin/couchdb"
+}
+
+cpeerdb: { image: "hyperledger/fabric-couchdb", tag: "0.4.15", name: "{{cpeerdb_user}}", replicas: -1,
+uid: "{{cpeerdb_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 8051,
+path: "/home/{{ hlf_username }}/hlft-store/{{cpeerdb_user}}",
+commands: "sleep 30000"
+}
+
+apeerdb: { image: "hyperledger/fabric-couchdb", tag: "0.4.15", name: "{{apeerdb_user}}", replicas: -1,
+uid: "{{apeerdb_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 9051,
+path: "/home/{{ hlf_username }}/hlft-store/{{apeerdb_user}}",
+commands: "sleep 30000"
 }
 
 cacreds: {
       rca: {name: "{{rca.name}}", username: "{{rca_username}}", password: "{{rca_password}}",
            commands: "fabric-ca-server start" },
       aica: {name: "{{aica.name}}", username: "{{aica_username}}", password: "{{aica_password}}",
-            commands: "fabric-ca-server start -u https://{{rca_username}}:{{rca_password}}@rca:{{rca.ca.port}} --intermediate.tls.certfiles /home/aica/fabric-ca/ca-{{rca.name}}-cert.pem"},
+            commands: "fabric-ca-server start -u https://{{rca_username}}:{{rca_password}}@rca:{{rca.ca.port}} --intermediate.tls.certfiles /home/aica/ca-{{rca.name}}-cert.pem"},
       uica: {name: "{{aica.name}}", username: "{{aica_username}}", password: "{{aica_password}}",
-            commands: "fabric-ca-server start -u https://{{rca_username}}:{{rca_password}}@rca:{{rca.ca.port}} --intermediate.tls.certfiles /home/aica/fabric-ca/ca-{{rca.name}}-cert.pem" },
-      psql: {name: "{{psql.name}}", username: "{{psql_username}}", password: "{{psql_password}}",
-            commands: "sleep 30000" }
+            commands: "fabric-ca-server start -u https://{{rca_username}}:{{rca_password}}@rca:{{rca.ca.port}} --intermediate.tls.certfiles /home/uica/ca-{{rca.name}}-cert.pem" }
 }
 
 services:
   - "{{rca}}"
   - "{{aica}}"
-  - "{{uica}}"
-  - "{{psql}}"
-  
+  - "{{uica}}"  
+  - "{{orderer}}"
+  - "{{ epeer }}"    
+  - "{{ cpeer }}"    
+  - "{{ apeer }}"
+  - "{{ epeerdb }}"    
+  - "{{ cpeerdb }}"    
+  - "{{ apeerdb }}"   

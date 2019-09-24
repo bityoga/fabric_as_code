@@ -20,16 +20,39 @@
       state: started
       recreate: yes
       command: bash -c "groupadd -g {{item.gid}} {{item.group}};
-        useradd -m -d /home/{{item.name}} -K UMASK=0027 -u {{item.uid}} -g {{item.gid}} {{item.name}};"
+        useradd --create-home -u {{item.uid}} {{item.name}};
+        usermod -a -G  {{item.gid}} {{item.name}}"
    with_items:
-    - "{{services}}"
+    - "{{services}}" 
 
  - name: Commit container {{item.name}} as {{item.name}}:{{item.tag}}
    become: yes
    become_user: "{{ hlf_username }}"
    shell: "docker commit {{item.name}} {{item.name}}:{{item.tag}}"
    with_items:
-    - "{{services}}"   
+    - "{{services}}"
+
+ - name: Perfrom additional changes for couchdb users
+   become: yes
+   become_user: "{{ hlf_username }}"
+   docker_container:
+      name: "{{ item.name }}"
+      image: "{{item.name}}:{{item.tag}}"
+      state: started
+      recreate: yes
+      command: bash -c "chown -R {{epeerdb_user}}:{{epeerdb_user}} /opt/couchdb;"
+   with_items:
+      - "{{ epeerdb }}"    
+      - "{{ cpeerdb }}"    
+      - "{{ apeerdb }}"  
+
+ - name: Commit container {{item.name}} as {{item.name}}:{{item.tag}}
+   become: yes
+   become_user: "{{ hlf_username }}"
+   shell: "docker commit {{item.name}} {{item.name}}:{{item.tag}}"
+   with_items:
+    - "{{services}}"
+    
     
  - name: Stop & Remove Container {{item.name}}, if it exist
    become: yes

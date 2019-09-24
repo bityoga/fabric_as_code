@@ -1,0 +1,12 @@
+---
+
+# ansible-playbook -v 101.deploy_peers.yml -u root
+
+- name: Spawn a Hyperledger Fabric Topology
+  hosts: swarm_manager_prime
+  gather_facts: no
+  vars:
+    couchdb_password: {epeerdb: "epeerdbpw", cpeerdb: "cpeerdbpw", apeerdb: "apeerdbpw"}
+  roles:
+    - hlf/couchdb
+    #- hlf/peers     

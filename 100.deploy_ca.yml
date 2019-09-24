@@ -12,8 +12,5 @@
     aica_password: "aiadminpw"
     uica_username: "uiadmin"
     uica_password: "uiadminpw"
-    psql_username: "padmin"
-    psql_password: "padminpw"
   roles:
-    - hlf/fabricca
-    #- hlf/postgres
+    - hlf/fabricca    

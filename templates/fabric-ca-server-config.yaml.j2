@@ -153,8 +153,8 @@ registry:
 #  or "mysql".
 #############################################################################
 db:
-  type: sqlite3
-  datasource: fabric-ca-server.db
+  type: {{ca_config.db.type}}
+  datasource: {{ca_config.db.source}}
   tls:
       enabled: false
       certfiles:

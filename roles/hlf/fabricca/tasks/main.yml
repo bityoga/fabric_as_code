@@ -1,4 +1,4 @@
----
+# ---
 
 # HLF CA Services  with
   # 1. 1x Root CA [replicas = 1]
@@ -6,30 +6,43 @@
     # 2.1. 1x Agent: registers agents such and peers, orderers and others [replicas = 1]
     # 2.2. 2x User: registers users of Blockchain application [replicas =2]
 
-  # We create relevent folder structure in S3FS mount locally for service {{ rca.name }}
-
-- name: Clean Fabric CA Server folders in hlft-store, if they exists
+  # Stop all CA services
+- name: Stop Fabric CA - {{ item.name }}
   become: yes
+  become_user: "{{ hlf_username}}"
+  docker_swarm_service:   
+    name: "{{ item.name }}"
+    state: absent
+    networks:
+      - "{{swarm_network}}"
+  loop: 
+    - "{{ rca }}"
+    - "{{ aica }}"
+    - "{{ uica }}"
+
+  # We create relevent folder structure in S3FS mount locally for service {{ rca.name }}
+- name: Clean Fabric CA Server folders in hlft-store, if they exists
+  become: yes  
   file: 
-    path: "{{item}}"
+    path: "{{item.path}}"
     state: absent
   loop:        
-        - "/home/{{ hlf_username }}/hlft-store/{{rca.name}}"
-        - "/home/{{ hlf_username }}/hlft-store/{{aica.name}}"
-        - "/home/{{ hlf_username }}/hlft-store/{{uica.name}}"
+    - "{{ rca }}"
+    - "{{ aica }}"
+    - "{{ uica }}"
 
 - name: Create Fabric CA Server folders in hlft-store
   become: yes
   file: 
     path: "{{ item.path }}"
     state: directory
-    owner: "{{ item.owner }}"
+    owner: "{{ item.name }}"
     group: "{{ item.group }}"
     mode: 0750
   loop:
-        - {path: "/home/{{ hlf_username }}/hlft-store/{{rca.name}}", owner: "{{rca.name}}", group: "{{ hlf_group}}"}
-        - {path: "/home/{{ hlf_username }}/hlft-store/{{aica.name}}", owner: "{{aica.name}}", group: "{{ hlf_group}}"}
-        - {path: "/home/{{ hlf_username }}/hlft-store/{{uica.name}}", owner: "{{uica.name}}", group: "{{ hlf_group}}"}
+    - "{{ rca }}"
+    - "{{ aica }}"
+    - "{{ uica }}"
 
  # Copy relevent config files to s3fs directories for the docker services
 - name: Config templating
@@ -53,7 +66,7 @@
   become: yes
   become_user: "{{ hlf_username}}"
   vars:
-    ca_home: "FABRIC_CA_HOME=/home/{{item.name}}/fabric-ca"
+    ca_home: "FABRIC_CA_HOME=/home/{{item.name}}"
   docker_swarm_service:
     user: "{{ item.name }}"     
     name: "{{ item.name }}"
@@ -70,29 +83,38 @@
     command: "bash -c"
     mounts:
       - source: "/home/{{ hlf_username}}/hlft-store/{{item.name}}"
-        target: "/home/{{item.name}}/fabric-ca"
+        target: "/home/{{item.name}}"
         type: bind
     env: "{{ca_home}}"
     args:
       - "{{cacreds[item.name].commands}}"
+    placement:      
+      constraints:
+        - node.role == worker      
     force_update: yes
   loop: 
     - "{{ rca }}"
 
 
+# # Pause starting the intermediate cas, so that we have the root ca stated and cert files generated
+# - name: Wait 30s for Root CA to start
+#   pause:
+#     seconds: 30
+
 # Pause starting the intermediate cas, so that we have the root ca stated and cert files generated
 - name: Wait until Root CA is running
   wait_for:
     port: "{{rca.ca.port}}"
-    delay: 10
-    timeout: 60
+    delay: 60
+    timeout: 180
+
 
   # Create & Start service intermediate ca 
 - name: Fabric CA - {{ item.name }}
   become: yes
   become_user: "{{ hlf_username}}"
   vars:
-    ca_home: "FABRIC_CA_HOME=/home/{{item.name}}/fabric-ca"
+    ca_home: "FABRIC_CA_HOME=/home/{{item.name}}"
   docker_swarm_service:
     user: "{{ item.name }}"     
     name: "{{ item.name }}"
@@ -109,16 +131,19 @@
     command: "bash -c"
     mounts:
       - source: "/home/{{ hlf_username}}/hlft-store/{{item.name}}"
-        target: "/home/{{item.name}}/fabric-ca"
+        target: "/home/{{item.name}}"
         type: bind
       - source: "/home/{{ hlf_username}}/hlft-store/{{item.ca.parent}}/ca-cert.pem"
-        target: "/home/{{item.name}}/fabric-ca/ca-{{item.ca.parent}}-cert.pem"
+        target: "/home/{{item.name}}/ca-{{item.ca.parent}}-cert.pem"
         type: bind
     env: "{{ca_home}}"
+
     args:
       - "{{cacreds[item.name].commands}}"
+    placement:
+      constraints:
+        - node.role == worker
     force_update: yes
   loop: 
     - "{{ aica }}"
     - "{{ uica }}"
-

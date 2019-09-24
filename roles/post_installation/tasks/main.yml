@@ -1,13 +1,4 @@
 
-
-  # Create system users and groups on each node, that would be used to spawn swarm and  deploy hlf services
-- name: Create group {{ docker_group }}
-  become: yes
-  group:
-    name: "{{ docker_group }}"
-    gid: "{{ docker_gid }}"
-    state: present
-
 - name: Create group {{ hlf_group }}
   become: yes
   group:
