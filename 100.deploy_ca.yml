@@ -1,13 +1,9 @@
 ---
 
-# ansible-playbook -v 100.deploy_ca.yml -u root
+# ansible-playbook -v 100.deploy_ca.yml --flush-cache -u root
 
 - name: Spawn a Hyperledger Fabric Topology
   hosts: swarm_manager_prime
-  gather_facts: no
-  vars:
-    rca_password: "radminpw"
-    aica_password: "aiadminpw"    
-    uica_password: "uiadminpw"
+  gather_facts: yes    
   roles:
     - hlf/fabricca    

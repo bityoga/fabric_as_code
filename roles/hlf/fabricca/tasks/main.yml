@@ -105,8 +105,8 @@
 - name: Copy TLS Cert
   become: yes
   copy:
-    src: "/home/{{ hlf_username}}/hlft-store/{{item.ca.parent}}/ca-cert.pem"
-    dest: "/home/{{ hlf_username}}/hlft-store/{{item.name}}/ca-{{item.ca.parent}}-cert.pem"
+    src: "/home/{{ hlf_username}}/hlft-store/{{item.ca.parent}}/tls-cert.pem"
+    dest: "/home/{{ hlf_username}}/hlft-store/{{item.name}}/tls-{{item.ca.parent}}-cert.pem"
     owner: "{{item.name}}"
     group: "{{item.group}}"
     mode: '0600'
@@ -135,10 +135,7 @@
         target_port: "7054"
         protocol: "tcp"
     command: >
-        bash -c "sleep 30000"
-      #- "/bin/bash"
-      #- -c
-      #- "fabric-ca-server start -u https://{{rca_username}}:{{rca_password}}@rca:{{rca.ca.port}} --intermediate.tls.certfiles /home/{{item.name}}/ca-{{rca.name}}-cert.pem"
+      bash -c "fabric-ca-server start -u https://{{rca_user}}:{{rca_password}}@rca:{{rca.ca.port}} --intermediate.tls.certfiles /home/{{item.name}}/tls-{{rca.name}}-cert.pem"
     mounts:
       - source: "/home/{{ hlf_username}}/hlft-store/{{item.name}}"
         target: "/home/{{item.name}}"
@@ -151,4 +148,4 @@
     force_update: yes
   loop: 
     - "{{ aica }}"
-    # - "{{ uica }}"
+    - "{{ uica }}"

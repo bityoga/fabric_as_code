@@ -33,6 +33,10 @@ cpeerdb_uid: "4002"
 apeerdb_user: "apeerdb"
 apeerdb_uid: "4003"
 
+rca_password: "radminpw"
+aica_password: "aiadminpw"    
+uica_password: "uiadminpw"
+
 # Name of the swarm network that would host the services
 swarm_network: "hlfnet"
 
