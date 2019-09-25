@@ -53,7 +53,8 @@ rca: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{rca_user}}", replica
        tls_enabled: true, tls_clientauth_type: "noclientcert"},
  csr: {cn: "rca", country: "NO", state: "Rogaland", city: "Stavanger"}, 
  path: "/home/{{ hlf_username }}/hlft-store/{{rca_user}}",
- db: "{{sqlite}}"
+ db: "{{sqlite}}",
+ password: "{{rca_password}}"
  }
 
 aica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{aica_user}}", replicas: -1,
@@ -63,7 +64,8 @@ uid: "{{aica_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
        tls_enabled: true, tls_clientauth_type: "noclientcert"},
  csr: {cn: "", country: "NO", state: "Rogaland", city: "Stavanger"}, 
  path: "/home/{{ hlf_username }}/hlft-store/{{aica_user}}",
- db: "{{sqlite}}"
+ db: "{{sqlite}}",
+ password: "{{aica_password}}"
  }
 
 uica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{uica_user}}", replicas: 2,
@@ -73,7 +75,8 @@ uid: "{{uica_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
        tls_enabled: true, tls_clientauth_type: "noclientcert"},
  csr: {cn: "", country: "NO", state: "Rogaland", city: "Stavanger"}, 
  path: "/home/{{ hlf_username }}/hlft-store/{{uica_user}}",
- db: "{{sqlite}}"
+ db: "{{sqlite}}",
+ password: "{{uica_password}}"
  }
 
 orderer: { image: "hyperledger/fabric-orderer", tag: "1.4", name: "{{orderer_user}}", replicas: -1,
@@ -110,7 +113,9 @@ commands: "sleep 30000"
 epeerdb: { image: "hyperledger/fabric-couchdb", tag: "0.4.15", name: "{{epeerdb_user}}", replicas: -1,
 uid: "{{epeerdb_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 7051,
 path: "/home/{{ hlf_username }}/hlft-store/{{epeerdb_user}}",
-commands: "/opt/couchdb/bin/couchdb"
+commands: 
+"sleep 5s;
+/opt/couchdb/bin/couchdb;"
 }
 
 cpeerdb: { image: "hyperledger/fabric-couchdb", tag: "0.4.15", name: "{{cpeerdb_user}}", replicas: -1,
@@ -123,15 +128,6 @@ apeerdb: { image: "hyperledger/fabric-couchdb", tag: "0.4.15", name: "{{apeerdb_
 uid: "{{apeerdb_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 9051,
 path: "/home/{{ hlf_username }}/hlft-store/{{apeerdb_user}}",
 commands: "sleep 30000"
-}
-
-cacreds: {
-      rca: {name: "{{rca.name}}", username: "{{rca_username}}", password: "{{rca_password}}",
-           commands: "fabric-ca-server start" },
-      aica: {name: "{{aica.name}}", username: "{{aica_username}}", password: "{{aica_password}}",
-            commands: "fabric-ca-server start -u https://{{rca_username}}:{{rca_password}}@rca:{{rca.ca.port}} --intermediate.tls.certfiles /home/aica/ca-{{rca.name}}-cert.pem"},
-      uica: {name: "{{aica.name}}", username: "{{aica_username}}", password: "{{aica_password}}",
-            commands: "fabric-ca-server start -u https://{{rca_username}}:{{rca_password}}@rca:{{rca.ca.port}} --intermediate.tls.certfiles /home/uica/ca-{{rca.name}}-cert.pem" }
 }
 
 services:

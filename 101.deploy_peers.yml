@@ -8,5 +8,5 @@
   vars:
     couchdb_password: {epeerdb: "epeerdbpw", cpeerdb: "cpeerdbpw", apeerdb: "apeerdbpw"}
   roles:
-    - hlf/couchdb
-    #- hlf/peers     
+    #- hlf/couchdb
+    - hlf/peer     

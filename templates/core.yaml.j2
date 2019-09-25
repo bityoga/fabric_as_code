@@ -14,7 +14,7 @@ peer:
     id: {{peer_config.name}}
 
     # The networkId allows for logical seperation of networks
-    networkId: {{peer_config.network}}
+    networkId: {{org.name}}
 
     # The Address at local network interface this Peer will listen on.
     # By default, it will listen on all network interfaces
@@ -587,7 +587,7 @@ ledger:
     # stateDatabase - options are "goleveldb", "CouchDB"
     # goleveldb - default state database stored in goleveldb.
     # CouchDB - store state database in CouchDB
-    stateDatabase: goleveldb
+    stateDatabase: CouchDB
     # Limit on the number of records to return per query
     totalQueryLimit: 100000
     couchDBConfig:

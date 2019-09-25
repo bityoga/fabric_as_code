@@ -129,8 +129,8 @@ registry:
 
   # Contains identity information which is used when LDAP is disabled
   identities:
-     - name: {{cacreds[ca_config.name].username}}
-       pass: {{cacreds[ca_config.name].password}}
+     - name: {{ca_config.name}}
+       pass: {{ca_config.password}}
        type: client
        affiliation: {{ca_config.ca.affiliation}}
        attrs:

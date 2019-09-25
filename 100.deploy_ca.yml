@@ -6,11 +6,8 @@
   hosts: swarm_manager_prime
   gather_facts: no
   vars:
-    rca_username: "radmin"
     rca_password: "radminpw"
-    aica_username: "aiadmin"
-    aica_password: "aiadminpw"
-    uica_username: "uiadmin"
+    aica_password: "aiadminpw"    
     uica_password: "uiadminpw"
   roles:
     - hlf/fabricca    

@@ -6,7 +6,7 @@
     # 2.1. 1x Agent: registers agents such and peers, orderers and others [replicas = 1]
     # 2.2. 2x User: registers users of Blockchain application [replicas =2]
 
-  # Stop all CA services
+# Stop all CA services
 - name: Stop Fabric CA - {{ item.name }}
   become: yes
   become_user: "{{ hlf_username}}"
@@ -24,7 +24,7 @@
 - name: Clean Fabric CA Server folders in hlft-store, if they exists
   become: yes  
   file: 
-    path: "{{item.path}}"
+    path: "{{ item.path }}"
     state: absent
   loop:        
     - "{{ rca }}"
@@ -42,7 +42,7 @@
   loop:
     - "{{ rca }}"
     - "{{ aica }}"
-    - "{{ uica }}"
+    - "{{ uica }}"   
 
  # Copy relevent config files to s3fs directories for the docker services
 - name: Config templating
@@ -65,8 +65,6 @@
 - name: Fabric CA - {{ item }}
   become: yes
   become_user: "{{ hlf_username}}"
-  vars:
-    ca_home: "FABRIC_CA_HOME=/home/{{item.name}}"
   docker_swarm_service:
     user: "{{ item.name }}"     
     name: "{{ item.name }}"
@@ -80,14 +78,14 @@
       - published_port: "{{item.ca.port}}"
         target_port: "7054"
         protocol: "tcp"
-    command: "bash -c"
+    command: >
+      bash -c "fabric-ca-server start"      
     mounts:
       - source: "/home/{{ hlf_username}}/hlft-store/{{item.name}}"
         target: "/home/{{item.name}}"
         type: bind
-    env: "{{ca_home}}"
-    args:
-      - "{{cacreds[item.name].commands}}"
+    env:
+      - "FABRIC_CA_HOME=/home/{{item.name}}"
     placement:      
       constraints:
         - node.role == worker      
@@ -96,25 +94,33 @@
     - "{{ rca }}"
 
 
-# # Pause starting the intermediate cas, so that we have the root ca stated and cert files generated
-# - name: Wait 30s for Root CA to start
-#   pause:
-#     seconds: 30
-
 # Pause starting the intermediate cas, so that we have the root ca stated and cert files generated
 - name: Wait until Root CA is running
   wait_for:
     port: "{{rca.ca.port}}"
-    delay: 60
-    timeout: 180
+    delay: 90
+    timeout: 270
+
+# Copy the root TLS certs, to relevent intermediate ca directories
+- name: Copy TLS Cert
+  become: yes
+  copy:
+    src: "/home/{{ hlf_username}}/hlft-store/{{item.ca.parent}}/ca-cert.pem"
+    dest: "/home/{{ hlf_username}}/hlft-store/{{item.name}}/ca-{{item.ca.parent}}-cert.pem"
+    owner: "{{item.name}}"
+    group: "{{item.group}}"
+    mode: '0600'
+    remote_src: yes
+    force: yes
+  loop: 
+    - "{{ aica }}"
+    - "{{ uica }}"
 
 
   # Create & Start service intermediate ca 
 - name: Fabric CA - {{ item.name }}
   become: yes
   become_user: "{{ hlf_username}}"
-  vars:
-    ca_home: "FABRIC_CA_HOME=/home/{{item.name}}"
   docker_swarm_service:
     user: "{{ item.name }}"     
     name: "{{ item.name }}"
@@ -128,22 +134,21 @@
       - published_port: "{{item.ca.port}}"
         target_port: "7054"
         protocol: "tcp"
-    command: "bash -c"
+    command: >
+        bash -c "sleep 30000"
+      #- "/bin/bash"
+      #- -c
+      #- "fabric-ca-server start -u https://{{rca_username}}:{{rca_password}}@rca:{{rca.ca.port}} --intermediate.tls.certfiles /home/{{item.name}}/ca-{{rca.name}}-cert.pem"
     mounts:
       - source: "/home/{{ hlf_username}}/hlft-store/{{item.name}}"
         target: "/home/{{item.name}}"
-        type: bind
-      - source: "/home/{{ hlf_username}}/hlft-store/{{item.ca.parent}}/ca-cert.pem"
-        target: "/home/{{item.name}}/ca-{{item.ca.parent}}-cert.pem"
-        type: bind
-    env: "{{ca_home}}"
-
-    args:
-      - "{{cacreds[item.name].commands}}"
+        type: bind      
+    env: 
+      - "FABRIC_CA_HOME=/home/{{item.name}}"
     placement:
       constraints:
         - node.role == worker
     force_update: yes
   loop: 
     - "{{ aica }}"
-    - "{{ uica }}"
+    # - "{{ uica }}"

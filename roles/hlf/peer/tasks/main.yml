@@ -33,6 +33,7 @@
     
 - name: Create Peer Server folders in hlft-store
   become: yes
+  become_user: "{{ hlf_username}}"
   file: 
     path: "{{ item.path }}"
     state: directory
@@ -48,7 +49,7 @@
 - name: Config templating core.yaml for Peers
   become: yes
   vars:
-    orderer_config: "{{item}}"
+    peer_config: "{{item}}"
   template:
     src: core.yaml.j2
     dest: "/home/{{ hlf_username }}/hlft-store/{{item.name}}/core.yaml"
@@ -77,13 +78,16 @@
     mode: replicated
     replicas: "{{item.replicas}}"
     publish:
-      - published_port: "{{item.ca.port}}"
+      - published_port: "{{item.port}}"
         target_port: "7054"
         protocol: "tcp"
     command: "bash -c"
     mounts:
       - source: "/home/{{ hlf_username}}/hlft-store/{{item.name}}"
         target: "/home/{{item.name}}"
+        type: bind
+      - source: "/home/{{ hlf_username}}/hlft-store/{{item.caname}}/ca-cert.pem"
+        target: "/home/{{item.name}}/ca-{{item.caname}}-cert.pem"
         type: bind
     env: "{{peer_home}}"
     args:
@@ -94,5 +98,5 @@
     force_update: yes
   loop: 
     - "{{ epeer }}"    
-    - "{{ cpeer }}"    
-    - "{{ apeer }}"
+    # - "{{ cpeer }}"    
+    # - "{{ apeer }}"
