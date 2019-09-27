@@ -35,7 +35,7 @@ General:
         # Certificate governs the file location of the server TLS certificate.
         Certificate: /home/{{orderer_config.name}}/tls/server.crt
         RootCAs:
-          - /home/{{orderer_config.name}}/tls/ca-{{orderer_config.caname}}-cert.crt
+          - /home/{{orderer_config.name}}/tls/tls-{{orderer_config.caname}}-cert.crt
         ClientAuthRequired: false
         ClientRootCAs:
     # Keepalive settings for the GRPC server.

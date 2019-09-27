@@ -117,7 +117,7 @@
     - "{{ uica }}"
 
 
-  # Create & Start service intermediate ca 
+# Create & Start service intermediate ca 
 - name: Fabric CA - {{ item.name }}
   become: yes
   become_user: "{{ hlf_username}}"
@@ -148,4 +148,4 @@
     force_update: yes
   loop: 
     - "{{ aica }}"
-    - "{{ uica }}"
+    #- "{{ uica }}"

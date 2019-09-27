@@ -1,0 +1,23 @@
+# ---
+
+# Register the agents on aica
+# 1x Orderer
+# 3x Peers
+#   # 1x endorser peer
+    # 1x comitter peer
+    # 1x anchor peer
+
+  # Create & Start service root ca 
+- name: Fabric CA - {{ item }}
+  become: yes
+  become_user: "{{ hlf_username}}"
+  docker_swarm_service:
+    user: "{{ item.name }}"     
+    name: "{{ item.name }}"
+    networks:
+      - "{{swarm_network}}"
+    image: "{{item.name}}:{{item.tag}}"
+    command: >
+      bash -c "echo $FABRIC_CA_HOME"          
+  loop: 
+    - "{{ aica }}"

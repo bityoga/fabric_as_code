@@ -1,0 +1,9 @@
+---
+
+# ansible-playbook -v 013.mount_fs.yml -u root
+
+- name: Spawn a Hyperledger Fabric Topology
+  hosts: swarm_workers
+  gather_facts: no
+  roles:
+    - mountfs

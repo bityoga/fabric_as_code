@@ -14,6 +14,7 @@ debian_package_list:
   - libltdl-dev
   - s3fs
   - python3-pip
+  - nfs-common
 
 redhat_package_list:
   - yum-utils
@@ -26,7 +27,7 @@ redhat_package_list:
   - libtool
   - libtool-ltdl-devel
   - s3fs-fuse
-  - python-pip
+  - python-pip  
 
 pip_packages:
   - docker

@@ -6,4 +6,4 @@
   hosts: swarm_manager_prime
   gather_facts: yes    
   roles:
-    - hlf/fabricca    
+    - hlf/fabricca        

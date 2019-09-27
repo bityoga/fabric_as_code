@@ -28,14 +28,11 @@ apeer_user: "apeer"
 apeer_uid: "3008"
 epeerdb_user: "epeerdb"
 epeerdb_uid: "4001"
-cpeerdb_user: "cpeerdb"
-cpeerdb_uid: "4002"
-apeerdb_user: "apeerdb"
-apeerdb_uid: "4003"
 
 rca_password: "radminpw"
 aica_password: "aiadminpw"    
 uica_password: "uiadminpw"
+orderer_password: "oadminpw"
 
 # Name of the swarm network that would host the services
 swarm_network: "hlfnet"
@@ -86,15 +83,14 @@ uid: "{{uica_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
 orderer: { image: "hyperledger/fabric-orderer", tag: "1.4", name: "{{orderer_user}}", replicas: -1,
 uid: "{{orderer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 6050,
 caname: "{{aica.name}}", anchorpeer: "{{apeer.name}}", anchorport: "{{apeer.port}}",
-path: "/home/{{ hlf_username }}/hlft-store/{{orderer_user}}", 
-commands: "sleep 30000"
+path: "/home/{{ hlf_username }}/hlft-store/{{orderer_user}}"
 }
 
 epeer: { image: "hyperledger/fabric-peer", tag: "1.4", name: "{{epeer_user}}", replicas: -1,
 uid: "{{epeer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 7050,
 caname: "{{aica.name}}", bootstrap_peers: {"{{cpeer.name}}:{{cpeer.port}}", "{{apeer.name}}:{{apeer.port}}"},
 path: "/home/{{ hlf_username }}/hlft-store/{{epeer_user}}", 
-couchdbname: "epeerdb", couchdbport: "{{epeerdb.port}}",
+dbtype: "CouchDB", couchdbname: "epeerdb", couchdbport: "{{epeerdb.port}}",
 commands: "sleep 30000"
 }
 
@@ -102,7 +98,7 @@ cpeer: { image: "hyperledger/fabric-peer", tag: "1.4", name: "{{cpeer_user}}", r
 uid: "{{cpeer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 8050,
 caname: "{{aica.name}}", bootstrap_peers: {"{{epeer.name}}:{{epeer.port}}", "{{apeer.name}}:{{apeer.port}}"},
 path: "/home/{{ hlf_username }}/hlft-store/{{cpeer_user}}", 
-couchdbname: "cpeerdb", couchdbport: "{{cpeerdb.port}}",
+dbtype: "goleveldb", couchdbname: "", couchdbport: "",
 commands: "sleep 30000"
 }
 
@@ -110,7 +106,7 @@ apeer: { image: "hyperledger/fabric-peer", tag: "1.4", name: "{{apeer_user}}", r
 uid: "{{apeer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 9050,
 caname: "{{aica.name}}", bootstrap_peers: {"{{epeer.name}}:{{epeer.port}}", "{{cpeer.name}}:{{cpeer.port}}"},
 path: "/home/{{ hlf_username }}/hlft-store/{{apeer_user}}", 
-couchdbname: "apeerdb", couchdbport: "{{apeerdb.port}}",
+dbtype: "goleveldb", couchdbname: "", couchdbport: "",
 commands: "sleep 30000"
 }
 
@@ -122,18 +118,6 @@ commands:
 /opt/couchdb/bin/couchdb;"
 }
 
-cpeerdb: { image: "hyperledger/fabric-couchdb", tag: "0.4.15", name: "{{cpeerdb_user}}", replicas: -1,
-uid: "{{cpeerdb_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 8051,
-path: "/home/{{ hlf_username }}/hlft-store/{{cpeerdb_user}}",
-commands: "sleep 30000"
-}
-
-apeerdb: { image: "hyperledger/fabric-couchdb", tag: "0.4.15", name: "{{apeerdb_user}}", replicas: -1,
-uid: "{{apeerdb_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 9051,
-path: "/home/{{ hlf_username }}/hlft-store/{{apeerdb_user}}",
-commands: "sleep 30000"
-}
-
 services:
   - "{{rca}}"
   - "{{aica}}"
@@ -142,6 +126,4 @@ services:
   - "{{ epeer }}"    
   - "{{ cpeer }}"    
   - "{{ apeer }}"
-  - "{{ epeerdb }}"    
-  - "{{ cpeerdb }}"    
-  - "{{ apeerdb }}"   
+  - "{{ epeerdb }}"      

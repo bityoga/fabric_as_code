@@ -1,9 +1,0 @@
----
-
-# ansible-playbook -v 013.mount_s3fs.yml -u root
-
-- name: Spawn a Hyperledger Fabric Topology
-  hosts: all
-  gather_facts: no
-  roles:
-    - s3fs

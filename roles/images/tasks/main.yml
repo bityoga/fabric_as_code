@@ -43,8 +43,6 @@
       command: bash -c "chown -R {{epeerdb_user}}:{{epeerdb_user}} /opt/couchdb;"
    with_items:
       - "{{ epeerdb }}"    
-      - "{{ cpeerdb }}"    
-      - "{{ apeerdb }}"  
 
  - name: Commit container {{item.name}} as {{item.name}}:{{item.tag}}
    become: yes

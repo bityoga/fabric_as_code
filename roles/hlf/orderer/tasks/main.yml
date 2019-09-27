@@ -16,7 +16,7 @@
     - "{{ orderer }}"    
 
   # We create relevent folder structure in S3FS mount locally for service 
-- name: Clean Ordererr folders in hlft-store, if they exists
+- name: Clean Orderer folders in hlft-store, if they exists
   become: yes  
   file: 
     path: "{{item.path}}"
@@ -65,12 +65,31 @@
   loop:
     - "{{ orderer }}"
 
-  # Create & Start service orderer with RAFT enabled
-- name: Fabric CA - {{ item }}
+- name: Ensures /home/{{ hlf_username}}/hlft-store/{{item.name}}/tls dir exists
+  file: 
+    path=/home/{{ hlf_username}}/hlft-store/{{item.name}}/tls 
+    state=directory
+  loop: 
+    - "{{ orderer }}"
+
+# Copy the root TLS certs from aica
+- name: Copy TLS Cert
   become: yes
-  become_user: "{{ hlf_username}}"
-  vars:
-    orderer_home: "FABRIC_CFG_PATH=/home/{{item.name}}"
+  copy:
+    src: "/home/{{ hlf_username}}/hlft-store/{{item.caname}}/tls-cert.pem"
+    dest: "/home/{{ hlf_username}}/hlft-store/{{item.name}}/tls/tls-{{item.caname}}-cert.pem"
+    owner: "{{item.name}}"
+    group: "{{item.group}}"
+    mode: '0600'
+    remote_src: yes
+    force: yes
+  loop: 
+    - "{{ orderer }}"    
+
+  # Create & Start service orderer with RAFT enabled
+- name: Fabric Orderer with RAFT - {{ item }}
+  become: yes
+  become_user: "{{ hlf_username}}"   
   docker_swarm_service:
     user: "{{ item.name }}"     
     name: "{{ item.name }}"
@@ -81,17 +100,19 @@
     mode: replicated
     replicas: "{{item.replicas}}"
     publish:
-      - published_port: "{{item.ca.port}}"
+      - published_port: "{{item.port}}"
         target_port: "7050"
         protocol: "tcp"
-    command: "bash -c"
+    command: >
+      bash -c "sleep 30000"
     mounts:
       - source: "/home/{{ hlf_username}}/hlft-store/{{item.name}}"
         target: "/home/{{item.name}}"
         type: bind
-    env: "{{orderer_home}}"
-    args:
-      - "{{item.commands}}"
+    env: 
+      - "FABRIC_CFG_PATH=/home/{{item.name}}"
+      - "ORDERER_USER={{item.name}}"
+      - "ORDERER_USER={{orderer_password}}"
     placement:      
       constraints:
         - node.role == worker      

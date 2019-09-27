@@ -1,0 +1,9 @@
+---
+
+# ansible-playbook -v 101.deploy_orderer.yml --flush-cache -u root 
+
+- name: Spawn a Hyperledger Fabric Topology
+  hosts: swarm_manager_prime
+  gather_facts: no
+  roles:
+    - hlf/orderer     
