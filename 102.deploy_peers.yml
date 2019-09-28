@@ -1,6 +1,6 @@
 ---
 
-# ansible-playbook -v 101.deploy_peers.yml --flush-cache -u root 
+# ansible-playbook -v 102.deploy_peers.yml --flush-cache -u root 
 
 - name: Spawn a Hyperledger Fabric Topology
   hosts: swarm_manager_prime

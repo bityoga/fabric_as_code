@@ -92,12 +92,12 @@ peer:
         # connection with ordering service and use delivery protocol
         # to pull ledger blocks from ordering service. It is recommended to
         # use leader election for large networks of peers.
-        useLeaderElection: true
+        useLeaderElection: false
         # Statically defines peer to be an organization "leader",
         # where this means that current peer will maintain connection
         # with ordering service and disseminate block across peers in
         # its own organization
-        orgLeader: false
+        orgLeader: {{peer_config.leader}}
 
         # Interval for membershipTracker polling
         membershipTrackerInterval: 5s
@@ -244,11 +244,11 @@ peer:
             file: /home/{{peer_config.name}}/tls/server.key
         # Trusted root certificate chain for tls.cert
         rootcert:
-            file: /home/{{peer_config.name}}/tls/ca-{{peer_config.caname}}-cert.crt
+            file: /home/{{peer_config.name}}/tls/tls-{{peer_config.caname}}-cert.pem
         # Set of root certificate authorities used to verify client certificates
         clientRootCAs:
             files:
-              - /home/{{peer_config.name}}/tls/ca-{{peer_config.caname}}-cert.crt
+              - /home/{{peer_config.name}}/tls/tls-{{peer_config.caname}}-cert.pem
         # Private key used for TLS when making client connections.  If
         # not set, peer.tls.key.file will be used instead
         clientKey:
@@ -595,9 +595,9 @@ ledger:
        # not map the CouchDB container port to a server port in docker-compose.
        # Otherwise proper security must be provided on the connection between
        # CouchDB client (on the peer) and server.
-       couchDBAddress: {{peer_config.couchdbname}}:{{peer_config.couchdbport}}
+       couchDBAddress: {{peer_config.couchdbaddress}}
        # This username must have read and write authority on CouchDB
-       username: {{peer_config.couchdbname}}
+       username: {{peer_config.name}}
        # The password is recommended to pass as an environment variable
        # during start up (eg CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD).
        # If it is stored here, the file must be access control protected

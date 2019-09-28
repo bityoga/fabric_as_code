@@ -94,24 +94,27 @@ epeer: { image: "hyperledger/fabric-peer", tag: "1.4", name: "{{epeer_user}}", r
 uid: "{{epeer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 7050,
 caname: "{{aica.name}}", bootstrap_peers: {"{{cpeer.name}}:{{cpeer.port}}", "{{apeer.name}}:{{apeer.port}}"},
 path: "/home/{{ hlf_username }}/hlft-store/{{epeer_user}}", 
-dbtype: "CouchDB", couchdbname: "epeerdb", couchdbport: "{{epeerdb.port}}",
-password: "{{epeer_password}}"
+dbtype: "goleveldb", couchdbaddress: "",
+password: "{{epeer_password}}",
+leader: "{{cpeer_user}}"
 }
 
 cpeer: { image: "hyperledger/fabric-peer", tag: "1.4", name: "{{cpeer_user}}", replicas: -1,
 uid: "{{cpeer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 8050,
 caname: "{{aica.name}}", bootstrap_peers: {"{{epeer.name}}:{{epeer.port}}", "{{apeer.name}}:{{apeer.port}}"},
 path: "/home/{{ hlf_username }}/hlft-store/{{cpeer_user}}", 
-dbtype: "goleveldb", couchdbname: "", couchdbport: "",
-password: "{{cpeer_password}}"
+dbtype: "goleveldb", couchdbaddress: "",
+password: "{{cpeer_password}}",
+leader: "{{cpeer_user}}"
 }
 
 apeer: { image: "hyperledger/fabric-peer", tag: "1.4", name: "{{apeer_user}}", replicas: -1,
 uid: "{{apeer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 9050,
 caname: "{{aica.name}}", bootstrap_peers: {"{{epeer.name}}:{{epeer.port}}", "{{cpeer.name}}:{{cpeer.port}}"},
 path: "/home/{{ hlf_username }}/hlft-store/{{apeer_user}}", 
-dbtype: "goleveldb", couchdbname: "", couchdbport: "",
-password: "{{apeer_password}}"
+dbtype: "goleveldb", couchdbaddress: "",
+password: "{{apeer_password}}",
+leader: "{{cpeer_user}}"
 }
 
 epeerdb: { image: "hyperledger/fabric-couchdb", tag: "0.4.15", name: "{{epeerdb_user}}", replicas: -1,
