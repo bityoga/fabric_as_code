@@ -35,56 +35,59 @@
   loop:
         - "{{ orderer }}"
 
+  # Copy the relevent scripts
+- name: Copy scripts
+  become: yes
+  copy:
+    src: "{{item.0}}"
+    dest: "/home/{{ hlf_username}}/hlft-store/{{orderer.name}}/{{item.0}}"
+    owner: "{{orderer.name}}"
+    group: "{{orderer.group}}"
+    mode: "{{item.1}}"
+    force: yes
+  loop: 
+    - ["orderer.sh", '0500']
+    - ["bootstrap.sh", '0500']
+
+- name: Copy MSP folder
+  become: yes
+  copy:
+    src: "/home/{{ hlf_username}}/hlft-store/{{item.caname}}/client/{{item.name}}/"
+    dest: "/home/{{ hlf_username}}/hlft-store/{{item.name}}/msp"
+    owner: "{{item.name}}"
+    group: "{{item.group}}"
+    mode: '0750'
+    remote_src: yes
+    force: yes
+  loop: 
+    - "{{ orderer }}"   
+
  # Copy relevent config files to s3fs directories for the docker services
 - name: Config templating orderer.yaml
   become: yes
   vars:
-    orderer_config: "{{item}}"
+    orderer_config: "{{item[0]}}"
   template:
-    src: orderer.yaml.j2
-    dest: "/home/{{ hlf_username }}/hlft-store/{{item.name}}/orderer.yaml"
-    owner: "{{ item.name }}"
-    group: "{{ item.group }}"
+    src: "{{item[1]}}.j2"
+    dest: "/home/{{ hlf_username }}/hlft-store/{{item[0].name}}/{{item[1]}}"
+    owner: "{{ item[0].name }}"
+    group: "{{ item[0].group }}"
     mode: 0600
     force: yes
-  loop:
-    - "{{ orderer }}"
-
- # Copy relevent config files to s3fs directories for the docker services
-- name: Config templating configtx.yaml
-  become: yes
-  vars:
-    orderer_config: "{{item}}"
-  template:
-    src: configtx.yaml.j2
-    dest: "/home/{{ hlf_username }}/hlft-store/{{item.name}}/configtx.yaml"
-    owner: "{{ item.name }}"
-    group: "{{ item.group }}"
-    mode: 0600
-    force: yes
-  loop:
-    - "{{ orderer }}"
+  with_nested:
+    - ["{{ orderer }}"]
+    - ["orderer.yaml", "configtx.yaml"]
 
 - name: Ensures /home/{{ hlf_username}}/hlft-store/{{item.name}}/tls dir exists
   file: 
-    path=/home/{{ hlf_username}}/hlft-store/{{item.name}}/tls 
-    state=directory
+    path: /home/{{ hlf_username}}/hlft-store/{{item.name}}/tls 
+    state: directory
+    owner: "{{ item.name }}"
+    group: "{{ item.group }}"
+    mode: 0750
+    force: yes    
   loop: 
     - "{{ orderer }}"
-
-# Copy the root TLS certs from aica
-- name: Copy TLS Cert
-  become: yes
-  copy:
-    src: "/home/{{ hlf_username}}/hlft-store/{{item.caname}}/tls-cert.pem"
-    dest: "/home/{{ hlf_username}}/hlft-store/{{item.name}}/tls/tls-{{item.caname}}-cert.pem"
-    owner: "{{item.name}}"
-    group: "{{item.group}}"
-    mode: '0600'
-    remote_src: yes
-    force: yes
-  loop: 
-    - "{{ orderer }}"    
 
   # Create & Start service orderer with RAFT enabled
 - name: Fabric Orderer with RAFT - {{ item }}
@@ -104,15 +107,16 @@
         target_port: "7050"
         protocol: "tcp"
     command: >
-      bash -c "sleep 30000"
+      bash -c "/home/{{item.name}}/{{item.name}}.sh;"
     mounts:
       - source: "/home/{{ hlf_username}}/hlft-store/{{item.name}}"
         target: "/home/{{item.name}}"
         type: bind
+      - source: "/home/{{ hlf_username}}/hlft-store/{{item.caname}}/tls-cert.pem"
+        target: "/home/{{item.name}}/tls/tls-{{item.caname}}-cert.pem"
+        type: bind
     env: 
-      - "FABRIC_CFG_PATH=/home/{{item.name}}"
-      - "ORDERER_USER={{item.name}}"
-      - "ORDERER_USER={{orderer_password}}"
+      - "FABRIC_CFG_PATH=/home/{{item.name}}"      
     placement:      
       constraints:
         - node.role == worker      

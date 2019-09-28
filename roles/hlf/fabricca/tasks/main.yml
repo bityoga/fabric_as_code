@@ -123,22 +123,6 @@
     delay: 15
     timeout: 45
 
-# # Copy the root TLS certs, to relevent intermediate ca directories
-# - name: Copy TLS Cert
-#   become: yes
-#   copy:
-#     src: "/home/{{ hlf_username}}/hlft-store/{{item.ca.parent}}/tls-cert.pem"
-#     dest: "/home/{{ hlf_username}}/hlft-store/{{item.name}}/tls-{{item.ca.parent}}-cert.pem"
-#     owner: "{{item.name}}"
-#     group: "{{item.group}}"
-#     mode: '0600'
-#     remote_src: yes
-#     force: yes
-#   loop: 
-#     - "{{ aica }}"
-#     - "{{ uica }}"
-
-
 # Create & Start service intermediate ca 
 - name: Fabric CA - {{ item.name }}
   become: yes

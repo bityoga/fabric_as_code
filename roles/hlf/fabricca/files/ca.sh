@@ -36,10 +36,19 @@ then
     # Register the ordering service    
     fabric-ca-client register -d --id.name $ORDERER_USER --id.type 'peer' --id.affiliation bityoga.hlf.agents.orderers --id.maxenrollments -1 --id.secret $ORDERER_PASSWORD --tls.certfiles $FABRIC_CA_HOME/tls-cert.pem
 
+
     # Register peer services
     fabric-ca-client register -d --id.name $EPEER_USER --id.type 'peer' --id.affiliation bityoga.hlf.agents.peers --id.maxenrollments -1 --id.secret $EPEER_PASSWORD --tls.certfiles $FABRIC_CA_HOME/tls-cert.pem
     fabric-ca-client register -d --id.name $CPEER_USER --id.type 'peer' --id.affiliation bityoga.hlf.agents.peers --id.maxenrollments -1 --id.secret $CPEER_PASSWORD --tls.certfiles $FABRIC_CA_HOME/tls-cert.pem
     fabric-ca-client register -d --id.name $APEER_USER --id.type 'peer' --id.affiliation bityoga.hlf.agents.peers --id.maxenrollments -1 --id.secret $APEER_PASSWORD --tls.certfiles $FABRIC_CA_HOME/tls-cert.pem
+
+    # Enroll the services, so as to generate the MSP
+    # Orderer
+    fabric-ca-client enroll -M $FABRIC_CA_HOME/client/$ORDERER_USER -u https://$ORDERER_USER:$ORDERER_PASSWORD@$FABRIC_CA_USER:7054 --tls.certfiles $FABRIC_CA_HOME/tls-cert.pem
+    #Peers
+    fabric-ca-client enroll -M $FABRIC_CA_HOME/client/$EPEER_USER -u https://$EPEER_USER:$EPEER_PASSWORD@$FABRIC_CA_USER:7054 --tls.certfiles $FABRIC_CA_HOME/tls-cert.pem
+    fabric-ca-client enroll -M $FABRIC_CA_HOME/client/$CPEER_USER -u https://$CPEER_USER:$CPEER_PASSWORD@$FABRIC_CA_USER:7054 --tls.certfiles $FABRIC_CA_HOME/tls-cert.pem
+    fabric-ca-client enroll -M $FABRIC_CA_HOME/client/$APEER_USER -u https://$APEER_USER:$APEER_PASSWORD@$FABRIC_CA_USER:7054 --tls.certfiles $FABRIC_CA_HOME/tls-cert.pem
  
 elif [ $type == "uica" ]
 then
