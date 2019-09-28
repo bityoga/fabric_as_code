@@ -44,22 +44,37 @@
     - "{{ aica }}"
     - "{{ uica }}"   
 
+  # Copy the relevent scripts
+- name: Copy scripts
+  become: yes
+  copy:
+    src: "ca.sh"
+    dest: "/home/{{ hlf_username}}/hlft-store/{{item.name}}/{{item.name}}.sh"
+    owner: "{{item.name}}"
+    group: "{{item.group}}"
+    mode: '0500'
+    force: yes
+  loop: 
+    - "{{ rca }}"
+    - "{{ aica }}"
+    - "{{ uica }}"
+
+    
  # Copy relevent config files to s3fs directories for the docker services
 - name: Config templating
   become: yes
   vars:
-    ca_config: "{{item}}"
+    ca_config: "{{item[0]}}"
   template:
-    src: fabric-ca-server-config.yaml.j2
-    dest: "/home/{{ hlf_username }}/hlft-store/{{item.name}}/fabric-ca-server-config.yaml"
-    owner: "{{ item.name }}"
-    group: "{{ item.group }}"
+    src: "{{item[1]}}.j2"
+    dest: "/home/{{ hlf_username }}/hlft-store/{{item[0].name}}/{{item[1]}}"
+    owner: "{{ item[0].name }}"
+    group: "{{ item[0].group }}"
     mode: 0600
     force: yes
-  loop:
-    - "{{ rca }}"
-    - "{{ aica }}"
-    - "{{ uica }}"
+  with_nested:
+    - ["{{ rca }}", "{{ aica }}", "{{ uica }}"]
+    - [ 'fabric-ca-server-config.yaml', 'fabric-ca-client-config.yaml']
 
   # Create & Start service root ca 
 - name: Fabric CA - {{ item }}
@@ -78,14 +93,21 @@
       - published_port: "{{item.ca.port}}"
         target_port: "7054"
         protocol: "tcp"
-    command: >
-      bash -c "fabric-ca-server start"      
+    command: 
+      bash -c "/home/{{item.name}}/{{item.name}}.sh {{item.name}} {{aica.ca.affiliation}} {{uica.ca.affiliation}};" 
     mounts:
       - source: "/home/{{ hlf_username}}/hlft-store/{{item.name}}"
         target: "/home/{{item.name}}"
         type: bind
     env:
       - "FABRIC_CA_HOME=/home/{{item.name}}"
+      - "FABRIC_CA_USER={{item.name}}"
+      - "FABRIC_CA_PASSWORD={{item.password}}"
+      - "FABRIC_AICA_USER={{aica.name}}"
+      - "FABRIC_AICA_PASSWORD={{aica.password}}"
+      - "FABRIC_UICA_USER={{uica.name}}"
+      - "FABRIC_UICA_PASSWORD={{uica.password}}"
+
     placement:      
       constraints:
         - node.role == worker      
@@ -98,23 +120,23 @@
 - name: Wait until Root CA is running
   wait_for:
     port: "{{rca.ca.port}}"
-    delay: 90
-    timeout: 270
+    delay: 15
+    timeout: 45
 
-# Copy the root TLS certs, to relevent intermediate ca directories
-- name: Copy TLS Cert
-  become: yes
-  copy:
-    src: "/home/{{ hlf_username}}/hlft-store/{{item.ca.parent}}/tls-cert.pem"
-    dest: "/home/{{ hlf_username}}/hlft-store/{{item.name}}/tls-{{item.ca.parent}}-cert.pem"
-    owner: "{{item.name}}"
-    group: "{{item.group}}"
-    mode: '0600'
-    remote_src: yes
-    force: yes
-  loop: 
-    - "{{ aica }}"
-    - "{{ uica }}"
+# # Copy the root TLS certs, to relevent intermediate ca directories
+# - name: Copy TLS Cert
+#   become: yes
+#   copy:
+#     src: "/home/{{ hlf_username}}/hlft-store/{{item.ca.parent}}/tls-cert.pem"
+#     dest: "/home/{{ hlf_username}}/hlft-store/{{item.name}}/tls-{{item.ca.parent}}-cert.pem"
+#     owner: "{{item.name}}"
+#     group: "{{item.group}}"
+#     mode: '0600'
+#     remote_src: yes
+#     force: yes
+#   loop: 
+#     - "{{ aica }}"
+#     - "{{ uica }}"
 
 
 # Create & Start service intermediate ca 
@@ -135,17 +157,31 @@
         target_port: "7054"
         protocol: "tcp"
     command: >
-      bash -c "fabric-ca-server start -u https://{{rca_user}}:{{rca_password}}@rca:{{rca.ca.port}} --intermediate.tls.certfiles /home/{{item.name}}/tls-{{rca.name}}-cert.pem"
+      bash -c "/home/{{item.name}}/{{item.name}}.sh {{item.name}} {{aica.ca.affiliation}} {{uica.ca.affiliation}};" 
     mounts:
       - source: "/home/{{ hlf_username}}/hlft-store/{{item.name}}"
         target: "/home/{{item.name}}"
+        type: bind  
+      - source: "/home/{{ hlf_username}}/hlft-store/{{item.ca.parent}}/tls-cert.pem"
+        target: "/home/{{item.name}}/tls-{{item.ca.parent}}-cert.pem"
         type: bind      
-    env: 
+    env:
+      - "FABRIC_CA_ROOT={{item.ca.parent}}"
       - "FABRIC_CA_HOME=/home/{{item.name}}"
+      - "FABRIC_CA_USER={{item.name}}"
+      - "FABRIC_CA_PASSWORD={{item.password}}"  
+      - "ORDERER_USER={{orderer.name}}"
+      - "ORDERER_PASSWORD={{orderer.password}}"
+      - "EPEER_USER={{epeer.name}}"
+      - "EPEER_PASSWORD={{epeer.password}}"
+      - "CPEER_USER={{cpeer.name}}"
+      - "CPEER_PASSWORD={{cpeer.password}}"
+      - "APEER_USER={{apeer.name}}"
+      - "APEER_PASSWORD={{apeer.password}}"
     placement:
       constraints:
         - node.role == worker
     force_update: yes
   loop: 
     - "{{ aica }}"
-    #- "{{ uica }}"
+    - "{{ uica }}"

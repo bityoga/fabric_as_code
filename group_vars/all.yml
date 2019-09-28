@@ -1,7 +1,7 @@
 ---
 # Organization Details
 org:
-  name: "bitYoga"
+  name: "bityoga"
   unit: "hlf"
 
 # Users and groups that would be created on host machines, for creating a swarm and deplying hlf services
@@ -33,6 +33,9 @@ rca_password: "radminpw"
 aica_password: "aiadminpw"    
 uica_password: "uiadminpw"
 orderer_password: "oadminpw"
+epeer_password: "epadminpw"
+cpeer_password: "cpadminpw"
+apeer_password: "apadminpw"
 
 # Name of the swarm network that would host the services
 swarm_network: "hlfnet"
@@ -61,7 +64,7 @@ rca: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{rca_user}}", replica
 aica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{aica_user}}", replicas: -1,
 uid: "{{aica_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
  ca: { version: "0.1", maxenrollments: -1, allow_intermediateca_registration: false, pathlength: 0, port: 7055,
-       affiliation: "{{org.name}}.{{org.unit}}", parent: "{{rca.name}}",     
+       affiliation: "{{org.name}}.{{org.unit}}.agents", parent: "{{rca.name}}",     
        tls_enabled: true, tls_clientauth_type: "noclientcert"},
  csr: {cn: "", country: "NO", state: "Rogaland", city: "Stavanger"}, 
  path: "/home/{{ hlf_username }}/hlft-store/{{aica_user}}",
@@ -72,7 +75,7 @@ uid: "{{aica_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
 uica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{uica_user}}", replicas: 2,
 uid: "{{uica_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
  ca: { version: "0.1", maxenrollments: 1, allow_intermediateca_registration: false, pathlength: 0, port: 7056,
-       affiliation: "{{org.name}}.{{org.unit}}", parent: "{{rca.name}}",
+       affiliation: "{{org.name}}.{{org.unit}}.users", parent: "{{rca.name}}",
        tls_enabled: true, tls_clientauth_type: "noclientcert"},
  csr: {cn: "", country: "NO", state: "Rogaland", city: "Stavanger"}, 
  path: "/home/{{ hlf_username }}/hlft-store/{{uica_user}}",
@@ -83,7 +86,8 @@ uid: "{{uica_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
 orderer: { image: "hyperledger/fabric-orderer", tag: "1.4", name: "{{orderer_user}}", replicas: -1,
 uid: "{{orderer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 6050,
 caname: "{{aica.name}}", anchorpeer: "{{apeer.name}}", anchorport: "{{apeer.port}}",
-path: "/home/{{ hlf_username }}/hlft-store/{{orderer_user}}"
+path: "/home/{{ hlf_username }}/hlft-store/{{orderer_user}}",
+ password: "{{orderer_password}}"
 }
 
 epeer: { image: "hyperledger/fabric-peer", tag: "1.4", name: "{{epeer_user}}", replicas: -1,
@@ -91,7 +95,7 @@ uid: "{{epeer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 7050,
 caname: "{{aica.name}}", bootstrap_peers: {"{{cpeer.name}}:{{cpeer.port}}", "{{apeer.name}}:{{apeer.port}}"},
 path: "/home/{{ hlf_username }}/hlft-store/{{epeer_user}}", 
 dbtype: "CouchDB", couchdbname: "epeerdb", couchdbport: "{{epeerdb.port}}",
-commands: "sleep 30000"
+password: "{{epeer_password}}"
 }
 
 cpeer: { image: "hyperledger/fabric-peer", tag: "1.4", name: "{{cpeer_user}}", replicas: -1,
@@ -99,7 +103,7 @@ uid: "{{cpeer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 8050,
 caname: "{{aica.name}}", bootstrap_peers: {"{{epeer.name}}:{{epeer.port}}", "{{apeer.name}}:{{apeer.port}}"},
 path: "/home/{{ hlf_username }}/hlft-store/{{cpeer_user}}", 
 dbtype: "goleveldb", couchdbname: "", couchdbport: "",
-commands: "sleep 30000"
+password: "{{cpeer_password}}"
 }
 
 apeer: { image: "hyperledger/fabric-peer", tag: "1.4", name: "{{apeer_user}}", replicas: -1,
@@ -107,7 +111,7 @@ uid: "{{apeer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 9050,
 caname: "{{aica.name}}", bootstrap_peers: {"{{epeer.name}}:{{epeer.port}}", "{{cpeer.name}}:{{cpeer.port}}"},
 path: "/home/{{ hlf_username }}/hlft-store/{{apeer_user}}", 
 dbtype: "goleveldb", couchdbname: "", couchdbport: "",
-commands: "sleep 30000"
+password: "{{apeer_password}}"
 }
 
 epeerdb: { image: "hyperledger/fabric-couchdb", tag: "0.4.15", name: "{{epeerdb_user}}", replicas: -1,
