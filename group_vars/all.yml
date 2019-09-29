@@ -94,7 +94,7 @@ path: "/home/{{ hlf_username }}/hlft-store/{{orderer_user}}",
  password: "{{orderer_password}}"
 }
 
-epeer: { image: "hyperledger/fabric-peer", tag: "1.4", name: "{{epeer_user}}", replicas: 2,
+epeer: { image: "hyperledger/fabric-peer", tag: "1.4", name: "{{epeer_user}}", replicas: -1,
 uid: "{{epeer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 7050,
 caname: "{{aica.name}}", bootstrap_peers: {"{{cpeer.name}}:{{cpeer.port}}", "{{apeer.name}}:{{apeer.port}}"},
 path: "/home/{{ hlf_username }}/hlft-store/{{epeer_user}}", 
