@@ -29,6 +29,9 @@ apeer_uid: "3008"
 epeerdb_user: "epeerdb"
 epeerdb_uid: "4001"
 
+cli_user: "cli"
+cli_uid: "9001"
+
 rca_password: "radminpw"
 aica_password: "aiadminpw"    
 uica_password: "uiadminpw"
@@ -36,6 +39,7 @@ orderer_password: "oadminpw"
 epeer_password: "epadminpw"
 cpeer_password: "cpadminpw"
 apeer_password: "apadminpw"
+cli_password: "cliadminpw"
 
 # Name of the swarm network that would host the services
 swarm_network: "hlfnet"
@@ -117,6 +121,16 @@ password: "{{apeer_password}}",
 leader: "{{cpeer_user}}"
 }
 
+cli: { image: "hyperledger/fabric-tools", tag: "1.4", name: "{{cli_user}}", replicas: -1,
+uid: "{{cli_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: "",
+anchorpeer: "{{apeer.name}}", anchorport: "{{apeer.port}}",
+caname: "{{aica.name}}", bootstrap_peers: {},
+path: "/home/{{ hlf_username }}/hlft-store/{{cli_user}}",
+dbtype: "goleveldb", couchdbaddress: "",
+password: "{{cli_password}}",
+leader: "{{cpeer_user}}"
+}
+
 epeerdb: { image: "hyperledger/fabric-couchdb", tag: "0.4.15", name: "{{epeerdb_user}}", replicas: -1,
 uid: "{{epeerdb_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 7051,
 path: "/home/{{ hlf_username }}/hlft-store/{{epeerdb_user}}",
@@ -133,4 +147,5 @@ services:
   - "{{ epeer }}"    
   - "{{ cpeer }}"    
   - "{{ apeer }}"
-  - "{{ epeerdb }}"      
+  - "{{ epeerdb }}"   
+  - "{{ cli }}" 

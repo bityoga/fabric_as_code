@@ -11,14 +11,14 @@
 peer:
 
     # The Peer id is used for identifying this Peer instance.
-    id: {{peer_config.name}}
+    id: {{config.name}}
 
     # The networkId allows for logical seperation of networks
     networkId: {{org.name}}
 
     # The Address at local network interface this Peer will listen on.
     # By default, it will listen on all network interfaces
-    listenAddress: 0.0.0.0:{{peer_config.port}}
+    listenAddress: 0.0.0.0:7054
 
     # The endpoint this peer uses to listen for inbound chaincode connections.
     # If this is commented-out, the listen address is selected to be
@@ -35,7 +35,7 @@ peer:
     # in the same organization. For peers in other organization, see
     # gossip.externalEndpoint for more info.
     # When used as CLI config, this means the peer's endpoint to interact with
-    address: 0.0.0.0:{{peer_config.port}}
+    address: 0.0.0.0:7054
 
     # Whether the Peer should programmatically determine its address
     # This case is useful for docker containers.
@@ -79,7 +79,7 @@ peer:
         # Important: The endpoints here have to be endpoints of peers in the same
         # organization, because the peer would refuse connecting to these endpoints
         # unless they are in the same organization as the peer.
-        bootstrap: {{peer_config.bootstrap_peers}}
+        bootstrap: {{config.bootstrap_peers}}
 
         # NOTE: orgLeader and useLeaderElection parameters are mutual exclusive.
         # Setting both to true would result in the termination of the peer
@@ -97,7 +97,7 @@ peer:
         # where this means that current peer will maintain connection
         # with ordering service and disseminate block across peers in
         # its own organization
-        orgLeader: {{peer_config.leader}}
+        orgLeader: {{config.leader}}
 
         # Interval for membershipTracker polling
         membershipTrackerInterval: 5s
@@ -230,25 +230,25 @@ peer:
     # not mutual TLS auth. See comments on chaincodeListenAddress for more info
     tls:
         # Require server-side TLS
-        enabled:  true
+        enabled:  false
         # Require client certificates / mutual TLS.
         # Note that clients that are not configured to use a certificate will
         # fail to connect to the peer.
         clientAuthRequired: false
         # X.509 certificate used for TLS server
         cert:
-            file: /home/{{peer_config.name}}/tls/server.crt
+            file: /home/{{config.name}}/tls/server.crt
         # Private key used for TLS server (and client if clientAuthEnabled
         # is set to true
         key:
-            file: /home/{{peer_config.name}}/tls/server.key
+            file: /home/{{config.name}}/tls/server.key
         # Trusted root certificate chain for tls.cert
         rootcert:
-            file: /home/{{peer_config.name}}/tls/tls-{{peer_config.caname}}-cert.pem
+            file: /home/{{config.name}}/tls/tls-{{config.caname}}-cert.pem
         # Set of root certificate authorities used to verify client certificates
         clientRootCAs:
             files:
-              - /home/{{peer_config.name}}/tls/tls-{{peer_config.caname}}-cert.pem
+              - /home/{{config.name}}/tls/tls-{{config.caname}}-cert.pem
         # Private key used for TLS when making client connections.  If
         # not set, peer.tls.key.file will be used instead
         clientKey:
@@ -268,7 +268,7 @@ peer:
     # Path on the file system where peer will store data (eg ledger). This
     # location must be access control protected to prevent unintended
     # modification that might corrupt the peer operations.
-    fileSystemPath: /home/{{peer_config.name}}/ledger
+    fileSystemPath: /home/{{config.name}}/ledger
 
     # BCCSP (Blockchain crypto provider): Select which crypto implementation or
     # library to use
@@ -299,7 +299,7 @@ peer:
                 KeyStore:
 
     # Path on the file system where peer will find MSP local configurations
-    mspConfigPath: /home/{{peer_config.name}}/msp
+    mspConfigPath: /home/{{config.name}}/msp
 
     # Identifier of the local MSP
     # ----!!!!IMPORTANT!!!-!!!IMPORTANT!!!-!!!IMPORTANT!!!!----
@@ -587,7 +587,7 @@ ledger:
     # stateDatabase - options are "goleveldb", "CouchDB"
     # goleveldb - default state database stored in goleveldb.
     # CouchDB - store state database in CouchDB
-    stateDatabase: {{peer_config.dbtype}}
+    stateDatabase: {{config.dbtype}}
     # Limit on the number of records to return per query
     totalQueryLimit: 100000
     couchDBConfig:
@@ -595,9 +595,9 @@ ledger:
        # not map the CouchDB container port to a server port in docker-compose.
        # Otherwise proper security must be provided on the connection between
        # CouchDB client (on the peer) and server.
-       couchDBAddress: {{peer_config.couchdbaddress}}
+       couchDBAddress: {{config.couchdbaddress}}
        # This username must have read and write authority on CouchDB
-       username: {{peer_config.name}}
+       username: {{config.name}}
        # The password is recommended to pass as an environment variable
        # during start up (eg CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD).
        # If it is stored here, the file must be access control protected

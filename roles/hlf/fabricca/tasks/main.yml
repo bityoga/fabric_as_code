@@ -162,6 +162,8 @@
       - "CPEER_PASSWORD={{cpeer.password}}"
       - "APEER_USER={{apeer.name}}"
       - "APEER_PASSWORD={{apeer.password}}"
+      - "CLI_USER={{cli.name}}"
+      - "CLI_PASSWORD={{cli.password}}"
     placement:
       constraints:
         - node.role == worker
@@ -169,3 +171,13 @@
   loop: 
     - "{{ aica }}"
     - "{{ uica }}"
+  
+# Pause finish running the playbook until all the CAs have finished running
+- name: Wait until {{item.name}} is running
+  wait_for:
+    port: "{{item.ca.port}}"
+    delay: 15
+    timeout: 45
+  loop:
+    - "{{uica}}"
+    - "{{aica}}"

@@ -27,7 +27,8 @@ function copyAdminCert {
 
 
 # Setting up GENESIS system block
-# Download the required binaries to generate genesis blockchain
+# Download the required binaries to generate genesis blockchain.
+# AS: TODO. Needs a better way to get the configtxgen binary
 cd $FABRIC_CFG_PATH
 $FABRIC_CFG_PATH/bootstrap.sh 1.4.3 -s -d
 tar -zxvf $FABRIC_CFG_PATH/hyperledger-fabric-linux-amd64-1.4.3.tar.gz.1
@@ -45,7 +46,7 @@ finishMSPSetup $FABRIC_CFG_PATH/msp
 copyAdminCert $FABRIC_CFG_PATH/msp
 
 # Generate system channel
-$FABRIC_CFG_PATH/bin/configtxgen -outputBlock $FABRIC_CFG_PATH/ledger/genesis -profile modeEtcdRaft -channelID orderer-system-channel
+$FABRIC_CFG_PATH/bin/configtxgen -outputBlock $FABRIC_CFG_PATH/ledger/genesis -profile modeDevSolo -channelID orderer-system-channel
 
 # Cleanup process
 rm -rf $FABRIC_CFG_PATH/config $FABRIC_CFG_PATH/bin 

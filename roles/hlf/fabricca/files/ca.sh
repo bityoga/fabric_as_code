@@ -40,7 +40,7 @@ then
     # Register peer services
     fabric-ca-client register -d --id.name $EPEER_USER --id.type 'peer' --id.affiliation bityoga.hlf.agents.peers --id.maxenrollments -1 --id.secret $EPEER_PASSWORD --tls.certfiles $FABRIC_CA_HOME/tls-cert.pem
     fabric-ca-client register -d --id.name $CPEER_USER --id.type 'peer' --id.affiliation bityoga.hlf.agents.peers --id.maxenrollments -1 --id.secret $CPEER_PASSWORD --tls.certfiles $FABRIC_CA_HOME/tls-cert.pem
-    fabric-ca-client register -d --id.name $APEER_USER --id.type 'peer' --id.affiliation bityoga.hlf.agents.peers --id.maxenrollments -1 --id.secret $APEER_PASSWORD --tls.certfiles $FABRIC_CA_HOME/tls-cert.pem
+    fabric-ca-client register -d --id.name $APEER_USER --id.type 'peer' --id.affiliation bityoga.hlf.agents.peers --id.maxenrollments -1 --id.secret $APEER_PASSWORD --tls.certfiles $FABRIC_CA_HOME/tls-cert.pem    
 
     # Enroll the services, so as to generate the MSP
     # Orderer
@@ -49,7 +49,12 @@ then
     fabric-ca-client enroll -M $FABRIC_CA_HOME/client/$EPEER_USER -u https://$EPEER_USER:$EPEER_PASSWORD@$FABRIC_CA_USER:7054 --tls.certfiles $FABRIC_CA_HOME/tls-cert.pem
     fabric-ca-client enroll -M $FABRIC_CA_HOME/client/$CPEER_USER -u https://$CPEER_USER:$CPEER_PASSWORD@$FABRIC_CA_USER:7054 --tls.certfiles $FABRIC_CA_HOME/tls-cert.pem
     fabric-ca-client enroll -M $FABRIC_CA_HOME/client/$APEER_USER -u https://$APEER_USER:$APEER_PASSWORD@$FABRIC_CA_USER:7054 --tls.certfiles $FABRIC_CA_HOME/tls-cert.pem
- 
+
+    # Provide group rx rights to msp/keystore folder, so that CLI can perform channel and chaincode operations
+    chmod -R g+rx $FABRIC_CA_HOME/client/$EPEER_USER/keystore
+    chmod -R g+rx $FABRIC_CA_HOME/client/$CPEER_USER/keystore
+    chmod -R g+rx $FABRIC_CA_HOME/client/$APEER_USER/keystore
+
 elif [ $type == "uica" ]
 then
     # Remove the agent specific env variable values
@@ -60,7 +65,7 @@ then
     CPEER_USER=""
     CPEER_PASSWORD=""
     APEER_USER=""
-    APEER_PASSWORD=""
+    APEER_PASSWORD=""    
 
     # Start the UICA
     nohup fabric-ca-server start -u https://$FABRIC_CA_USER:$FABRIC_CA_PASSWORD@$FABRIC_CA_ROOT:7054 --intermediate.tls.certfiles $FABRIC_CA_HOME/tls-$FABRIC_CA_ROOT-cert.pem &    

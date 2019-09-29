@@ -22,20 +22,20 @@ General:
     LedgerType: file
 
     # Listen address: The IP on which to bind to listen.
-    ListenAddress: 127.0.0.1
+    ListenAddress: {{config.name}}
 
     # Listen port: The port on which to bind to listen.
     ListenPort: 7050
 
     # TLS: TLS settings for the GRPC server.
     TLS:
-        Enabled: true
+        Enabled: false
         # PrivateKey governs the file location of the private key of the TLS certificate.
-        PrivateKey: /home/{{orderer_config.name}}/tls/server.key
+        PrivateKey: /home/{{config.name}}/tls/server.key
         # Certificate governs the file location of the server TLS certificate.
-        Certificate: /home/{{orderer_config.name}}/tls/server.crt
+        Certificate: /home/{{config.name}}/tls/server.crt
         RootCAs:
-          - /home/{{orderer_config.name}}/tls/tls-{{orderer_config.caname}}-cert.pem
+          - /home/{{config.name}}/tls/tls-{{config.caname}}-cert.pem
         ClientAuthRequired: false
         ClientRootCAs:
     # Keepalive settings for the GRPC server.
@@ -58,9 +58,9 @@ General:
         SendBufferSize: 10
         # ClientCertificate governs the file location of the client TLS certificate
         # used to establish mutual TLS connections with other ordering service nodes.
-        ClientCertificate: /home/{{orderer_config.name}}/tls/server.crt
+        ClientCertificate: /home/{{config.name}}/tls/server.crt
         # ClientPrivateKey governs the file location of the private key of the client TLS certificate.
-        ClientPrivateKey: /home/{{orderer_config.name}}/tls/server.key
+        ClientPrivateKey: /home/{{config.name}}/tls/server.key
         # The below 4 properties should be either set together, or be unset together.
         # If they are set, then the orderer node uses a separate listener for intra-cluster
         # communication. If they are unset, then the general orderer listener is used.
@@ -88,7 +88,7 @@ General:
     # GenesisMethod is set to "provisional". See the configtx.yaml file for the
     # descriptions of the available profiles. Ignored if GenesisMethod is set to
     # "file".
-    GenesisProfile: modeEtcdRaft
+    GenesisProfile: modeDevSolo
 
     # Genesis file: The file containing the genesis block to use when
     # initializing the orderer system channel and GenesisMethod is set to
@@ -98,7 +98,7 @@ General:
     # LocalMSPDir is where to find the private crypto material needed by the
     # orderer. It is set relative here as a default for dev environments but
     # should be changed to the real location in production.
-    LocalMSPDir: /home/{{orderer_config.name}}/msp
+    LocalMSPDir: /home/{{config.name}}/msp
 
     # LocalMSPID is the identity to register the local MSP material with the MSP
     # manager. IMPORTANT: The local MSP ID of an orderer needs to match the MSP
@@ -154,7 +154,7 @@ FileLedger:
     # Location: The directory to store the blocks in.
     # NOTE: If this is unset, a new temporary location will be chosen every time
     # the orderer is restarted, using the prefix specified by Prefix.
-    Location: /home/{{orderer_config.name}}/ledger
+    Location: /home/{{config.name}}/ledger
 
     # The prefix to use when generating a ledger directory in temporary space.
     # Otherwise, this value is ignored.
@@ -247,8 +247,8 @@ Consensus:
 
     # WALDir specifies the location at which Write Ahead Logs for etcd/raft are
     # stored. Each channel will have its own subdir named after channel ID.
-    WALDir: /home/{{orderer_config.name}}/wal
+    WALDir: /home/{{config.name}}/wal
 
     # SnapDir specifies the location at which snapshots for etcd/raft are
     # stored. Each channel will have its own subdir named after channel ID.
-    SnapDir: /home/{{orderer_config.name}}/snapshot
+    SnapDir: /home/{{config.name}}/snapshot

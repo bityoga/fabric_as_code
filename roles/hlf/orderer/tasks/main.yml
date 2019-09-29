@@ -66,13 +66,13 @@
 - name: Config templating orderer.yaml
   become: yes
   vars:
-    orderer_config: "{{item[0]}}"
+    config: "{{item[0]}}"
   template:
     src: "{{item[1]}}.j2"
     dest: "/home/{{ hlf_username }}/hlft-store/{{item[0].name}}/{{item[1]}}"
     owner: "{{ item[0].name }}"
     group: "{{ item[0].group }}"
-    mode: 0600
+    mode: 0660
     force: yes
   with_nested:
     - ["{{ orderer }}"]
@@ -116,7 +116,8 @@
         target: "/home/{{item.name}}/tls/tls-{{item.caname}}-cert.pem"
         type: bind
     env: 
-      - "FABRIC_CFG_PATH=/home/{{item.name}}"      
+      - "FABRIC_CFG_PATH=/home/{{item.name}}"    
+      - "GODEBUG=netdns=gos"  
     placement:      
       constraints:
         - node.role == worker      

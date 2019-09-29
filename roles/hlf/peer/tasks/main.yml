@@ -80,13 +80,13 @@
 - name: Config templating core.yaml for Peers
   become: yes
   vars:
-    peer_config: "{{item}}"
+    config: "{{item}}"
   template:
     src: core.yaml.j2
     dest: "/home/{{ hlf_username }}/hlft-store/{{item.name}}/core.yaml"
     owner: "{{ item.name }}"
     group: "{{ item.group }}"
-    mode: 0600
+    mode: 0660
     force: yes
   loop:
     - "{{ epeer }}"    
@@ -134,8 +134,6 @@
         type: bind
     env: 
       - "FABRIC_CFG_PATH=/home/{{item.name}}"
-      - "ORDERER_HOST={{orderer.name}}"
-      - "ORDERER_PORT={{orderer.port}}"
     placement:      
       constraints:
         - node.role == worker      

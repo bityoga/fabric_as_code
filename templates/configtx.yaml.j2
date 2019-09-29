@@ -15,50 +15,50 @@
 Organizations:
 
     # Template for other definitions.
-    - &Org0
+    - &bityoga
         # Name is the key by which this org will be referenced in channel
         # configuration transactions.
         # Name can include alphanumeric characters as well as dots and dashes.
-        Name: {{org.name}}
+        Name: bityoga
 
         # ID is the key by which this org's MSP definition will be referenced.
-        # ID can include alphanumeric characters as well as dots and dashes.
-        ID: {{org.name}}
+        # ID can include alphanumeric characters as well as dots and dashes. 
+        ID: bityogaMSP
 
         # MSPDir is the filesystem path which contains the MSP configuration.
-        MSPDir: /home/{{orderer_config.name}}/msp
+        MSPDir: /home/{{config.name}}/msp
 
         # Policies defines the set of policies at this level of the config tree
         # For organization policies, their canonical path is usually
         #   /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
-        Policies: &Org0Policies
+        Policies: &bityogaPolicies
             Readers:
                 Type: Signature
-                Rule: "OR('Org0.member')"
+                Rule: "OR('bityogaMSP.member')"
                 # If your MSP is configured with the new NodeOUs, you might
                 # want to use a more specific rule like the following:
                 # Rule: "OR('Org.admin', 'Org.peer', 'Org.client')"
             Writers:
                 Type: Signature
-                Rule: "OR('Org0.member')"
+                Rule: "OR('bityogaMSP.member')"
                 # If your MSP is configured with the new NodeOUs, you might
                 # want to use a more specific rule like the following:
                 # Rule: "OR('Org.admin', 'Org.client')"
             Admins:
                 Type: Signature
-                Rule: "OR('Org0.admin')"
+                Rule: "OR('bityogaMSP.admin')"
 
         # OrdererEndpoints is a list of all orderers this org runs which clients
         # and peers may to connect to to push transactions and receive blocks respectively.
         OrdererEndpoints:
-            - "127.0.0.1:7050"
+            - {{config.name}}:7050
 
         # AnchorPeers defines the location of peers which can be used for
         # cross-org gossip communication. Note, this value is only encoded in
         # the genesis block in the Application section context.
         AnchorPeers:
-            - Host: {{orderer_config.anchorpeer}}
-              Port: {{orderer_config.anchorport}}
+            - Host: {{config.anchorpeer}}
+              Port: {{config.anchorport}}
 
 ################################################################################
 #
@@ -224,7 +224,7 @@ Application: &ApplicationDefaults
             Rule: "ANY Writers"
         Admins:
             Type: ImplicitMeta
-            Rule: "MAJORITY Admins"
+            Rule: "ANY Admins"
 
     # Capabilities describes the application level capabilities, see the
     # dedicated Capabilities section elsewhere in this file for a full
@@ -252,7 +252,7 @@ Orderer: &OrdererDefaults
     # as TLS validation.  The preferred way to specify orderer addresses is now
     # to include the OrdererEndpoints item in your org definition
     Addresses:
-        # - 127.0.0.1:7050
+        - {{config.name}}:7050
 
     # Batch Timeout: The amount of time to wait before creating a batch.
     BatchTimeout: 2s
@@ -303,10 +303,10 @@ Orderer: &OrdererDefaults
         # a subset of the host:port items enumerated in this list should be
         # replicated under the Orderer.Addresses key above.
         Consenters:
-            - Host: {{orderer_config.name}}
+            - Host: {{config.name}}
               Port: 7050
-              ClientTLSCert: /home/{{orderer_config.name}}/tls/server.crt
-              ServerTLSCert: /home/{{orderer_config.name}}/tls/server.crt            
+              ClientTLSCert: /home/{{config.name}}/tls/server.crt
+              ServerTLSCert: /home/{{config.name}}/tls/server.crt            
 
         # Options to be specified for all the etcd/raft nodes. The values here
         # are the defaults for all new channels and can be modified on a
@@ -350,7 +350,7 @@ Orderer: &OrdererDefaults
             Rule: "ANY Writers"
         Admins:
             Type: ImplicitMeta
-            Rule: "MAJORITY Admins"
+            Rule: "ANY Admins"
         # BlockValidation specifies what signatures must be included in the block
         # from the orderer for the peer to validate it.
         BlockValidation:
@@ -387,7 +387,7 @@ Channel: &ChannelDefaults
         # By default, who may modify elements at this config level
         Admins:
             Type: ImplicitMeta
-            Rule: "MAJORITY Admins"
+            Rule: "ANY Admins"
 
 
     # Capabilities describes the channel level capabilities, see the
@@ -408,34 +408,17 @@ Channel: &ChannelDefaults
 #   name.
 #
 ################################################################################
-Profiles:    
-    modeEtcdRaft:
-        <<: *ChannelDefaults
+# AC: Both profiles are for test. Highly insecure
+Profiles:          
+    modeDevSolo:
         Orderer:
             <<: *OrdererDefaults
-            OrdererType: etcdraft
-            Organizations:
-                - <<: *Org0
-                  Policies:
-                      <<: *Org0Policies
-                      Admins:
-                          Type: Signature
-                          Rule: "OR('Org0.member')"
-        Application:
-            <<: *ApplicationDefaults
-            Organizations:
-                - <<: *Org0
-                  Policies:
-                      <<: *Org0Policies
-                      Admins:
-                          Type: Signature
-                          Rule: "OR('Org0.member')"
         Consortiums:
-            Consortium:
+            MySoMeConsortium:
                 Organizations:
-                    - <<: *Org0
-                      Policies:
-                          <<: *Org0Policies
-                          Admins:
-                              Type: Signature
-                              Rule: "OR('Org0.member')"
+
+    InitApplicationChannel:
+        Consortium: MySoMeConsortium
+        Application:
+            Organizations:
+                

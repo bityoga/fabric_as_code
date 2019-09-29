@@ -38,11 +38,6 @@ copyAdminCert $FABRIC_CFG_PATH/msp
 # Create the path for storing the ledger
 mkdir -p $FABRIC_CFG_PATH/ledger
 
-while true; do
-  echo 'here I am'
-  sleep 0.1
-done
-
 # Starting the peer
-peer channel create -o $ORDERER_HOST:$ORDERER_PORT -c mysocialchange
-peer node start -o $ORDERER_HOST:$ORDERER_PORT #--peer-chaincodedev
+peer node start #--peer-chaincodedev
+
