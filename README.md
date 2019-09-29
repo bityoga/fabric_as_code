@@ -73,13 +73,13 @@ t3 ansible_python_interpreter="/usr/bin/python2.7"
  - Playbook: **001.despawn_droplets.yml** deprovisions the infrastructure that was spawned earlier
  - Start: **ansible-playbook -v 001.despawn_droplets.yml**
 
-## Persistent Storage Initialization
-- Playbook: **010.init.mount.yml** provide a persistent storage for for your services.
-- Start: **ansible-playbook -v 010.init.mount.yml -u root**
-
 ## Prepare the spawned machines on DO.
-- Playbook: **011.initialize_hosts.yml** Install required pre-req., setup docker and create relevent users for the services
-- Start: **ansible-playbook -v 011.initialize_hosts.yml -u root**
+- Playbook: **010.initialize_hosts.yml** Install required pre-req., setup docker and create relevent users for the services
+- Start: **ansible-playbook -v 010.initialize_hosts.yml -u root**
+
+## Persistent Storage Initialization
+- Playbook: **011.init.mount.yml** provide a persistent storage for for your services.
+- Start: **ansible-playbook -v 011.init.mount.yml -u root**
 
 ## Service images prep
 - Playbook **012.prepare_docker_images.yml** pull docker images relevent for your services and update them as per your service requirements

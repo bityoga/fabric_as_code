@@ -1,5 +1,5 @@
 ---
-# ansible-playbook -v 010.init.mount.yml -u root
+# ansible-playbook -v 011.init.mount.yml -u root
 
 - name: create mount
   hosts: swarm_manager_prime
