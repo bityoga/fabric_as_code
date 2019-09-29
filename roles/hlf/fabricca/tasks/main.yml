@@ -162,8 +162,6 @@
       - "CPEER_PASSWORD={{cpeer.password}}"
       - "APEER_USER={{apeer.name}}"
       - "APEER_PASSWORD={{apeer.password}}"
-      - "CLI_USER={{cli.name}}"
-      - "CLI_PASSWORD={{cli.password}}"
     placement:
       constraints:
         - node.role == worker
@@ -179,5 +177,5 @@
     delay: 15
     timeout: 45
   loop:
-    - "{{uica}}"
     - "{{aica}}"
+    - "{{uica}}"

@@ -44,8 +44,6 @@
     - "{{ cpeer }}"    
     - "{{ apeer }}"
 
-
-
   # Copy the relevent scripts
 - name: Copy scripts
   become: yes
@@ -74,7 +72,7 @@
   loop: 
     - "{{ epeer }}"
     - "{{ cpeer }}"
-    - "{{ epeer }}"
+    - "{{ apeer }}"
 
  # Copy relevent config files to s3fs directories for the docker services
 - name: Config templating core.yaml for Peers
@@ -139,6 +137,17 @@
         - node.role == worker      
     force_update: yes
   loop: 
-    #- "{{ epeer }}"    
-     - "{{ cpeer }}"    
-    # - "{{ apeer }}"
+    - "{{ epeer }}"    
+    - "{{ cpeer }}"    
+    - "{{ apeer }}"
+
+# Pause finish running the playbook until the ordering service have finished running
+- name: Wait until {{item.name}} is running
+  wait_for:
+    port: "{{item.port}}"
+    delay: 15
+    timeout: 45
+  loop:
+    - "{{ epeer }}"    
+    - "{{ cpeer }}"    
+    - "{{ apeer }}"

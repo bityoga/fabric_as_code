@@ -106,6 +106,7 @@
       - published_port: "{{item.port}}"
         target_port: "7050"
         protocol: "tcp"
+        mode: "ingress"
     command: >
       bash -c "/home/{{item.name}}/{{item.name}}.sh;"
     mounts:
@@ -124,3 +125,18 @@
     force_update: yes
   loop: 
     - "{{ orderer }}"
+
+
+# AC: WAITFOR is not working on orderer published port
+# Pause finish running the playbook until the ordering service have finished running
+# - name: Wait until {{item.name}} is running
+#   wait_for:
+#     port: "{{item.port}}"
+#     delay: 15
+#     timeout: 45
+#   loop:
+#     - "{{orderer}}"    
+
+# Pause for 15 seconds for the orderer service to finish setting up
+- pause:
+    seconds: 45

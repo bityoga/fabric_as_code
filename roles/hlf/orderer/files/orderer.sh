@@ -45,13 +45,13 @@ cp $FABRIC_CFG_PATH/msp/signcerts/$filename $FABRIC_CFG_PATH/tls/server.crt
 finishMSPSetup $FABRIC_CFG_PATH/msp
 copyAdminCert $FABRIC_CFG_PATH/msp
 
+# Create the path for storing the ledger
+mkdir -p $FABRIC_CFG_PATH/ledger/chains
 # Generate system channel
-$FABRIC_CFG_PATH/bin/configtxgen -outputBlock $FABRIC_CFG_PATH/ledger/genesis -profile modeDevSolo -channelID orderer-system-channel
+$FABRIC_CFG_PATH/bin/configtxgen -outputBlock $FABRIC_CFG_PATH/ledger/chains/genesis.block -profile modeDevSolo -channelID orderer-system-channel
 
 # Cleanup process
 rm -rf $FABRIC_CFG_PATH/config $FABRIC_CFG_PATH/bin 
 
-# Create the path for storing the ledger
-mkdir -p $FABRIC_CFG_PATH/ledger
 # Start the ordering service 
 orderer
