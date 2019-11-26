@@ -8,7 +8,7 @@
   tasks:
     - digital_ocean_droplet:    
         name: "{{item.name}}"
-        oauth_token: 2c7eab4408ccb4f5805e68030f0482f1f2120ed6e9c04e11bb9b227b58d0fbef
+        oauth_token: 
         state: absent
         unique_name: yes
         wait: yes
