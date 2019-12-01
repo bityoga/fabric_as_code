@@ -10,7 +10,7 @@ ansible_python_interpreter: "/usr/bin/python3"
 ###########################################################################################
 
 # Digital ocean API access token
-do_oauth_token: 2c7eab4408ccb4f5805e68030f0482f1f2120ed6e9c04e11bb9b227b58d0fbef
+do_oauth_token: <<token>>
 # curl -X GET -silent "https://api.digitalocean.com/v2/account/keys" -H "Authorization: Bearer <<token>>" # to retrive the key
 # Will list all the ssh key pub keys, ids, fingerprint and other relevent information. 
 # Execute it on your terminal to retrive the required ssk_keys ids that would be able to ssh onto the droplets
