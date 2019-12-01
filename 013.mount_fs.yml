@@ -1,9 +1,0 @@
----
-
-# ansible-playbook -v 013.mount_fs.yml -u root
-
-- name: Mount the GlusterFS on each node of the swarm
-  hosts: all
-  gather_facts: yes
-  roles:
-    - mountfs
