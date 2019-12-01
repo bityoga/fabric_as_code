@@ -1,0 +1,76 @@
+---
+
+# Setup and Create a docker swarm creating the relevent managers and slaves as described in inventory/hosts
+
+- name: "Get docker info"
+  shell: docker info
+  register: docker_info
+  changed_when: false
+
+
+  # Initialize and set configuration for the prime manager
+- name: "Init a new swarm with default parameters"
+  become: yes
+  become_user: "root"
+  docker_swarm:
+    state: present
+    advertise_addr: "{{ hostvars[groups.swarm_manager_prime[0]]['ansible_eth0']['ipv4']['address'] }}"
+  when: "docker_info.stdout.find('Swarm: inactive') != -1 and inventory_hostname in groups.swarm_manager_prime"
+
+- name: Update swarm configuration
+  become: yes
+  become_user: "root"
+  docker_swarm:
+    state: present
+    election_tick: 15
+  when: "docker_info.stdout.find('Swarm: inactive') != -1 and inventory_hostname in groups.swarm_manager_prime"
+
+  # Get the details about the swarm after manager prime is initialized, so that we can retrive the TOKENS for managers and workers
+- name: Inspect swarm
+  become: yes
+  become_user: "root"
+  docker_swarm_info:
+    nodes: no
+  register: result
+  when: "inventory_hostname in groups.swarm_manager_prime"
+
+  # Add managers to the swarm
+- name: "Join as a manager"
+  become: yes
+  become_user: "root"
+  docker_swarm:
+    state: join
+    join_token: "{{ hostvars[groups.swarm_manager_prime[0]]['result'].swarm_facts.JoinTokens.Manager }}"
+    advertise_addr: "eth0:4567"
+    remote_addrs: ["{{ hostvars[groups.swarm_manager_prime[0]]['ansible_eth0']['ipv4']['address'] }}:2377" ]
+  retries: 3
+  delay: 15
+  when: "docker_info.stdout.find('Swarm: inactive') != -1  and inventory_hostname in groups.swarm_managers"
+
+  # Add workers to the swarm
+- name: "Join as a worker"
+  become: yes
+  become_user: "root"
+  docker_swarm:
+    state: join
+    join_token: "{{ hostvars[groups.swarm_manager_prime[0]]['result'].swarm_facts.JoinTokens.Worker }}"
+    advertise_addr: "eth0:4567"
+    remote_addrs: "{{ hostvars[groups.swarm_manager_prime[0]]['ansible_eth0']['ipv4']['address'] }}"
+  retries: 3
+  delay: 20
+  when: "docker_info.stdout.find('Swarm: inactive') != -1 and inventory_hostname in groups.swarm_workers"
+  
+  # Now we create a overlay network on prime manager for the HLF services that would be deployed to this swarm
+- name: "Create an Overlay Docker Network"
+  become: yes
+  become_user: "root"
+  docker_network:    
+    name: "{{ swarm_network }}"
+    driver: "overlay"
+    attachable: yes
+  when: "inventory_hostname in groups.swarm_manager_prime"
+
+
+
+
+

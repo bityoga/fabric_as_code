@@ -1,0 +1,150 @@
+---
+ansible_python_interpreter: "/usr/bin/python3"
+
+###########################################################################################
+#                                                                                         #
+#                                                                                         #
+#                       Digital Ocean Infrastructure config vars                          #
+#                                                                                         #
+#                                                                                         #
+###########################################################################################
+
+# Digital ocean API access token
+do_oauth_token: 2c7eab4408ccb4f5805e68030f0482f1f2120ed6e9c04e11bb9b227b58d0fbef
+# curl -X GET -silent "https://api.digitalocean.com/v2/account/keys" -H "Authorization: Bearer <<token>>" # to retrive the key
+# Will list all the ssh key pub keys, ids, fingerprint and other relevent information. 
+# Execute it on your terminal to retrive the required ssk_keys ids that would be able to ssh onto the droplets
+# These ssh keys needs to be alrready created and present in digital ocean
+ssh_keys: [20711668, 25140548]
+
+# curl -X GET -silent "https://api.digitalocean.com/v2/images?per_page=999" -H "Authorization: Bearer <<token>>" | grep --color -E "ubuntu"
+# Will get all the images and highlight ubuntu
+images:
+    # Debian should always be the first image
+  - image: "53893572" # Ubuntu 18.04.3 (LTS) x64. 
+    size: "s-1vcpu-1gb"
+    region: "fra1"
+  - image: "47384041" # fedora-30-x64
+    size: "s-1vcpu-1gb"
+    region: "ams3"
+  - image: "47384041" # fedora-30-x64
+    size: "s-1vcpu-1gb"
+    region: "ams3"
+  - image: "47384041" # fedora-30-x64
+    size: "s-1vcpu-1gb"
+    region: "ams3"
+  - image: "53893572" # Ubuntu 18.04.3 (LTS) x64
+    size: "s-1vcpu-1gb"
+    region: "ams3"
+  
+cluster_ips: "{{ groups['all'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+# gluster cluster ips
+cluster_hosts: "{{ cluster_ips.split(',') }}"
+
+###########################################################################################
+#                                                                                         #
+#                                                                                         #
+#                       GlusterFS Cluster conf vars                                       #
+#                                                                                         #
+#                                                                                         #
+###########################################################################################
+# gluster volume
+gluster_cluster_volume: "gv0"
+# gluster cluster ips
+gluster_cluster_host0: "104.248.141.9"
+glusterd_version: '7'
+
+###########################################################################################
+#                                                                                         #
+#                                                                                         #
+#                       Hyperledger Fabric Network config vars                            #
+#                                                                                         #
+#                                                                                         #
+###########################################################################################
+
+# Organization Details
+org:
+  name: "hlf"
+  unit: "bityoga"
+
+# Creds of various agents
+tlsca_user: "tlsca"
+tlsca_password: "tlscapw"
+
+orgca_user: "orgca"
+orgca_password: "orgcapw"  
+
+orderer_user: "orderer"
+orderer_password: "ordererpw"
+
+peer1_user: "peer1"
+peer1_password: "peer2pw"
+
+peer2_user: "peer2"
+peer2_password: "peer2pw"
+
+# Name of the swarm network that would host the services
+swarm_network: "hlfnet"
+
+######################################### KEY INFO ABOUT PORT MAPPING #############################################
+# All services internally run on <<target_port>> and get mapped to the <<publised_port>> sepecified in their respective section bellow
+# Orderer: 7050
+# Peer: 7051
+# CA: 7054
+
+
+######################################### CAs #############################################
+tlsca: { switch: "on", image: "hyperledger/fabric-ca", tag: "1.4.3", replicas: -1, port: 8081,
+ path: "/root/{{tlsca_user}}",
+ db: "{{sqlite}}",
+ name: "{{tlsca_user}}", password: "{{tlsca_password}}"
+}
+
+orgca: { switch: "on", image: "hyperledger/fabric-ca", tag: "1.4.3", replicas: -1, port: 8052,
+ path: "/root/{{orgca_user}}",
+ db: "{{sqlite}}",
+ name: "{{orgca_user}}", password: "{{orgca_password}}"
+ }
+
+
+######################################### Orderer #############################################
+orderer: { switch: "on", image: "hyperledger/fabric-orderer", tag: "1.4.3", replicas: -1, port: 8053,
+caname: "{{orgca.name}}", anchorpeer: "{{peer1.name}}", anchorport: "{{peer1.port}}",
+path: "/root/{{orderer_user}}", type: "solo",
+name: "{{orderer_user}}", password: "{{orderer_password}}"
+}
+
+######################################### Peers #############################################
+peer1: { switch: "on", image: "hyperledger/fabric-peer", tag: "1.4.3", replicas: -1, port: 8054, 
+caname: "{{orgca.name}}", path: "/root/{{peer1_user}}", bootstrap: "",
+dbtype: "goleveldb", couchdbaddress: "",
+name: "{{peer1_user}}", password: "{{peer1_password}}",
+leader: "{peer1_user}}"
+}
+
+peer2: { switch: "on", image: "hyperledger/fabric-peer", tag: "1.4.3", replicas: -1, port: 8055,
+caname: "{{orgca.name}}", path: "/root/{{peer2_user}}", bootstrap: "{{peer1.name}}:7051",
+dbtype: "goleveldb", couchdbaddress: "",
+name: "{{peer2_user}}", password: "{{peer2_password}}",
+leader: "{{peer1_user}}"
+}
+
+######################################### CLI #############################################
+cli: { switch: "on", image: "hyperledger/fabric-tools", tag: "1.4.3"}
+######################################### DBs #############################################
+sqlite: {type: "sqlite3", source: "fabric-ca-server.db"}
+
+# epeerdb: { image: "hyperledger/fabric-couchdb", tag: "0.4.15", replicas: -1, port: 7051,
+# path: "/root/hlft-store/{{epeer_user}}",
+# name: "{{epeer_user}}",
+# commands: 
+# "sleep 5s;
+# /opt/couchdb/bin/couchdb;"
+# }
+
+services:
+  - "{{tlsca}}"
+  - "{{orgca}}"
+  - "{{orderer}}"
+  - "{{ peer1 }}"    
+  - "{{ peer2 }}"     

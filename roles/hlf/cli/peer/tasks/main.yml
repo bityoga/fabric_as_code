@@ -1,0 +1,72 @@
+# ---
+
+# HLF CLI Service
+  
+  # Stop all Services services
+- name: Stop CLI Service
+  become: yes
+  docker_swarm_service:   
+    name: "peer_cli"
+    state: absent
+    networks:
+      - "{{swarm_network}}"
+    
+- name: Create CLI assets folders in hlft-store
+  become: yes
+  file: 
+    path: "/root/hlft-store/peer_cli"
+    state: directory
+    mode: 0750              
+
+# Copy the relevent scripts
+- name: Copy scripts
+  become: yes
+  copy:
+    src: "cli.sh"
+    dest: "/root/hlft-store/peer_cli/cli.sh"
+    mode: "0500"
+    force: yes 
+
+  # Create & Start service for CLI 
+- name: Fabric Service - {{ item.name }}
+  become: yes
+  docker_swarm_service:
+    name: "peer_cli"
+    hostname: "peer_cli"
+    networks:
+      - "{{swarm_network}}"
+    image: "{{cli.image}}:{{cli.tag}}"
+    command: >
+      bash -c "/root/peer_cli/cli.sh;"
+    working_dir: /root/peer_cli
+    mounts:      
+      - source: "/root/hlft-store/peer_cli/"
+        target: "/root/peer_cli"
+        type: bind 
+      - source: "/root/hlft-store/orderer_cli/"
+        target: "/root/peer_cli/artifacts"
+        type: bind
+      - source: "/root/hlft-store/{{peer1.name}}/"
+        target: "{{peer1.path}}"
+        type: bind 
+      - source: "/root/hlft-store/{{peer2.name}}/"
+        target: "{{peer2.path}}"
+        type: bind   
+      - source: "/root/hlft-store/{{orgca.name}}/admin/"
+        target: "/root/admin"
+        type: bind
+    env: 
+      - "GOPATH=/opt/gopath"
+      - "CORE_VM_ENDPOINT=unix:///var/run/docker.sock"
+      - "FABRIC_LOGGING_SPEC=DEBUG"
+      - "CORE_PEER_TLS_ENABLED=true"  
+      - "CORE_PEER_LOCALMSPID={{org.name}}MSP"    
+      - "ORDERER_HOST={{orderer.name}}"
+      - "PEER1_HOST={{peer1.name}}"
+      - "PEER2_HOST={{peer2.name}}"
+      - "TLSCA_HOST={{tlsca.name}}"
+    placement:      
+      constraints:
+        - node.role == worker      
+    force_update: yes    
+  when: cli.switch == "on"

@@ -1,0 +1,12 @@
+---
+# Creating the hostfile
+- name: Delete the host file if present
+  file:
+    path: ./inventory/hosts
+    state: absent  
+
+- name: Copy to host template file to be placeholder for the new host ips
+  copy:
+    src: ./inventory/hosts_template
+    dest: ./inventory/hosts    
+  when: droplet_state == "present"

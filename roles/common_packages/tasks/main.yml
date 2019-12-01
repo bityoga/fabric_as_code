@@ -1,0 +1,62 @@
+---
+
+# Docker Swarm would be nodes setup
+
+  # Update & Upgrade the nodes
+- name: Update and upgrade apt packages
+  become: yes
+  apt:
+    update_cache: yes
+  when: ansible_os_family == 'Debian'
+
+- name: Update and upgrade yum packages
+  become: yes
+  yum:
+    update_cache: yes
+  when: ansible_os_family == 'RedHat'
+  
+  # Setup relevent repos
+- name: Set up the golang APT repository
+  become: yes
+  apt_repository:
+    repo: ppa:longsleep/golang-backports
+    state: present
+  when: ansible_os_family == 'Debian'  
+
+- name: Set up the golang YUM GPG key
+  become: yes
+  rpm_key: 
+    key: https://mirror.go-repo.io/centos/RPM-GPG-KEY-GO-REPO
+    state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: Set up the Docker CE YUM repository
+  become: yes
+  get_url:
+    url: https://mirror.go-repo.io/centos/go-repo.repo
+    dest: /etc/yum.repos.d/go-repo.repo
+  when: ansible_os_family == 'RedHat'
+
+  # Install the packages specified in defaults/main.yml
+- name: Install prerequisites for Debian distros
+  become: yes
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop: "{{ debian_package_list }}"
+  when: ansible_os_family == 'Debian'
+
+- name: Install prerequisites for RedHat distros
+  become: yes
+  yum:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ redhat_package_list }}"
+  when: ansible_os_family == 'RedHat'
+
+- name: Install docker driver for python.
+  become: yes
+  pip:
+    name: "{{ item }}"
+  loop: "{{ pip_packages }}"

@@ -1,0 +1,107 @@
+# ---
+  
+  # Stop all Services services
+- name: Stop Peers Service - {{ item.name }}
+  become: yes
+  docker_swarm_service:   
+    name: "{{ item.name }}"
+    state: absent
+    networks:
+      - "{{swarm_network}}"
+  loop: 
+    - "{{ peer1 }}"    
+    - "{{ peer2 }}"        
+
+  # We create relevent folder structure in the mount locally for services
+- name: Clean Peer folders in hlft-store, if they exists
+  become: yes  
+  file: 
+    path: "/root/hlft-store/{{item.name}}"
+    state: absent
+  loop:        
+    - "{{ peer1 }}"    
+    - "{{ peer2 }}"     
+
+- name: Create Peer Service folders in hlft-store
+  become: yes
+  file: 
+    path: "/root/hlft-store/{{item.name}}"
+    state: directory
+    mode: 0750
+  loop:
+    - "{{ peer1 }}"    
+    - "{{ peer2 }}"     
+
+- name: Copy MSP folder
+  become: yes
+  copy:
+    src: "/root/hlft-store/{{orgca.name}}/{{item.name}}/msp/"
+    dest: "/root/hlft-store/{{item.name}}/msp"
+    mode: '0750'
+    remote_src: yes
+    force: yes
+  loop: 
+    - "{{ peer1 }}"
+    - "{{ peer2 }}"    
+
+- name: Copy TLSMSP folder
+  become: yes
+  copy:
+    src: "/root/hlft-store/{{tlsca.name}}/{{item.name}}/tls-msp/"
+    dest: "/root/hlft-store/{{item.name}}/tls-msp"
+    mode: '0750'
+    remote_src: yes
+    force: yes
+  loop: 
+    - "{{ peer1 }}"
+    - "{{ peer2 }}"
+
+  # Create & Start services for Peers 
+- name: Fabric Service - {{ item }}
+  become: yes
+  docker_swarm_service:
+    name: "{{ item.name }}"
+    hostname: "{{ item.name }}"
+    networks:
+      - "{{swarm_network}}"
+    image: "{{item.image}}:{{item.tag}}"
+    mode: replicated
+    replicas: "{{item.replicas}}"
+    mounts:
+      - source: "/root/hlft-store/{{item.name}}"
+        target: "{{item.path}}"
+        type: bind 
+      - source: "/var/run/docker.sock"
+        target: "/var/run/docker.sock"
+        type: bind      
+    publish:
+      - published_port: "{{item.port}}"
+        target_port: "7051"
+        protocol: "tcp"
+    env:       
+      - "CORE_PEER_ID={{item.name}}"
+      - "CORE_PEER_ADDRESS={{item.name}}:7051"
+      - "CORE_PEER_LISTENADDRESS={{item.name}}:7051"
+      - "CORE_PEER_LOCALMSPID={{org.name}}MSP"
+      - "CORE_PEER_MSPCONFIGPATH={{item.path}}/msp"
+      - "CORE_VM_ENDPOINT=unix:///var/run/docker.sock"
+      - "CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE={{swarm_network}}"
+      - "FABRIC_LOGGING_SPEC=debug"
+      - "CORE_PEER_TLS_ENABLED=true"
+      - "CORE_PEER_TLS_CERT_FILE={{item.path}}/tls-msp/signcerts/cert.pem"
+      - "CORE_PEER_TLS_KEY_FILE={{item.path}}/tls-msp/keystore/key.pem"
+      - "CORE_PEER_TLS_ROOTCERT_FILE={{item.path}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem"
+      - "CORE_PEER_GOSSIP_USELEADERELECTION=true"
+      - "CORE_PEER_GOSSIP_ORGLEADER=false"
+      - "CORE_PEER_GOSSIP_EXTERNALENDPOINT={{item.name}}:7051"
+      - "CORE_PEER_GOSSIP_SKIPHANDSHAKE=true"
+      - "CORE_PEER_GOSSIP_BOOTSTRAP={{item.bootstrap}}"
+    working_dir: "{{item.path}}"
+    placement:      
+      constraints:
+        - node.role == worker      
+    force_update: yes
+  loop: 
+    - "{{ peer1 }}"    
+    - "{{ peer2 }}"    
+  when: item.switch == "on"
