@@ -12,22 +12,19 @@ debian_package_list:
   - golang-go
   - libtool
   - libltdl-dev
-  - s3fs
   - python3-pip
-  - nfs-common
 
 redhat_package_list:
   - yum-utils
   - device-mapper-persistent-data
   - lvm2
-  - epel-release
+  #- epel-release # Needed for CentOS
   - jq
   - rsync
   - golang
   - libtool
   - libtool-ltdl-devel
-  - s3fs-fuse
-  - python-pip  
+  - python3-pip  
 
 pip_packages:
   - docker

@@ -1,151 +1,150 @@
 ---
+ansible_python_interpreter: "/usr/bin/python3"
+
+###########################################################################################
+#                                                                                         #
+#                                                                                         #
+#                       Digital Ocean Infrastructure config vars                          #
+#                                                                                         #
+#                                                                                         #
+###########################################################################################
+
+# Digital ocean API access token
+do_oauth_token: <<token>>
+# curl -X GET -silent "https://api.digitalocean.com/v2/account/keys" -H "Authorization: Bearer <<token>>" # to retrive the key
+# Will list all the ssh key pub keys, ids, fingerprint and other relevent information. 
+# Execute it on your terminal to retrive the required ssk_keys ids that would be able to ssh onto the droplets
+# These ssh keys needs to be alrready created and present in digital ocean
+ssh_keys: [20711668, 25140548]
+
+# curl -X GET -silent "https://api.digitalocean.com/v2/images?per_page=999" -H "Authorization: Bearer <<token>>" | grep --color -E "ubuntu"
+# Will get all the images and highlight ubuntu
+images:
+    # Debian should always be the first image
+  - image: "53893572" # Ubuntu 18.04.3 (LTS) x64. 
+    size: "s-1vcpu-1gb"
+    region: "fra1"
+  - image: "47384041" # fedora-30-x64
+    size: "s-1vcpu-1gb"
+    region: "ams3"
+  - image: "47384041" # fedora-30-x64
+    size: "s-1vcpu-1gb"
+    region: "ams3"
+  - image: "47384041" # fedora-30-x64
+    size: "s-1vcpu-1gb"
+    region: "ams3"
+  - image: "53893572" # Ubuntu 18.04.3 (LTS) x64
+    size: "s-1vcpu-1gb"
+    region: "ams3"
+  
+cluster_ips: "{{ groups['all'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+# gluster cluster ips
+cluster_hosts: "{{ cluster_ips.split(',') }}"
+
+###########################################################################################
+#                                                                                         #
+#                                                                                         #
+#                       GlusterFS Cluster conf vars                                       #
+#                                                                                         #
+#                                                                                         #
+###########################################################################################
+# gluster volume
+gluster_cluster_volume: "gv0"
+# gluster cluster ips
+gluster_cluster_host0: "104.248.141.9"
+glusterd_version: '7'
+
+###########################################################################################
+#                                                                                         #
+#                                                                                         #
+#                       Hyperledger Fabric Network config vars                            #
+#                                                                                         #
+#                                                                                         #
+###########################################################################################
+
 # Organization Details
 org:
-  name: "bityoga"
-  unit: "hlf"
+  name: "hlf"
+  unit: "bityoga"
 
-# Users and groups that would be created on host machines, for creating a swarm and deplying hlf services
-docker_group: "docker"
+# Creds of various agents
+tlsca_user: "tlsca"
+tlsca_password: "tlscapw"
 
-hlf_username: "hlf"
-hlf_uid: "2002"
-hlf_group: "hlf"
-hlf_gid: "2002"
+orgca_user: "orgca"
+orgca_password: "orgcapw"  
 
-rca_user: "rca"
-rca_uid: "3001"
-aica_user: "aica"
-aica_uid: "3002"
-uica_user: "uica"
-uica_uid: "3003"
 orderer_user: "orderer"
-orderer_uid: "3004"
-epeer_user: "epeer"
-epeer_uid: "3006"
-cpeer_user: "cpeer"
-cpeer_uid: "3007"
-apeer_user: "apeer"
-apeer_uid: "3008"
-epeerdb_user: "epeerdb"
-epeerdb_uid: "4001"
+orderer_password: "ordererpw"
 
-cli_user: "cli"
-cli_uid: "9001"
+peer1_user: "peer1"
+peer1_password: "peer2pw"
 
-rca_password: "radminpw"
-aica_password: "aiadminpw"    
-uica_password: "uiadminpw"
-orderer_password: "oadminpw"
-epeer_password: "epadminpw"
-cpeer_password: "cpadminpw"
-apeer_password: "apadminpw"
-cli_password: "cliadminpw"
+peer2_user: "peer2"
+peer2_password: "peer2pw"
 
 # Name of the swarm network that would host the services
 swarm_network: "hlfnet"
 
-# S3FS shared file system to store the services config and data
-# S3FS on DigitalOcean
-S3FS_URL: "https://fra1.digitaloceanspaces.com"
-S3FS_KEY: "5JWX4EJM5OCRY7AATWYU"
-S3FS_SECRET: "3cM8A1JI/ZaP0+qZ//hbzcT2PUkPsXMMbzFiaOrphTA"
+######################################### KEY INFO ABOUT PORT MAPPING #############################################
+# All services internally run on <<target_port>> and get mapped to the <<publised_port>> sepecified in their respective section bellow
+# Orderer: 7050
+# Peer: 7051
+# CA: 7054
 
+
+######################################### CAs #############################################
+tlsca: { switch: "on", image: "hyperledger/fabric-ca", tag: "1.4.3", replicas: -1, port: 8081,
+ path: "/root/{{tlsca_user}}",
+ db: "{{sqlite}}",
+ name: "{{tlsca_user}}", password: "{{tlsca_password}}"
+}
+
+orgca: { switch: "on", image: "hyperledger/fabric-ca", tag: "1.4.3", replicas: -1, port: 8052,
+ path: "/root/{{orgca_user}}",
+ db: "{{sqlite}}",
+ name: "{{orgca_user}}", password: "{{orgca_password}}"
+ }
+
+
+######################################### Orderer #############################################
+orderer: { switch: "on", image: "hyperledger/fabric-orderer", tag: "1.4.3", replicas: -1, port: 8053,
+caname: "{{orgca.name}}", anchorpeer: "{{peer1.name}}", anchorport: "{{peer1.port}}",
+path: "/root/{{orderer_user}}", type: "solo",
+name: "{{orderer_user}}", password: "{{orderer_password}}"
+}
+
+######################################### Peers #############################################
+peer1: { switch: "on", image: "hyperledger/fabric-peer", tag: "1.4.3", replicas: -1, port: 8054, 
+caname: "{{orgca.name}}", path: "/root/{{peer1_user}}", bootstrap: "",
+dbtype: "goleveldb", couchdbaddress: "",
+name: "{{peer1_user}}", password: "{{peer1_password}}",
+leader: "{peer1_user}}"
+}
+
+peer2: { switch: "on", image: "hyperledger/fabric-peer", tag: "1.4.3", replicas: -1, port: 8055,
+caname: "{{orgca.name}}", path: "/root/{{peer2_user}}", bootstrap: "{{peer1.name}}:7051",
+dbtype: "goleveldb", couchdbaddress: "",
+name: "{{peer2_user}}", password: "{{peer2_password}}",
+leader: "{{peer1_user}}"
+}
+
+######################################### CLI #############################################
+cli: { switch: "on", image: "hyperledger/fabric-tools", tag: "1.4.3"}
+######################################### DBs #############################################
 sqlite: {type: "sqlite3", source: "fabric-ca-server.db"}
 
-
-# Fabric Images and Services
-rca: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{rca_user}}", replicas: -1,
- uid: "{{rca_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
- ca: { version: "0.1", maxenrollments: -1, allow_intermediateca_registration: true, pathlength: 1, port: 7054,
-       affiliation: "{{org.name}}.{{org.unit}}", parent: "",
-       tls_enabled: true, tls_clientauth_type: "noclientcert"},
- csr: {cn: "rca", country: "NO", state: "Rogaland", city: "Stavanger"}, 
- path: "/home/{{ hlf_username }}/hlft-store/{{rca_user}}",
- db: "{{sqlite}}",
- password: "{{rca_password}}"
- }
-
-aica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{aica_user}}", replicas: -1,
-uid: "{{aica_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
- ca: { version: "0.1", maxenrollments: -1, allow_intermediateca_registration: false, pathlength: 0, port: 7055,
-       affiliation: "{{org.name}}.{{org.unit}}.agents", parent: "{{rca.name}}",     
-       tls_enabled: true, tls_clientauth_type: "noclientcert"},
- csr: {cn: "", country: "NO", state: "Rogaland", city: "Stavanger"}, 
- path: "/home/{{ hlf_username }}/hlft-store/{{aica_user}}",
- db: "{{sqlite}}",
- password: "{{aica_password}}"
- }
-
-uica: { image: "hyperledger/fabric-ca", tag: "1.4", name: "{{uica_user}}", replicas: 2,
-uid: "{{uica_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}",
- ca: { version: "0.1", maxenrollments: 1, allow_intermediateca_registration: false, pathlength: 0, port: 7056,
-       affiliation: "{{org.name}}.{{org.unit}}.users", parent: "{{rca.name}}",
-       tls_enabled: true, tls_clientauth_type: "noclientcert"},
- csr: {cn: "", country: "NO", state: "Rogaland", city: "Stavanger"}, 
- path: "/home/{{ hlf_username }}/hlft-store/{{uica_user}}",
- db: "{{sqlite}}",
- password: "{{uica_password}}"
- }
-
-orderer: { image: "hyperledger/fabric-orderer", tag: "1.4", name: "{{orderer_user}}", replicas: -1,
-uid: "{{orderer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 6050,
-caname: "{{aica.name}}", anchorpeer: "{{apeer.name}}", anchorport: "{{apeer.port}}",
-path: "/home/{{ hlf_username }}/hlft-store/{{orderer_user}}",
- password: "{{orderer_password}}"
-}
-
-epeer: { image: "hyperledger/fabric-peer", tag: "1.4", name: "{{epeer_user}}", replicas: -1,
-uid: "{{epeer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 7050,
-caname: "{{aica.name}}", bootstrap_peers: {"{{cpeer.name}}:{{cpeer.port}}", "{{apeer.name}}:{{apeer.port}}"},
-path: "/home/{{ hlf_username }}/hlft-store/{{epeer_user}}", 
-dbtype: "goleveldb", couchdbaddress: "",
-password: "{{epeer_password}}",
-leader: "{{cpeer_user}}"
-}
-
-cpeer: { image: "hyperledger/fabric-peer", tag: "1.4", name: "{{cpeer_user}}", replicas: -1,
-uid: "{{cpeer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 8050,
-caname: "{{aica.name}}", bootstrap_peers: {"{{epeer.name}}:{{epeer.port}}", "{{apeer.name}}:{{apeer.port}}"},
-path: "/home/{{ hlf_username }}/hlft-store/{{cpeer_user}}", 
-dbtype: "goleveldb", couchdbaddress: "",
-password: "{{cpeer_password}}",
-leader: "{{cpeer_user}}"
-}
-
-apeer: { image: "hyperledger/fabric-peer", tag: "1.4", name: "{{apeer_user}}", replicas: -1,
-uid: "{{apeer_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 9050,
-caname: "{{aica.name}}", bootstrap_peers: {"{{epeer.name}}:{{epeer.port}}", "{{cpeer.name}}:{{cpeer.port}}"},
-path: "/home/{{ hlf_username }}/hlft-store/{{apeer_user}}", 
-dbtype: "goleveldb", couchdbaddress: "",
-password: "{{apeer_password}}",
-leader: "{{cpeer_user}}"
-}
-
-cli: { image: "hyperledger/fabric-tools", tag: "1.4", name: "{{cli_user}}", replicas: -1,
-uid: "{{cli_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: "",
-anchorpeer: "{{apeer.name}}", anchorport: "{{apeer.port}}",
-caname: "{{aica.name}}", bootstrap_peers: {},
-path: "/home/{{ hlf_username }}/hlft-store/{{cli_user}}",
-dbtype: "goleveldb", couchdbaddress: "",
-password: "{{cli_password}}",
-leader: "{{cpeer_user}}"
-}
-
-epeerdb: { image: "hyperledger/fabric-couchdb", tag: "0.4.15", name: "{{epeerdb_user}}", replicas: -1,
-uid: "{{epeerdb_uid}}", gid: "{{hlf_gid}}", group: "{{hlf_group}}", port: 7051,
-path: "/home/{{ hlf_username }}/hlft-store/{{epeerdb_user}}",
-commands: 
-"sleep 5s;
-/opt/couchdb/bin/couchdb;"
-}
+# epeerdb: { image: "hyperledger/fabric-couchdb", tag: "0.4.15", replicas: -1, port: 7051,
+# path: "/root/hlft-store/{{epeer_user}}",
+# name: "{{epeer_user}}",
+# commands: 
+# "sleep 5s;
+# /opt/couchdb/bin/couchdb;"
+# }
 
 services:
-  - "{{rca}}"
-  - "{{aica}}"
-  - "{{uica}}"  
+  - "{{tlsca}}"
+  - "{{orgca}}"
   - "{{orderer}}"
-  - "{{ epeer }}"    
-  - "{{ cpeer }}"    
-  - "{{ apeer }}"
-  - "{{ epeerdb }}"   
-  - "{{ cli }}" 
+  - "{{ peer1 }}"    
+  - "{{ peer2 }}"     

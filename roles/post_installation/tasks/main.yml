@@ -1,76 +1,22 @@
 
-- name: Create group {{ hlf_group }}
-  become: yes
-  group:
-    name: "{{ hlf_group }}"
-    gid: "{{ hlf_gid }}"
-    state: present
-
-- name: Create user {{ hlf_username }}
-  become: yes
-  user:
-    name: "{{ hlf_username }}"
-    uid: "{{ hlf_uid }}"
-    create_home: yes
-    state: present
-
-- name: Add {{ hlf_username }} to groups {{ hlf_group }} & {{ docker_group }}
-  become: yes
-  user:
-    name: "{{ hlf_username }}"
-    groups: 
-      - "{{ hlf_group }}"
-      - "{{ docker_group }}"
-    append: yes
-
-# Giving rx rights to other group members, so that they will be able to read into the hlf user home folder as it mount s3fs
-- name: Give user {{ hlf_username }} HOME dir rx rights to group {{ hlf_group }}
-  become: yes
-  file:
-    path: "/home/{{ hlf_username }}"
-    state: directory
-    owner: "{{ hlf_username }}"
-    group: "{{ hlf_group }}"
-    mode: 0750
-
-# Creating Service Users on each host machine
-- name: Create Service Uses {{item.name}}
-  become: yes
-  user:
-    name: "{{ item.name }}"
-    uid: "{{ item.uid }}"
-    group: "{{ hlf_group }}"
-    create_home: no
-    state: present
-  with_items:
-    - "{{services}}"
-
   # Docker Swarm & Services modules needs the GOLANG GOPATH to be set
 - name: Set GOPATH ENV variable
   become: yes
-  become_user: "{{hlf_username}}"
+  become_user: "root"
   lineinfile: 
-    dest: /home/{{hlf_username}}/.bashrc
+    dest: /root/.bashrc
     insertafter: EOF
-    line: "export GOPATH=/home/{{hlf_username}}/.go"
+    line: "export GOPATH=/root/.go"
 
 - name: Creates GOPATH workspace directory
   become: yes
-  become_user: "{{hlf_username}}"
+  become_user: "root"
   file:
-    path: /home/{{hlf_username}}/.go
+    path: /root/.go
     state: directory
-    owner: "{{hlf_username}}"
-    group: "{{hlf_group}}"
+    owner: "root"
+    group: "root"
     mode: 0775
-
-  # In order for S3FS filesystem to be mounted into docker services from local mounts, user_allow_other option needs to be set in /etc/fuse.conf
-- name: Set user_allow_other option in /etc/fuse.conf
-  become: yes
-  lineinfile: 
-    dest: /etc/fuse.conf
-    insertafter: EOF
-    line: "user_allow_other"
 
 - name: Start Docker service
   become: yes  
@@ -78,3 +24,9 @@
     name: docker
     state: started
     enabled: yes
+
+# Current version of ansible copy and template has issues with redhats
+# - name: Disable SELinux
+#   selinux:
+#     state: disabled
+#   when: ansible_os_family == 'RedHat'

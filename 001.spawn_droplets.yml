@@ -5,52 +5,7 @@
   hosts: localhost
   connection: local
   gather_facts: false
-  tasks:
-    - digital_ocean_droplet:    
-        backups: no
-        image: "{{item.image}}"
-        ipv6: no
-        monitoring: yes
-        name: "{{item.name}}"
-        oauth_token: 2c7eab4408ccb4f5805e68030f0482f1f2120ed6e9c04e11bb9b227b58d0fbef
-        private_networking: no
-        region: "{{item.region}}"
-        size: "{{item.size}}"
-        # curl -X GET -silent "https://api.digitalocean.com/v2/account/keys" -H "Authorization: Bearer 2c7eab4408ccb4f5805e68030f0482f1f2120ed6e9c04e11bb9b227b58d0fbef" # to retrive the key
-        # Will list all the ssh key pub keys, ids, fingerprint and other relevent information. Execute it on your terminal to retrive the required ssk_keys ids that would be able to ssh onto the droplets
-        # These ssh keys needs to be alrready created and present in digital ocean
-        # curl -X GET -silent "https://api.digitalocean.com/v2/images?per_page=999" -H "Authorization: Bearer 2c7eab4408ccb4f5805e68030f0482f1f2120ed6e9c04e11bb9b227b58d0fbef" | grep --color -E "ubuntu"
-        # Will get all the images and highlight ubuntu
-        ssh_keys: [20711668, 25140548]
-        state: present
-        unique_name: yes
-        wait: yes
-        wait_timeout: 300  
-      loop:
-        - {name: "hlft0", image: "52473856", region: "lon1", size: "s-1vcpu-1gb"} # Ubuntu 16.04.6 (LTS) x64
-        - {name: "hlft1", image: "50903182", region: "fra1", size: "s-1vcpu-1gb"} # CentOS 7.6 x64
-        - {name: "hlft2", image: "52473856", region: "fra1", size: "s-1vcpu-1gb"} # Ubuntu 16.04.6 (LTS) x64
-        - {name: "hlft3", image: "50903182", region: "ams3", size: "s-1vcpu-1gb"} # CentOS 7.6 x64
-        - {name: "hlft4", image: "52473856", region: "ams3", size: "s-1vcpu-1gb"} # Ubuntu 16.04.6 (LTS) x64
-      register: droplets
-
-    - debug:
-        msg: "IP is {{ item.data.ip_address }} and hostname is {{ item.data.droplet.name }}"      
-      loop: "{{droplets.results}}"
-    
-    # Delete the host file if present
-    - file:
-        path: ./inventory/hosts
-        state: absent
-
-    # Copy to host template file to be placeholder for the new host ips
-    - copy:
-        src: ./inventory/hosts_template
-        dest: ./inventory/hosts        
-    
-    # Replace the host file with right host ips
-    - replace:
-        path: ./inventory/hosts  
-        regexp: "{{ item.data.droplet.name }}"
-        replace: "{{ item.data.droplet.name }} ansible_host={{ item.data.ip_address }}"
-      loop: "{{droplets.results}}"
+  vars:
+    droplet_state: "present"
+  roles:
+    - setuphostsmachines/droplets

@@ -1,25 +1,14 @@
-[debian]
-hlft0 ansible_host=104.248.165.1  ansible_python_interpreter="/usr/bin/python3.5"
-hlft2 ansible_host=206.189.57.103  ansible_python_interpreter="/usr/bin/python3.5"
-hlft4 ansible_host=134.209.194.161  ansible_python_interpreter="/usr/bin/python3.5"
-
-[redhat]
-hlft1 ansible_host=165.22.31.119 ansible_python_interpreter="/usr/bin/python2.7"
-hlft3 ansible_host=134.209.206.41 ansible_python_interpreter="/usr/bin/python2.7"
-
 [all:children]
 swarm_manager_prime
 swarm_managers
 swarm_workers
 
 [swarm_manager_prime]
-hlft0 ansible_host=104.248.165.1  ansible_python_interpreter="/usr/bin/python3.5"
+hlf0 ansible_host=165.22.18.60
 
 [swarm_managers]
-hlft0 ansible_host=104.248.165.1  ansible_python_interpreter="/usr/bin/python3.5"
-hlft1 ansible_host=165.22.31.119 ansible_python_interpreter="/usr/bin/python2.7"
+hlf0 ansible_host=165.22.18.60
 
 [swarm_workers]
-hlft2 ansible_host=206.189.57.103 ansible_python_interpreter="/usr/bin/python3.5"
-hlft3 ansible_host=134.209.206.41 ansible_python_interpreter="/usr/bin/python2.7"
-hlft4 ansible_host=134.209.194.161 ansible_python_interpreter="/usr/bin/python3.5"
+hlf1 ansible_host=178.62.230.90
+hlf2 ansible_host=178.62.195.32

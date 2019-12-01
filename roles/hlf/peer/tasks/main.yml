@@ -1,144 +1,107 @@
 # ---
-
-# HLF CA Services  with
-  # 1. 3x Peer Services 
-  # 2. 1x Endorser Peer [replicas=2]
-  # 3. 1x Commiter Peer [replicas=2]
-  # 4. 1x Anchor Peer [replicas=2]
   
   # Stop all Services services
 - name: Stop Peers Service - {{ item.name }}
   become: yes
-  become_user: "{{ hlf_username}}"
   docker_swarm_service:   
     name: "{{ item.name }}"
     state: absent
     networks:
       - "{{swarm_network}}"
   loop: 
-    - "{{ epeer }}"    
-    - "{{ cpeer }}"    
-    - "{{ apeer }}"    
+    - "{{ peer1 }}"    
+    - "{{ peer2 }}"        
 
-  # We create relevent folder structure in S3FS mount locally for service 
+  # We create relevent folder structure in the mount locally for services
 - name: Clean Peer folders in hlft-store, if they exists
   become: yes  
   file: 
-    path: "{{item.path}}"
+    path: "/root/hlft-store/{{item.name}}"
     state: absent
   loop:        
-    - "{{ epeer }}"    
-    - "{{ cpeer }}"    
-    - "{{ apeer }}"   
+    - "{{ peer1 }}"    
+    - "{{ peer2 }}"     
 
 - name: Create Peer Service folders in hlft-store
   become: yes
   file: 
-    path: "{{ item.path }}"
+    path: "/root/hlft-store/{{item.name}}"
     state: directory
-    owner: "{{ item.name }}"
-    group: "{{ item.group }}"
     mode: 0750
   loop:
-    - "{{ epeer }}"    
-    - "{{ cpeer }}"    
-    - "{{ apeer }}"
-
-
-
-  # Copy the relevent scripts
-- name: Copy scripts
-  become: yes
-  copy:
-    src: "peer.sh"
-    dest: "/home/{{ hlf_username}}/hlft-store/{{item.name}}/peer.sh"
-    owner: "{{item.name}}"
-    group: "{{item.group}}"
-    mode: "0500"
-    force: yes
-  loop: 
-    - "{{ epeer }}"    
-    - "{{ cpeer }}"    
-    - "{{ apeer }}"
+    - "{{ peer1 }}"    
+    - "{{ peer2 }}"     
 
 - name: Copy MSP folder
   become: yes
   copy:
-    src: "/home/{{ hlf_username}}/hlft-store/{{item.caname}}/client/{{item.name}}/"
-    dest: "/home/{{ hlf_username}}/hlft-store/{{item.name}}/msp"
-    owner: "{{item.name}}"
-    group: "{{item.group}}"
+    src: "/root/hlft-store/{{orgca.name}}/{{item.name}}/msp/"
+    dest: "/root/hlft-store/{{item.name}}/msp"
     mode: '0750'
     remote_src: yes
     force: yes
   loop: 
-    - "{{ epeer }}"
-    - "{{ cpeer }}"
-    - "{{ epeer }}"
+    - "{{ peer1 }}"
+    - "{{ peer2 }}"    
 
- # Copy relevent config files to s3fs directories for the docker services
-- name: Config templating core.yaml for Peers
+- name: Copy TLSMSP folder
   become: yes
-  vars:
-    config: "{{item}}"
-  template:
-    src: core.yaml.j2
-    dest: "/home/{{ hlf_username }}/hlft-store/{{item.name}}/core.yaml"
-    owner: "{{ item.name }}"
-    group: "{{ item.group }}"
-    mode: 0660
+  copy:
+    src: "/root/hlft-store/{{tlsca.name}}/{{item.name}}/tls-msp/"
+    dest: "/root/hlft-store/{{item.name}}/tls-msp"
+    mode: '0750'
+    remote_src: yes
     force: yes
-  loop:
-    - "{{ epeer }}"    
-    - "{{ cpeer }}"    
-    - "{{ apeer }}"
-
-- name: Ensures /home/{{ hlf_username}}/hlft-store/{{item.name}}/tls dir exists
-  file: 
-    path: /home/{{ hlf_username}}/hlft-store/{{item.name}}/tls 
-    state: directory
-    owner: "{{ item.name }}"
-    group: "{{ item.group }}"
-    mode: 0750
-    force: yes    
   loop: 
-    - "{{ epeer }}"    
-    - "{{ cpeer }}"    
-    - "{{ apeer }}"
+    - "{{ peer1 }}"
+    - "{{ peer2 }}"
 
   # Create & Start services for Peers 
 - name: Fabric Service - {{ item }}
   become: yes
-  become_user: "{{ hlf_username}}"  
   docker_swarm_service:
-    user: "{{ item.name }}"     
     name: "{{ item.name }}"
     hostname: "{{ item.name }}"
     networks:
       - "{{swarm_network}}"
-    image: "{{item.name}}:{{item.tag}}"
+    image: "{{item.image}}:{{item.tag}}"
     mode: replicated
     replicas: "{{item.replicas}}"
+    mounts:
+      - source: "/root/hlft-store/{{item.name}}"
+        target: "{{item.path}}"
+        type: bind 
+      - source: "/var/run/docker.sock"
+        target: "/var/run/docker.sock"
+        type: bind      
     publish:
       - published_port: "{{item.port}}"
-        target_port: "7054"
+        target_port: "7051"
         protocol: "tcp"
-    command: >
-      bash -c "/home/{{item.name}}/peer.sh;"
-    mounts:
-      - source: "/home/{{ hlf_username}}/hlft-store/{{item.name}}"
-        target: "/home/{{item.name}}"
-        type: bind
-      - source: "/home/{{ hlf_username}}/hlft-store/{{item.caname}}/tls-cert.pem"
-        target: "/home/{{item.name}}/tls/tls-{{item.caname}}-cert.pem"
-        type: bind
-    env: 
-      - "FABRIC_CFG_PATH=/home/{{item.name}}"
+    env:       
+      - "CORE_PEER_ID={{item.name}}"
+      - "CORE_PEER_ADDRESS={{item.name}}:7051"
+      - "CORE_PEER_LISTENADDRESS={{item.name}}:7051"
+      - "CORE_PEER_LOCALMSPID={{org.name}}MSP"
+      - "CORE_PEER_MSPCONFIGPATH={{item.path}}/msp"
+      - "CORE_VM_ENDPOINT=unix:///var/run/docker.sock"
+      - "CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE={{swarm_network}}"
+      - "FABRIC_LOGGING_SPEC=debug"
+      - "CORE_PEER_TLS_ENABLED=true"
+      - "CORE_PEER_TLS_CERT_FILE={{item.path}}/tls-msp/signcerts/cert.pem"
+      - "CORE_PEER_TLS_KEY_FILE={{item.path}}/tls-msp/keystore/key.pem"
+      - "CORE_PEER_TLS_ROOTCERT_FILE={{item.path}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem"
+      - "CORE_PEER_GOSSIP_USELEADERELECTION=true"
+      - "CORE_PEER_GOSSIP_ORGLEADER=false"
+      - "CORE_PEER_GOSSIP_EXTERNALENDPOINT={{item.name}}:7051"
+      - "CORE_PEER_GOSSIP_SKIPHANDSHAKE=true"
+      - "CORE_PEER_GOSSIP_BOOTSTRAP={{item.bootstrap}}"
+    working_dir: "{{item.path}}"
     placement:      
       constraints:
         - node.role == worker      
     force_update: yes
   loop: 
-    #- "{{ epeer }}"    
-     - "{{ cpeer }}"    
-    # - "{{ apeer }}"
+    - "{{ peer1 }}"    
+    - "{{ peer2 }}"    
+  when: item.switch == "on"

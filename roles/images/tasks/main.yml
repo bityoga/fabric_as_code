@@ -4,7 +4,7 @@
 
  - name: Stop & Remove Container {{ item.name }}, if it exist
    become: yes
-   become_user: "{{ hlf_username }}"
+   become_user: "root"
    docker_container:
      name: "{{ item.name }}"
      state: absent
@@ -13,48 +13,18 @@
 
  - name: Pull & Build Docker Image {{ item.image }}:{{ item.tag }}
    become: yes
-   become_user: "{{ hlf_username }}"
+   become_user: "root"
    docker_container:
       name: "{{ item.name }}"
       image: "{{ item.image }}:{{ item.tag }}"
       state: started
-      recreate: yes
-      command: bash -c "groupadd -g {{item.gid}} {{item.group}};
-        useradd --create-home -u {{item.uid}} {{item.name}};
-        usermod -a -G  {{item.gid}} {{item.name}}"
    with_items:
     - "{{services}}" 
-
- - name: Commit container {{item.name}} as {{item.name}}:{{item.tag}}
-   become: yes
-   become_user: "{{ hlf_username }}"
-   shell: "docker commit {{item.name}} {{item.name}}:{{item.tag}}"
-   with_items:
-    - "{{services}}"
-
- - name: Perfrom additional changes for couchdb users
-   become: yes
-   become_user: "{{ hlf_username }}"
-   docker_container:
-      name: "{{ item.name }}"
-      image: "{{item.name}}:{{item.tag}}"
-      state: started
-      recreate: yes
-      command: bash -c "chown -R {{epeerdb_user}}:{{epeerdb_user}} /opt/couchdb;"
-   with_items:
-      - "{{ epeerdb }}"    
-
- - name: Commit container {{item.name}} as {{item.name}}:{{item.tag}}
-   become: yes
-   become_user: "{{ hlf_username }}"
-   shell: "docker commit {{item.name}} {{item.name}}:{{item.tag}}"
-   with_items:
-    - "{{services}}"
     
     
  - name: Stop & Remove Container {{item.name}}, if it exist
    become: yes
-   become_user: "{{ hlf_username }}"
+   become_user: "root"
    docker_container:
      name: "{{item.name}}"
      state: absent

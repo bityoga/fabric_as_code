@@ -6,4 +6,5 @@
   hosts: swarm_manager_prime
   gather_facts: no
   roles:
-    - hlf/orderer     
+    - hlf/cli/orderer
+    - hlf/orderer    

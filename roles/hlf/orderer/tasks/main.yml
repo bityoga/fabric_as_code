@@ -1,12 +1,8 @@
 # ---
-
-# HLF CA Services  with
-  # 1. 1x Ordering Service [replica=2]
   
-  # Stop all CA services
+# Stop all Orderering services
 - name: Stop Orderer Service - {{ item.name }}
   become: yes
-  become_user: "{{ hlf_username}}"
   docker_swarm_service:   
     name: "{{ item.name }}"
     state: absent
@@ -15,11 +11,11 @@
   loop: 
     - "{{ orderer }}"    
 
-  # We create relevent folder structure in S3FS mount locally for service 
+  # We create relevent folder structure in the mount locally for the service 
 - name: Clean Orderer folders in hlft-store, if they exists
   become: yes  
   file: 
-    path: "{{item.path}}"
+    path: "/root/hlft-store/{{item.name}}"
     state: absent
   loop:        
     - "{{ orderer }}"
@@ -27,100 +23,77 @@
 - name: Create Orderer CA Server folders in hlft-store
   become: yes
   file: 
-    path: "{{ item.path }}"
+    path: "/root/hlft-store/{{item.name}}"
     state: directory
-    owner: "{{ item.name }}"
-    group: "{{ item.group }}"
     mode: 0750
   loop:
-        - "{{ orderer }}"
-
-  # Copy the relevent scripts
-- name: Copy scripts
-  become: yes
-  copy:
-    src: "{{item.0}}"
-    dest: "/home/{{ hlf_username}}/hlft-store/{{orderer.name}}/{{item.0}}"
-    owner: "{{orderer.name}}"
-    group: "{{orderer.group}}"
-    mode: "{{item.1}}"
-    force: yes
-  loop: 
-    - ["orderer.sh", '0500']
-    - ["bootstrap.sh", '0500']
+    - "{{ orderer }}" 
 
 - name: Copy MSP folder
   become: yes
   copy:
-    src: "/home/{{ hlf_username}}/hlft-store/{{item.caname}}/client/{{item.name}}/"
-    dest: "/home/{{ hlf_username}}/hlft-store/{{item.name}}/msp"
-    owner: "{{item.name}}"
-    group: "{{item.group}}"
+    src: "/root/hlft-store/{{orgca.name}}/{{item.name}}/msp/"
+    dest: "/root/hlft-store/{{item.name}}/msp"
     mode: '0750'
     remote_src: yes
     force: yes
   loop: 
     - "{{ orderer }}"   
 
- # Copy relevent config files to s3fs directories for the docker services
-- name: Config templating orderer.yaml
+- name: Copy TLSMSP folder
   become: yes
-  vars:
-    config: "{{item[0]}}"
-  template:
-    src: "{{item[1]}}.j2"
-    dest: "/home/{{ hlf_username }}/hlft-store/{{item[0].name}}/{{item[1]}}"
-    owner: "{{ item[0].name }}"
-    group: "{{ item[0].group }}"
-    mode: 0660
+  copy:
+    src: "/root/hlft-store/{{tlsca.name}}/{{item.name}}/tls-msp/"
+    dest: "/root/hlft-store/{{item.name}}/tls-msp"
+    mode: '0750'
+    remote_src: yes
     force: yes
-  with_nested:
-    - ["{{ orderer }}"]
-    - ["orderer.yaml", "configtx.yaml"]
-
-- name: Ensures /home/{{ hlf_username}}/hlft-store/{{item.name}}/tls dir exists
-  file: 
-    path: /home/{{ hlf_username}}/hlft-store/{{item.name}}/tls 
-    state: directory
-    owner: "{{ item.name }}"
-    group: "{{ item.group }}"
-    mode: 0750
-    force: yes    
   loop: 
     - "{{ orderer }}"
 
   # Create & Start service orderer with RAFT enabled
-- name: Fabric Orderer with RAFT - {{ item }}
+- name: Start the fabric orderer
   become: yes
-  become_user: "{{ hlf_username}}"   
   docker_swarm_service:
-    user: "{{ item.name }}"     
     name: "{{ item.name }}"
     hostname: "{{ item.name }}"
     networks:
       - "{{swarm_network}}"
-    image: "{{item.name}}:{{item.tag}}"
+    image: "{{item.image}}:{{item.tag}}"
     mode: replicated
     replicas: "{{item.replicas}}"
+    mounts:
+      - source: "/root/hlft-store/{{item.name}}"
+        target: "{{item.path}}"
+        type: bind 
+      - source: "/root/hlft-store/{{item.name}}_cli/genesis.block"
+        target: "{{item.path}}/genesis.block"
+        type: bind      
     publish:
       - published_port: "{{item.port}}"
         target_port: "7050"
-        protocol: "tcp"
-    command: >
-      bash -c "/home/{{item.name}}/{{item.name}}.sh;"
-    mounts:
-      - source: "/home/{{ hlf_username}}/hlft-store/{{item.name}}"
-        target: "/home/{{item.name}}"
-        type: bind
-      - source: "/home/{{ hlf_username}}/hlft-store/{{item.caname}}/tls-cert.pem"
-        target: "/home/{{item.name}}/tls/tls-{{item.caname}}-cert.pem"
-        type: bind
+        protocol: "tcp"     
     env: 
-      - "FABRIC_CFG_PATH=/home/{{item.name}}"    
-      - "GODEBUG=netdns=gos"  
+      - "ORDERER_HOME={{item.path}}"
+      - "ORDERER_HOST={{item.name}}"
+      - "ORDERER_GENERAL_LEDGERTYPE=file"
+      - "ORDERER_GENERAL_LISTENADDRESS={{item.name}}"
+      - "ORDERER_GENERAL_LISTENPORT=7050"
+      - "ORDERER_GENERAL_GENESISMETHOD=file"
+      - "ORDERER_GENERAL_GENESISFILE={{item.path}}/genesis.block"
+      - "ORDERER_GENERAL_LOCALMSPID={{org.name}}MSP"
+      - "ORDERER_GENERAL_LOCALMSPDIR={{item.path}}/msp"
+      - "ORDERER_GENERAL_TLS_ENABLED=true"
+      - "ORDERER_GENERAL_TLS_CERTIFICATE={{item.path}}/tls-msp/signcerts/cert.pem"
+      - "ORDERER_GENERAL_TLS_PRIVATEKEY={{item.path}}/tls-msp/keystore/key.pem"
+      - "ORDERER_GENERAL_TLS_ROOTCAS=[{{item.path}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem]"
+      - "ORDERER_GENERAL_LOGLEVEL=debug"
+      - "ORDERER_DEBUG_BROADCASTTRACEDIR=data/logs"
+    working_dir: "{{item.path}}"
     placement:      
       constraints:
         - node.role == worker      
     force_update: yes
   loop: 
     - "{{ orderer }}"
+  when: item.switch == "on"

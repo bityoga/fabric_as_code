@@ -6,14 +6,12 @@
 - name: Update and upgrade apt packages
   become: yes
   apt:
-    #upgrade: yes
     update_cache: yes
   when: ansible_os_family == 'Debian'
 
 - name: Update and upgrade yum packages
   become: yes
   yum:
-    #upgrade: yes
     update_cache: yes
   when: ansible_os_family == 'RedHat'
   

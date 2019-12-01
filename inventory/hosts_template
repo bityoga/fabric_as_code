@@ -1,25 +1,14 @@
-[debian]
-hlft0  ansible_python_interpreter="/usr/bin/python3.5"
-hlft2  ansible_python_interpreter="/usr/bin/python3.5"
-hlft4  ansible_python_interpreter="/usr/bin/python3.5"
-
-[redhat]
-hlft1 ansible_python_interpreter="/usr/bin/python2.7"
-hlft3 ansible_python_interpreter="/usr/bin/python2.7"
-
 [all:children]
 swarm_manager_prime
 swarm_managers
 swarm_workers
 
 [swarm_manager_prime]
-hlft0  ansible_python_interpreter="/usr/bin/python3.5"
+hlf0
 
 [swarm_managers]
-hlft0  ansible_python_interpreter="/usr/bin/python3.5"
-hlft1 ansible_python_interpreter="/usr/bin/python2.7"
+hlf0
 
 [swarm_workers]
-hlft2 ansible_python_interpreter="/usr/bin/python3.5"
-hlft3 ansible_python_interpreter="/usr/bin/python2.7"
-hlft4 ansible_python_interpreter="/usr/bin/python3.5"
+hlf1
+hlf2

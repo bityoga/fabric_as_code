@@ -2,8 +2,8 @@
 
 # ansible-playbook -v 013.mount_fs.yml -u root
 
-- name: Spawn a Hyperledger Fabric Topology
-  hosts: swarm_workers
-  gather_facts: no
+- name: Mount the GlusterFS on each node of the swarm
+  hosts: all
+  gather_facts: yes
   roles:
     - mountfs
