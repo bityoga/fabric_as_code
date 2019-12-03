@@ -6,5 +6,6 @@
   hosts: swarm_manager_prime
   gather_facts: no
   roles:
+    - hlf/couchdb
     - hlf/peer
     - hlf/cli/peer

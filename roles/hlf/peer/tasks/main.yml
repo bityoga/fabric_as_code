@@ -96,6 +96,10 @@
       - "CORE_PEER_GOSSIP_EXTERNALENDPOINT={{item.name}}:7051"
       - "CORE_PEER_GOSSIP_SKIPHANDSHAKE=true"
       - "CORE_PEER_GOSSIP_BOOTSTRAP={{item.bootstrap}}"
+      - "CORE_LEDGER_STATE_STATEDATABASE={{item.dbtype}}"
+      - "CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS={{couchdb.name}}_{{item.name}}:5984"
+      - "CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME={{couchdb.name}}"
+      - "CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD={{couchdb.password}}"
     working_dir: "{{item.path}}"
     placement:      
       constraints:

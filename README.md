@@ -31,7 +31,7 @@ CORE_PEER_ADDRESS=peer2:7051 CORE_PEER_MSPCONFIGPATH=/root/peer2/msp CORE_PEER_T
 CORE_PEER_ADDRESS=peer2:7051 CORE_PEER_MSPCONFIGPATH=/root/peer2/msp CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE peer chaincode query -C appchannel -n testcc -c '{"Args":["query","a"]}'
 
 ## Next Version(s)
-- CouchDB as State DB
+- couchdb as State DB
 - Customizable Policies for Channels (Sys and App)
 - Mutual TLS
 - Raft as Orderer

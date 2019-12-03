@@ -10,7 +10,7 @@ ansible_python_interpreter: "/usr/bin/python3"
 ###########################################################################################
 
 # Digital ocean API access token
-do_oauth_token: <<token>>
+do_oauth_token: eb2d0dcaf644863f88fae05f5605c49abd90e96c949b404fe27b26c8a4d057d7
 # curl -X GET -silent "https://api.digitalocean.com/v2/account/keys" -H "Authorization: Bearer <<token>>" # to retrive the key
 # Will list all the ssh key pub keys, ids, fingerprint and other relevent information. 
 # Execute it on your terminal to retrive the required ssk_keys ids that would be able to ssh onto the droplets
@@ -51,7 +51,7 @@ cluster_hosts: "{{ cluster_ips.split(',') }}"
 # gluster volume
 gluster_cluster_volume: "gv0"
 # gluster cluster ips
-gluster_cluster_host0: "104.248.141.9"
+gluster_cluster_host0: "167.172.110.56"
 glusterd_version: '7'
 
 ###########################################################################################
@@ -82,6 +82,9 @@ peer1_password: "peer2pw"
 
 peer2_user: "peer2"
 peer2_password: "peer2pw"
+
+couchdb_user: "couchdb"
+couchdb_password: "couchdbpw"
 
 # Name of the swarm network that would host the services
 swarm_network: "hlfnet"
@@ -117,14 +120,14 @@ name: "{{orderer_user}}", password: "{{orderer_password}}"
 ######################################### Peers #############################################
 peer1: { switch: "on", image: "hyperledger/fabric-peer", tag: "1.4.3", replicas: -1, port: 8054, 
 caname: "{{orgca.name}}", path: "/root/{{peer1_user}}", bootstrap: "",
-dbtype: "goleveldb", couchdbaddress: "",
+dbtype: "goleveldb",
 name: "{{peer1_user}}", password: "{{peer1_password}}",
 leader: "{peer1_user}}"
 }
 
 peer2: { switch: "on", image: "hyperledger/fabric-peer", tag: "1.4.3", replicas: -1, port: 8055,
 caname: "{{orgca.name}}", path: "/root/{{peer2_user}}", bootstrap: "{{peer1.name}}:7051",
-dbtype: "goleveldb", couchdbaddress: "",
+dbtype: "CouchDB",
 name: "{{peer2_user}}", password: "{{peer2_password}}",
 leader: "{{peer1_user}}"
 }
@@ -134,13 +137,10 @@ cli: { switch: "on", image: "hyperledger/fabric-tools", tag: "1.4.3"}
 ######################################### DBs #############################################
 sqlite: {type: "sqlite3", source: "fabric-ca-server.db"}
 
-# epeerdb: { image: "hyperledger/fabric-couchdb", tag: "0.4.15", replicas: -1, port: 7051,
-# path: "/root/hlft-store/{{epeer_user}}",
-# name: "{{epeer_user}}",
-# commands: 
-# "sleep 5s;
-# /opt/couchdb/bin/couchdb;"
-# }
+couchdb: { switch: "on", image: "couchdb", tag: "2.3", replicas: -1,
+path: "/opt/couchdb/data",
+name: "{{couchdb_user}}", password: "{{couchdb_password}}"
+}
 
 services:
   - "{{tlsca}}"

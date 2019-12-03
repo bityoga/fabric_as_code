@@ -1,0 +1,74 @@
+# Stop all Services services
+- name: Stop couchdb Service for peer {{ peer }}
+  become: yes
+  vars:
+    peer: "{{item.name}}"
+  docker_swarm_service:   
+    name: "{{ couchdb.name }}_{{peer}}"
+    state: absent
+    networks:
+      - "{{swarm_network}}"
+  loop:
+    - "{{peer1}}"
+    - "{{peer2}}"
+  when: item.dbtype == "CouchDB"
+  
+  # We create relevent folder structure in the mount locally for services
+- name: Clean couchdb_{{peer}} folders in hlft-store, if they exists
+  vars:
+    peer: "{{item.name}}"
+  become: yes  
+  file: 
+    path: "/root/hlft-store/{{couchdb.name}}_{{peer}}"
+    state: absent
+  loop:
+    - "{{peer1}}"
+    - "{{peer2}}"
+  when: item.dbtype == "CouchDB"
+  
+- name: Create couchdb_{{peer}} Service folders in hlft-store
+  become: yes
+  vars:
+    peer: "{{item.name}}"
+  file: 
+    path: "/root/hlft-store/{{couchdb.name}}_{{peer}}"
+    state: directory
+    mode: 0750
+  loop:
+    - "{{peer1}}"
+    - "{{peer2}}"
+  when: item.dbtype == "CouchDB"
+
+  # Create & Start services for Peers 
+- name: Fabric Service - {{ couchdb.name }}_{{peer}}
+  become: yes
+  vars:
+    peer: "{{item.name}}"
+  docker_swarm_service:
+    name: "{{ couchdb.name }}_{{peer}}"
+    hostname: "{{ couchdb.name }}_{{peer}}"
+    networks:
+      - "{{swarm_network}}"
+    image: "{{couchdb.image}}:{{couchdb.tag}}"
+    mode: replicated
+    replicas: "{{couchdb.replicas}}"
+    mounts:
+      - source: "/root/hlft-store/{{couchdb.name}}_{{peer}}"
+        target: "{{couchdb.path}}"
+        type: bind      
+    publish:
+      - published_port: "5984"
+        target_port: "5984"
+        protocol: "tcp"
+    env:       
+      - COUCHDB_USER={{couchdb.name}}
+      - COUCHDB_PASSWORD={{couchdb.password}}
+    working_dir: "{{couchdb.path}}"
+    placement:      
+      constraints:
+        - node.role == worker      
+    force_update: yes      
+  loop:
+    - "{{peer1}}"
+    - "{{peer2}}"
+  when: couchdb.switch == "on" and item.dbtype == "CouchDB"
