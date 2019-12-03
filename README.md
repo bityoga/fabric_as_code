@@ -4,6 +4,8 @@
 ##### Ansible
 ##### Moduler
 ##### Easily Configurable Architecture
+![Architecture Diagram](https://github.com/achak1987/fabric_as_code/blob/master/fabric_as_code.jpg)
+
 
 
 ....
