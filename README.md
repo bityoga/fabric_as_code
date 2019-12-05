@@ -43,6 +43,8 @@ python version = 3.7.4 (default, Jul  9 2019, 18:13:23) [Clang 10.0.1 (clang-100
   - We have created an easily deployable package for creating a GlusterFS cluster.
   Please check: [https://github.com/achak1987/mysome_glusterfs]
 
+[![Installation Guide](https://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg)](https://youtu.be/b1DYPJG6_Xs)
+
 ## Configuration
 There are very few parameters to be configured currently. All configurations are made inside *all.yml*. 
 - If you are using the automated process for host setup (*see bellow*), it needs few steps to enable ansible to setup the remote environment
