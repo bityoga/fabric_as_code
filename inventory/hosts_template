@@ -4,10 +4,9 @@ swarm_managers
 swarm_workers
 
 [swarm_manager_prime]
-hlf0
+
 
 [swarm_managers]
-hlf0
+
 
 [swarm_workers]
-hlf1
