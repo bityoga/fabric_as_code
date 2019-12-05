@@ -165,7 +165,7 @@ swarm_workers
   - `hostname`: can be any name. Must be unique for each machine. The project will internally refer to the machines with this name
   - `ansible_host`: the ip address of the remote host. This machine should be accessable over the network with this ip address
   - `ansible_python_interpreter`: In order for ansible to work, we need python 2.7.x or above available on each remote machine. Here we specify the **path of python on the remote machine** so that our local ansible project know where to find python on these machines.
-- The following *example* defines 3 machines as remote hosts
+- The following *example* defines 5 machines as remote hosts
 ```
 [all:children]
 swarm_manager_prime
