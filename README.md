@@ -43,6 +43,7 @@ python version = 3.7.4 (default, Jul  9 2019, 18:13:23) [Clang 10.0.1 (clang-100
   - We have created an easily deployable package for creating a GlusterFS cluster.
   Please check: [https://github.com/achak1987/mysome_glusterfs]
 
+Installation Guide Video:
 [![Installation Guide](installationGuideThumbnail.jpg)](https://youtu.be/b1DYPJG6_Xs)
 
 ## Configuration
