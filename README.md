@@ -47,7 +47,7 @@ Installation Guide Video:
 [![Installation Guide](installationGuideThumbnail.jpg)](https://youtu.be/b1DYPJG6_Xs)
 
 ## Configuration
-There are very few parameters to be configured currently. All configurations are made inside *all.yml*. 
+There are very few parameters to be configured currently. All configurations are made inside *group_vars/all.yml*. 
 - If you are using the automated process for host setup (*see bellow*), it needs few steps to enable ansible to setup the remote environment
   - **API token** !Required
     - In order to connect with Digital Ocean. 
