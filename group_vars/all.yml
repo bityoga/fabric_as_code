@@ -9,7 +9,7 @@
 # gluster volume
 gluster_cluster_volume: "gv0"
 # gluster cluster ips
-gluster_cluster_host0: "167.172.110.56"
+gluster_cluster_host0: "167.71.42.51"
 glusterd_version: '7'
 
 ###########################################################################################

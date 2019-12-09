@@ -24,11 +24,13 @@
     state: present
   when: ansible_os_family == 'RedHat'
 
-- name: Update repositories cache and install "glusterfs-client" package
+- name: Update repositories cache and install "glusterfs-client" and other required package
   package:
-    name: glusterfs-client
+    name: "{{item}}"
     update_cache: yes
     state: present
+  loop:
+    - "glusterfs-client"
   
 
 # Check if GlusterFS is already mounted, if yes, unmount it
