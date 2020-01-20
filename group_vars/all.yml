@@ -44,6 +44,16 @@ peer2_password: "peer2pw"
 couchdb_user: "couchdb"
 couchdb_password: "couchdbpw"
 
+
+hlf_explorer_db_user: "hppoc"
+hlf_explorer_db_password: "password"
+
+
+hlf_explorer_admin_user: "admin"
+hlf_explorer_admin_password: "adminpw"
+
+
+
 # Name of the swarm network that would host the services
 swarm_network: "hlfnet"
 
@@ -100,9 +110,37 @@ path: "/opt/couchdb/data",
 name: "{{couchdb_user}}", password: "{{couchdb_password}}"
 }
 
+
+hlf_explorer_db : {
+  image : "hyperledger/explorer-db",
+  tag : "latest",
+  name : 'hlf_explorer_db',
+  replicas: -1,
+  db_name : "fabricexplorer",
+  db_user_name : "{{hlf_explorer_db_user}}",
+  db_password : "{{hlf_explorer_db_password}}",
+  port : 5432,
+  switch: "on",
+  volume : "pgdata"
+}
+
+hlf_explorer : {
+  image : "hyperledger/explorer",
+  tag : 'latest',
+  name : 'hlf_explorer',
+  admin_user: "{{hlf_explorer_admin_user}}",
+  admin_password: "{{hlf_explorer_admin_password}}",
+  replicas: -1,
+  port : 8090,
+  switch: "on",
+  volume : "walletstore"
+}
+
 services:
   - "{{tlsca}}"
   - "{{orgca}}"
   - "{{orderer}}"
   - "{{ peer1 }}"    
-  - "{{ peer2 }}"     
+  - "{{ peer2 }}"
+  - "{{hlf_explorer_db}}"
+  - "{{hlf_explorer}}"     

@@ -1,0 +1,9 @@
+---
+
+# ansible-playbook -v 104.deploy_hlf_explorer.yml --flush-cache -u root 
+
+- name: Deploy Hyper ledger explorer service
+  hosts: swarm_manager_prime
+  gather_facts: yes
+  roles:
+    - hlf_explorer

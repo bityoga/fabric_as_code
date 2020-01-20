@@ -1,0 +1,53 @@
+
+# SPDX-License-Identifier: Apache-2.0
+version: '2.0'
+
+volumes:
+  {{hlf_explorer_db.name}}.{{hlf_explorer_db.volume}}:
+  {{hlf_explorer.name}}.{{hlf_explorer.volume}}:
+
+networks:
+  {{swarm_network}}:
+    external:
+      name: {{swarm_network}}
+
+services:
+
+  {{hlf_explorer_db.name}}:
+    image: {{hlf_explorer_db.image}}:{{hlf_explorer_db.tag}}
+    container_name: {{hlf_explorer_db.name}}
+    hostname: {{hlf_explorer_db.name}}
+    environment:
+      - DATABASE_DATABASE={{hlf_explorer_db.db_name}}
+      - DATABASE_USERNAME={{hlf_explorer_db.db_user_name}}
+      - DATABASE_PASSWORD={{hlf_explorer_db.db_password}}
+      - POSTGRES_USER=postgress
+    volumes:
+      - /root/hlf-explorer/createdb.sh:/docker-entrypoint-initdb.d/createdb.sh
+      - {{hlf_explorer_db.name}}.{{hlf_explorer_db.volume}}:/var/lib/postgresql/data
+    networks:
+      - {{swarm_network}}
+
+  {{hlf_explorer.name}}:
+    image: {{hlf_explorer.image}}:{{hlf_explorer.tag}}
+    container_name: {{hlf_explorer.name}}
+    hostname: {{hlf_explorer.name}}
+    environment:
+      - DATABASE_HOST={{hlf_explorer_db.name}}
+      - DATABASE_USERNAME={{hlf_explorer_db.db_user_name}}
+      - DATABASE_PASSWD={{hlf_explorer_db.db_password}}
+      - DISCOVERY_AS_LOCALHOST=false
+    volumes:
+      - /root/hlf-explorer/config.json:/opt/explorer/app/platform/fabric/config.json
+      - /root/hlf-explorer/connection-profile:/opt/explorer/app/platform/fabric/connection-profile
+      - /root/hlft-store:/tmp/crypto
+      - {{hlf_explorer.name}}.{{hlf_explorer.volume}}:/opt/wallet
+    depends_on:
+      - {{hlf_explorer_db.name}}
+    links:
+      - {{hlf_explorer_db.name}}:db
+    command: sh -c "sleep 16&& node /opt/explorer/main.js && tail -f /dev/null"
+    ports:
+      - {{hlf_explorer.port}}:8080
+    networks:
+      - {{swarm_network}}

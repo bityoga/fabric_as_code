@@ -1,0 +1,10 @@
+{
+        "network-configs": {
+                "{{swarm_network}}": {
+                        "name": "{{swarm_network}}",
+                        "profile": "./connection-profile/hlf-explorer-network.json"
+                }
+        },
+        "license": "Apache-2.0"
+}
+
