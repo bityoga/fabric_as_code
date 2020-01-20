@@ -60,6 +60,7 @@
       - "FABRIC_CA_SERVER_TLS_ENABLED=true"
       - "FABRIC_CA_SERVER_CSR_CN={{item.name}}"
       - "FABRIC_CA_SERVER_CSR_HOSTS={{item.name}}"
+      - "FABRIC_CA_SERVER_CA_NAME={{item.name}}"
       - "FABRIC_CA_SERVER_DEBUG=true"
     placement:      
       constraints:

@@ -81,7 +81,7 @@
     env:       
       - "CORE_PEER_ID={{item.name}}"
       - "CORE_PEER_ADDRESS={{item.name}}:7051"
-      - "CORE_PEER_LISTENADDRESS={{item.name}}:7051"
+      - "CORE_PEER_LISTENADDRESS=0.0.0.0:7051"
       - "CORE_PEER_LOCALMSPID={{org.name}}MSP"
       - "CORE_PEER_MSPCONFIGPATH={{item.path}}/msp"
       - "CORE_VM_ENDPOINT=unix:///var/run/docker.sock"

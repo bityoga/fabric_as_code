@@ -77,7 +77,7 @@
       - "ORDERER_HOME={{item.path}}"
       - "ORDERER_HOST={{item.name}}"
       - "ORDERER_GENERAL_LEDGERTYPE=file"
-      - "ORDERER_GENERAL_LISTENADDRESS={{item.name}}"
+      - "ORDERER_GENERAL_LISTENADDRESS=0.0.0.0"
       - "ORDERER_GENERAL_LISTENPORT=7050"
       - "ORDERER_GENERAL_GENESISMETHOD=file"
       - "ORDERER_GENERAL_GENESISFILE={{item.path}}/genesis.block"
@@ -89,6 +89,7 @@
       - "ORDERER_GENERAL_TLS_ROOTCAS=[{{item.path}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem]"
       - "ORDERER_GENERAL_LOGLEVEL=debug"
       - "ORDERER_DEBUG_BROADCASTTRACEDIR=data/logs"
+      - "CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE={{swarm_network}}"
     working_dir: "{{item.path}}"
     placement:      
       constraints:
