@@ -173,3 +173,30 @@ Setting up of hyperledger fabric cluster requires the following steps. Creating 
       ```CORE_PEER_ADDRESS=peer2:7051 CORE_PEER_MSPCONFIGPATH=/root/peer2/msp CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE peer chaincode invoke -C appchannel -n testcc -c '{"Args":["invoke","a","b","10"]}' --tls --cafile ${CORE_PEER_TLS_ROOTCERT_FILE}```
       - GET
       ```CORE_PEER_ADDRESS=peer2:7051 CORE_PEER_MSPCONFIGPATH=/root/peer2/msp CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE peer chaincode query -C appchannel -n testcc -c '{"Args":["query","a"]}```
+      
+- Playbook: `104.deploy_hlf_explorer`
+    - Execute: `ansible-playbook -v 104.deploy_hlf_explorer.yml --flush-cache -u root`
+    - Deploys the hyperledger explorer services to docker swarm.
+    - The service will be exposed in **port : 8090**
+
+  **File Configuration Explanations**
+
+  - All 'hlf_explorer' config files will be available under the directory "root/hlf-explorer/" , in the primary manager.
+  - "/root/hlf-explorer/pgdata" - is used as mount directory for hlf_explorer_db (Postgresql) service
+  - "/root/hlf-explorer/wallet" - is used as the wallet directory for the hlf_explorer service
+     - Both of these directories are in the primary manager as the services are started only in primary manager. .
+     - This can be modified to a shared mount point, if the services are later planned to run different machines in the swarm.
+  - In hlf_explorer_db,
+        - "/docker-entrypoint-initdb.d/createdb.sh" and
+        - "/docker-entrypoint.sh" are modified as the original scripts in the images were not starting properly.
+  - The network config file for the hlf_explorer is configured with the prime manager's ip addressees.
+
+  **Service Configuration Explanations**
+
+  - The current commit, specifies all the explorer services to be started as swarm services in the prime manager.
+     - Both of the services 1) hlf_explorer_db(Postgresql db) and 2) hlf_explorer are started in the prime manager.
+
+  - The playbook also supports deploying the hlf_explorer services using a docker compose file (and) docker stack deploy
+      - This features are commented out currently. Only swarm service deployment is enabled in this commit.
+      - However a docker-compose.yaml to deploy the hlf_explorer service is templated and configured dynamically for additional support.
+      - This file will be available in the "root/hlf-explorer/hlf-explorer-docker-compose.yaml" in the prime manager machine.
