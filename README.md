@@ -178,11 +178,14 @@ Setting up of hyperledger fabric cluster requires the following steps. Creating 
     - Execute: `ansible-playbook -v 104.deploy_hlf_explorer.yml --flush-cache -u root`
     - Deploys the hyperledger explorer services to docker swarm.
     - The service will be exposed in **port : 8090**.
-    - The hlf_explorer service will start 16 seconds after the hlf_explorer_db service. Try to wait for sometime and check the url http://http://178.62.207.235:8090/  (replace ip  with your primary manager's ip).
-    **Login Credentials**
+    - The hlf_explorer service will start 16 seconds after the hlf_explorer_db service. Try to wait for sometime and check the url **http://178.62.207.235:8090/  (Replace ip address, with your primary manager's ip address).**
+    - Note : Make sure to have run 'ansible-playbook -v 012.prepare_docker_images.yml -u root' so the docker images needed for the explorer services are pulled and made ready. Else it may take some time for the services to get started.
+    
+    
+    **Hyperledger Explorer Login Credentials**
     - **user_name : admin**
     - **password : adminpw**
-    - Note : Make sure to have run 'ansible-playbook -v 012.prepare_docker_images.yml -u root' so the docker images needed for the explorer services are pulled and made ready. Else it may take some time for the services to get started.
+    
 
   **File Configuration Explanations**
 
