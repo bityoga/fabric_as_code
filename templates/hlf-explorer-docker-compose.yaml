@@ -1,6 +1,6 @@
 
 # SPDX-License-Identifier: Apache-2.0
-version: '2.0'
+version: '3.0'
 
 volumes:
   {{hlf_explorer_db.name}}.{{hlf_explorer_db.volume}}:
@@ -23,8 +23,11 @@ services:
       - DATABASE_PASSWORD={{hlf_explorer_db.db_password}}
       - POSTGRES_USER=postgress
     volumes:
+      - /root/hlf-explorer/docker-entrypoint.sh:/docker-entrypoint.sh
       - /root/hlf-explorer/createdb.sh:/docker-entrypoint-initdb.d/createdb.sh
       - {{hlf_explorer_db.name}}.{{hlf_explorer_db.volume}}:/var/lib/postgresql/data
+    ports:
+      - {{hlf_explorer_db.port}}:5432
     networks:
       - {{swarm_network}}
 
