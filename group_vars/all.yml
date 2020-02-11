@@ -136,6 +136,15 @@ hlf_explorer : {
   volume : "walletstore"
 }
 
+swarm_visualizer : {
+  image : "dockersamples/visualizer",
+  tag : 'latest',
+  name : 'swarm_visualizer',
+  replicas: -1,
+  port : 9090,
+  switch: "on",
+}
+
 services:
   - "{{tlsca}}"
   - "{{orgca}}"
@@ -143,4 +152,5 @@ services:
   - "{{ peer1 }}"    
   - "{{ peer2 }}"
   - "{{hlf_explorer_db}}"
-  - "{{hlf_explorer}}"     
+  - "{{hlf_explorer}}"
+  - "{{swarm_visualizer}}"

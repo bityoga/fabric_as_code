@@ -1,0 +1,46 @@
+# ---   
+  # Stop Swarm Visualizer service
+- name: Stop Swarm Visualizer Service - {{ item.name }}
+  become: yes
+  docker_swarm_service:   
+    name: "{{item.name}}"
+    state: absent
+    networks:
+      - "{{swarm_network}}"
+  loop: 
+    - "{{swarm_visualizer}}"
+  when: hlf_explorer.switch == "on" and inventory_hostname in groups.swarm_manager_prime  
+
+
+
+  
+
+  # Create & Start Swarm Visualizer service
+  # Containers are placed in the managers
+- name: Swarm Visualizer Service
+  become: yes
+  docker_swarm_service:
+    name: "{{swarm_visualizer.name}}"
+    hostname: "{{swarm_visualizer.name}}"
+    networks:
+      - "{{swarm_network}}"
+    image: "{{swarm_visualizer.image}}:{{swarm_visualizer.tag}}"
+
+    mode: replicated
+    replicas: "{{swarm_visualizer.replicas}}"
+    mounts:
+      - source: "/var/run/docker.sock"
+        target: "/var/run/docker.sock"
+        type: bind  
+     
+    publish:
+      - published_port: "{{swarm_visualizer.port}}"
+        target_port: "8080"
+        protocol: "tcp"
+
+    placement:      
+      constraints:
+        - node.hostname == {{inventory_hostname}}
+    force_update: yes
+    debug : yes
+  when: swarm_visualizer.switch == "on" and inventory_hostname in groups.swarm_manager_prime

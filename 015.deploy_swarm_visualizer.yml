@@ -1,0 +1,9 @@
+---
+
+# ansible-playbook -v 015.deploy_swarm_visualizer.yml --flush-cache -u root 
+
+- name: Deploy Docker Swarm Visualizer
+  hosts: swarm_manager_prime
+  gather_facts: yes
+  roles:
+    - swarm_visualizer
