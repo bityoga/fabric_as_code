@@ -145,6 +145,15 @@ swarm_visualizer : {
   switch: "on",
 }
 
+portainer : {
+  image : "portainer/portainer",
+  tag : 'latest',
+  name : 'portainer',
+  replicas: -1,
+  port : 9000,
+  switch: "on",
+}
+
 services:
   - "{{tlsca}}"
   - "{{orgca}}"
@@ -154,3 +163,4 @@ services:
   - "{{hlf_explorer_db}}"
   - "{{hlf_explorer}}"
   - "{{swarm_visualizer}}"
+  - "{{portainer}}"

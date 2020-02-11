@@ -1,0 +1,9 @@
+---
+
+# ansible-playbook -v 016.deploy_portainer.yml --flush-cache -u root 
+
+- name: Deploy Portainer
+  hosts: swarm_manager_prime
+  gather_facts: yes
+  roles:
+    - portainer
