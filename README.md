@@ -145,6 +145,11 @@ Setting up of hyperledger fabric cluster requires the following steps. Creating 
     - Starts a docker swarm visualizer service.
     - The swam visualiser service will be exposed in port : **9090**
     - **Example :** Open http://167.172.189.6:9090/  (Replace Ip address with your manager's Ip address).
+- Playbook: `016.deploy_portainer.yml`
+    - Execute: `ansible-playbook -v 016.deploy_portainer.yml -u root`
+    - Starts a portainer service.
+    - The portainer service will be exposed in port : **9000**
+    - **Example :** Open http://167.172.189.6:9000/  (Replace Ip address with your manager's Ip address).
 - Playbook: `100.deploy_ca`
     - Execute: `ansible-playbook -v 100.deploy_ca -u root`
     - Deploys the organizational and tls CAs to docker swarm. Also creates the required initial users on both CAs for the network to be operational
