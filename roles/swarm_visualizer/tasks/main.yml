@@ -9,7 +9,7 @@
       - "{{swarm_network}}"
   loop: 
     - "{{swarm_visualizer}}"
-  when: hlf_explorer.switch == "on" and inventory_hostname in groups.swarm_manager_prime  
+  when: swarm_visualizer.switch == "on" 
 
 
 
@@ -40,7 +40,9 @@
 
     placement:      
       constraints:
-        - node.hostname == {{inventory_hostname}}
+        - node.role == manager
     force_update: yes
     debug : yes
-  when: swarm_visualizer.switch == "on" and inventory_hostname in groups.swarm_manager_prime
+  loop: 
+    - "{{swarm_visualizer}}" 
+  when: swarm_visualizer.switch == "on"
