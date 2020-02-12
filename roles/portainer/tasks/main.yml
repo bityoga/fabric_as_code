@@ -11,22 +11,31 @@
     - "{{portainer}}"
   when: portainer.switch == "on"
 
+  # Stop Portainer Agent service
+- name: Stop Portainer Agent Service - {{ item.name }}
+  become: yes
+  docker_swarm_service:   
+    name: "{{item.name}}"
+    state: absent
+    networks:
+      - "{{swarm_network}}"
+  loop: 
+    - "{{portainer_agent}}"
+  when: portainer_agent.switch == "on"
 
 
-  
-
-  # Create & Start Portainer service
+# Create & Start Portainer service
   # Containers are placed in the managers
 - name: Portainer Service
   become: yes
   docker_swarm_service:
-    name: "{{portainer.name}}"
-    hostname: "{{portainer.name}}"
+    name: "{{item.name}}"
+    hostname: "{{item.name}}"
     networks:
       - "{{swarm_network}}"
-    image: "{{portainer.image}}:{{portainer.tag}}"
+    image: "{{item.image}}:{{item.tag}}"
     mode: replicated
-    replicas: "{{portainer.replicas}}"
+    replicas: "{{item.replicas}}"
     mounts:
       - source: "/var/run/docker.sock"
         target: "/var/run/docker.sock"
@@ -36,7 +45,7 @@
       #   type: bind  
      
     publish:
-      - published_port: "{{portainer.port}}"
+      - published_port: "{{item.port}}"
         target_port: "9000"
         protocol: "tcp"
       # - published_port: "8000"
@@ -51,3 +60,43 @@
   loop: 
     - "{{portainer}}" 
   when: portainer.switch == "on"
+
+  
+
+  # Create & Start Portainer Agent service
+  # Containers are placed in the managers
+- name: Portainer Agent Service
+  become: yes
+  docker_swarm_service:
+    name: "{{item.name}}"
+    #hostname: "{{item.name}}"
+    networks:
+      - "{{swarm_network}}"
+    image: "{{item.image}}:{{item.tag}}"
+    mode: global
+    #replicas: "{{item.replicas}}"
+    mounts:
+      - source: "//var/run/docker.sock"
+        target: "/var/run/docker.sock"
+        type: bind 
+      - source: "//var/lib/docker/volumes"
+        target: "/var/lib/docker/volumes"
+        type: bind  
+     
+    publish:
+      - published_port: "{{item.port}}"
+        target_port: "9001"
+        mode: host
+        #protocol: "tcp"
+      # - published_port: "8000"
+      #   target_port: "8000"
+      #   protocol: "tcp"
+      
+    placement:      
+      constraints:
+        - node.platform.os == linux
+    force_update: yes
+    debug : yes
+  loop: 
+    - "{{portainer_agent}}" 
+  when: portainer_agent.switch == "on"

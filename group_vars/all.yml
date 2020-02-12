@@ -154,6 +154,14 @@ portainer : {
   switch: "on",
 }
 
+portainer_agent : {
+  image : "portainer/agent",
+  tag : 'latest',
+  name : 'portainer_agent',
+  port : 9001,
+  switch: "on",
+}
+
 services:
   - "{{tlsca}}"
   - "{{orgca}}"
@@ -164,3 +172,4 @@ services:
   - "{{hlf_explorer}}"
   - "{{swarm_visualizer}}"
   - "{{portainer}}"
+  - "{{portainer_agent}}"
