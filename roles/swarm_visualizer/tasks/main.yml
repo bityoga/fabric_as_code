@@ -20,21 +20,21 @@
 - name: Swarm Visualizer Service
   become: yes
   docker_swarm_service:
-    name: "{{swarm_visualizer.name}}"
-    hostname: "{{swarm_visualizer.name}}"
+    name: "{{item.name}}"
+    hostname: "{{item.name}}"
     networks:
       - "{{swarm_network}}"
-    image: "{{swarm_visualizer.image}}:{{swarm_visualizer.tag}}"
+    image: "{{item.image}}:{{item.tag}}"
 
     mode: replicated
-    replicas: "{{swarm_visualizer.replicas}}"
+    replicas: "{{item.replicas}}"
     mounts:
       - source: "/var/run/docker.sock"
         target: "/var/run/docker.sock"
         type: bind  
      
     publish:
-      - published_port: "{{swarm_visualizer.port}}"
+      - published_port: "{{item.port}}"
         target_port: "8080"
         protocol: "tcp"
 
