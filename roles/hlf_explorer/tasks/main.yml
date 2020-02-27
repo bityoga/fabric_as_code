@@ -275,10 +275,6 @@
       - "DATABASE_PASSWORD={{hlf_explorer_db.db_password}}"
       - "POSTGRES_USER=postgress"
       - "POSTGRES_PASSWORD=password"
-     
-    placement:      
-      constraints:
-        - node.hostname == {{inventory_hostname}}
     force_update: yes
     debug : yes
   when: hlf_explorer_db.switch == "on" and inventory_hostname in groups.swarm_manager_prime
@@ -334,10 +330,7 @@
       - "DATABASE_USERNAME={{hlf_explorer_db.db_user_name}}"
       - "DATABASE_PASSWD={{hlf_explorer_db.db_password}}"
       - "DISCOVERY_AS_LOCALHOST=false"
-     
-    placement:      
-      constraints:
-        - node.hostname == {{inventory_hostname}}     
+      
     force_update: yes
   when: hlf_explorer.switch == "on" and inventory_hostname in groups.swarm_manager_prime
 
