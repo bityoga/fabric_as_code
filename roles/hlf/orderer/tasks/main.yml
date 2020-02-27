@@ -61,7 +61,7 @@
       - "{{swarm_network}}"
     image: "{{item.image}}:{{item.tag}}"
     mode: replicated
-    replicas: "{{item.replicas}}"
+    replicas: "{{item.replicas}}"    
     mounts:
       - source: "/root/hlft-store/{{item.name}}"
         target: "{{item.path}}"

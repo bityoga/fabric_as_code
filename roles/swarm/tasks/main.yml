@@ -7,14 +7,13 @@
   register: docker_info
   changed_when: false
 
-
   # Initialize and set configuration for the prime manager
 - name: "Init a new swarm with default parameters"
   become: yes
   become_user: "root"
   docker_swarm:
     state: present
-    advertise_addr: "{{ hostvars[groups.swarm_manager_prime[0]]['ansible_eth0']['ipv4']['address'] }}"
+    advertise_addr: "{{ hostvars[groups.swarm_manager_prime[0]]}}"
   when: "docker_info.stdout.find('Swarm: inactive') != -1 and inventory_hostname in groups.swarm_manager_prime"
 
 - name: Update swarm configuration
@@ -42,7 +41,7 @@
     state: join
     join_token: "{{ hostvars[groups.swarm_manager_prime[0]]['result'].swarm_facts.JoinTokens.Manager }}"
     advertise_addr: "eth0:4567"
-    remote_addrs: ["{{ hostvars[groups.swarm_manager_prime[0]]['ansible_eth0']['ipv4']['address'] }}:2377" ]
+    remote_addrs: ["{{ hostvars[groups.swarm_manager_prime[0]]['ansible_host'] }}:2377" ]
   retries: 3
   delay: 15
   when: "docker_info.stdout.find('Swarm: inactive') != -1  and inventory_hostname in groups.swarm_managers"
@@ -55,7 +54,7 @@
     state: join
     join_token: "{{ hostvars[groups.swarm_manager_prime[0]]['result'].swarm_facts.JoinTokens.Worker }}"
     advertise_addr: "eth0:4567"
-    remote_addrs: "{{ hostvars[groups.swarm_manager_prime[0]]['ansible_eth0']['ipv4']['address'] }}"
+    remote_addrs: "{{ hostvars[groups.swarm_manager_prime[0]]['ansible_host'] }}"
   retries: 3
   delay: 20
   when: "docker_info.stdout.find('Swarm: inactive') != -1 and inventory_hostname in groups.swarm_workers"
