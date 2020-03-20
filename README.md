@@ -150,6 +150,11 @@ Setting up of hyperledger fabric cluster requires the following steps. Creating 
     - Starts a portainer service.
     - The portainer service will be exposed in port : **9000**
     - **Example :** Open http://167.172.189.6:9000/  (Replace Ip address with your manager's Ip address).
+    - **Set up the portainer admin password and login (Remember the admin password for future logins)**
+    - **CONNECT TO PORTAINER AGENT**
+       - **agent name :** "agent"
+       - **end point url :** "tasks.portainer_agent:9001"
+- This will list all swarm information . Almost entire swarm management is supported.
 - Playbook: `100.deploy_ca`
     - Execute: `ansible-playbook -v 100.deploy_ca -u root`
     - Deploys the organizational and tls CAs to docker swarm. Also creates the required initial users on both CAs for the network to be operational
