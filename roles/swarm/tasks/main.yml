@@ -13,7 +13,7 @@
   become_user: "root"
   docker_swarm:
     state: present
-    advertise_addr: "{{ hostvars[groups.swarm_manager_prime[0]]}}"
+    advertise_addr: "{{ hostvars[groups.swarm_manager_prime[0]]['ansible_host']}}"
   when: "docker_info.stdout.find('Swarm: inactive') != -1 and inventory_hostname in groups.swarm_manager_prime"
 
 - name: Update swarm configuration
