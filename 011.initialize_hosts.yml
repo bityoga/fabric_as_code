@@ -6,6 +6,6 @@
   hosts: all
   gather_facts: yes
   roles:
-    - common_packages
-    - docker
-    - post_installation
+    - init/common_packages
+    - init/docker
+    - init/post_installation

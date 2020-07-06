@@ -10,9 +10,7 @@
     state: absent
     networks:
       - "{{swarm_network}}"
-  loop: 
-    - "{{ tlsca }}"
-    - "{{ orgca }}"       
+  loop: "{{ caservices }}"      
 
 # Copy the relevent scripts
 - name: Copy scripts
@@ -22,12 +20,10 @@
     dest: "/root/hlft-store/{{item.name}}/cli.sh"
     mode: "0500"
     force: yes
-  loop: 
-    - "{{ tlsca }}" 
-    - "{{ orgca }}" 
+  loop: "{{ caservices }}"
 
-  # Create & Start service for CLI 
-- name: Fabric Service - {{ item.name }}
+  # Enroll Admin on each CA service
+- name: ENROLL ADMIN Fabric Service - {{ item.name }}
   become: yes
   docker_swarm_service:
     name: "{{ item.name }}_cli"
@@ -38,7 +34,7 @@
     mode: replicated
     replicas: "-1"
     command: >
-      bash -c "/{{item.path}}/cli.sh {{item.name}};"
+      bash -c "/{{item.path}}/enroll_admin.sh {{item.name}};"
     mounts:
       - source: "/root/hlft-store/{{item.name}}/"
         target: "{{item.path}}"
@@ -49,17 +45,13 @@
       - "FABRIC_CA_SECRET={{item.password}}"
       - "FABRIC_CA_PORT=7054"
       - "CORE_PEER_LOCALMSPID={{org.name}}MSP"
-      - "ORDERER_HOST={{orderer.name}}"
-      - "ORDERER_SECRET={{orderer.password}}"
-      - "PEER1_HOST={{peer1.name}}"
-      - "PEER1_SECRET={{peer1.password}}"
-      - "PEER2_HOST={{peer2.name}}"
-      - "PEER2_SECRET={{peer2.password}}"      
+      # - "ORDERER_HOST={{orderer.name}}"
+      # - "ORDERER_SECRET={{orderer.password}}"
+      # - "PEER_HOST={{peer.name}}"
+      # - "PEER_SECRET={{peer.password}}"
     placement:      
       constraints:
         - node.role == worker     
     force_update: yes 
-  loop: 
-     - "{{ tlsca }}"
-     - "{{ orgca }}"    
+  loop: "{{ caservices }}" 
   when: item.switch == "on"

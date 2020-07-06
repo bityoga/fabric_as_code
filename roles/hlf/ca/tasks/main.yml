@@ -10,9 +10,7 @@
     state: absent
     networks:
       - "{{swarm_network}}"
-  loop: 
-    - "{{ tlsca }}"
-    - "{{ orgca }}"
+  loop: "{{ caservices }}"
 
   # We create relevent folder structure in mount locally for service
 - name: Clean Fabric CA Server folders in hlft-store, if they exists
@@ -20,9 +18,7 @@
   file: 
     path: "/root/hlft-store/{{item.name}}"
     state: absent
-  loop:        
-    - "{{ tlsca }}"
-    - "{{ orgca }}"
+  loop: "{{ caservices }}"
 
 - name: Create Fabric CA Server folders in hlft-store
   become: yes
@@ -30,9 +26,7 @@
     path: "/root/hlft-store/{{item.name}}"
     state: directory
     mode: 0750
-  loop:
-    - "{{ tlsca }}"
-    - "{{ orgca }}"
+  loop: "{{ caservices }}"
 
 # Create & Start service TLS CA 
 - name: Fabric CA - {{ item }}
@@ -66,7 +60,5 @@
       constraints:
         - node.role == worker   
     force_update: yes   
-  loop: 
-    - "{{ tlsca }}"
-    - "{{ orgca }}"
+  loop: "{{ caservices }}"
   when: item.switch == "on"

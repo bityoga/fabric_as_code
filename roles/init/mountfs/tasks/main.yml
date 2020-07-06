@@ -1,0 +1,35 @@
+---
+
+# Setup GlusterFS as local mount on each node
+# Check if GlusterFS is already mounted, if yes, unmount it
+- name: Unmount GlusterFS if already mounted
+  become: yes
+  mount:
+    path: /root/hlft-store
+    state: unmounted
+
+# Remove the local mount point folder, if it exists, so that we get the right permissions everytime
+- name: Remove Mount Point
+  become: yes
+  file:
+    path: /root/hlft-store
+    state: absent
+
+# Create the local mount point on each node for S3FS mount
+- name: Create Mount Point
+  become: yes
+  become_user: "root"
+  file:
+    path: /root/hlft-store
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: 0750
+
+# Mount the volume on /root/myfiles
+- name: Mount Gluster volume
+  mount:
+    path: /root/hlft-store
+    src: "{{ gluster_cluster_host0 }}:/{{gluster_cluster_volume}}"
+    fstype: glusterfs
+    state: mounted

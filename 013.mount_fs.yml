@@ -6,4 +6,4 @@
   hosts: all
   gather_facts: yes
   roles:
-    - mountfs
+    - init/mountfs

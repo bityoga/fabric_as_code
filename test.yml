@@ -1,0 +1,9 @@
+---
+- name: Test Playbook
+  hosts: localhost
+  tasks:
+    - name: Debug
+      debug:
+        msg: "{{item}}"
+      loop: "{{caservices}}"
+        
