@@ -40,7 +40,7 @@ Once ansible-semaphore is installed, you can verify it by accessing its url.
   ![alt text](../../images/semaphore_4_all_other_tasks.png)
     
 - **5) Run Tasks** 
-  - Run all of the 5 Tasks one by one.
+  - Run all of the 11 Tasks one by one.
   - Click "run" green button on the right corner of the each tasks
   - Click "run" green button on the bottom right corner of the "create task" pop up
   
