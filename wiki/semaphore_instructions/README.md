@@ -31,6 +31,9 @@ Once ansible-semaphore is installed, you can verify it by accessing its url.
 - **4) Create Task Templates** - Click "Task Templates" from the side-menu and click "new template" on top right corner
   - Create 11 Task Templates for the 11 playbooks as shown in the figure below:
   
+  ![alt text](../../images/semaphore_4_task_list.png)
+  
+  
   - **Extra CLI arugments for 013.mount_fs.yml task -** ["-u","root","--extra-vars","gluster_cluster_host0='164.90.198.91' gluster_cluster_volume='gfs0'"]
   
   ![alt text](../../images/semaphore_4_mountfs_task.png)
