@@ -46,6 +46,14 @@ python version = 3.7.4 (default, Jul  9 2019, 18:13:23) [Clang 10.0.1 (clang-100
 Installation Guide Video:
 [![Installation Guide](installationGuideThumbnail.jpg)](https://youtu.be/b1DYPJG6_Xs)
 
+## ansible-semaphore Setup Instructions:
+
+These instructions is to be used only when utilising ansible-semaphore for deployment. 
+
+**Refer :** [ansible-semaphore-setup-instructions](/wiki/semaphore_instructions/)
+
+For normal deployment process, ignore this and follow the instructions below.
+
 ## Configuration
 There are very few parameters to be configured currently. All configurations are made inside *group_vars/all.yml*. 
   - **GlusterFS Setup** !Required
