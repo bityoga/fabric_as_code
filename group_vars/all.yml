@@ -100,6 +100,9 @@ name: "{{peer2_user}}", password: "{{peer2_password}}",
 leader: "{{peer1_user}}"
 }
 
+peer_chaincode_builder : {
+  image: "hyperledger/fabric-ccenv", tag: "1.4"
+}
 ######################################### CLI #############################################
 cli: { switch: "on", image: "hyperledger/fabric-tools", tag: "1.4"}
 ######################################### DBs #############################################
@@ -173,3 +176,4 @@ services:
   - "{{swarm_visualizer}}"
   - "{{portainer}}"
   - "{{portainer_agent}}"
+  - "{{peer_chaincode_builder}}"
