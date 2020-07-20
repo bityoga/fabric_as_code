@@ -34,7 +34,7 @@ Once ansible-semaphore is installed, you can verify it by accessing its url.
   ![alt text](../../images/semaphore_4_task_list.png)
   
   
-  - **Extra CLI arugments for 013.mount_fs.yml task -** ["-u","root","--extra-vars","gluster_cluster_host0='164.90.198.91' gluster_cluster_volume='gfs0'"]
+  - **Extra CLI arugments for 013.mount_fs.yml task -** ["-u","root","--extra-vars","gluster_cluster_host0='164.90.198.91' gluster_cluster_volume='gfs0'"] (Replace "root" as per the username having root access in the remote machines)
   
   ![alt text](../../images/semaphore_4_mountfs_task.png)
   
