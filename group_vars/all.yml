@@ -101,7 +101,7 @@ leader: "{{peer1_user}}"
 }
 
 peer_chaincode_builder : {
-  image: "hyperledger/fabric-ccenv", tag: "1.4"
+  "name":"hyperledger_fabric-ccenv", image: "hyperledger/fabric-ccenv", tag: "1.4"
 }
 ######################################### CLI #############################################
 cli: { switch: "on", image: "hyperledger/fabric-tools", tag: "1.4"}
