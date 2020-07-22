@@ -3,6 +3,7 @@
 # Setup GlusterFS as local mount on each node
 # Install glusterfs-client
 - name: Add new apt source
+  become: yes
   apt_repository:
     repo: ppa:gluster/glusterfs-{{ glusterd_version }}
     filename: gluster.list
