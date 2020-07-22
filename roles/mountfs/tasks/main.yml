@@ -62,6 +62,7 @@
 
 # Mount the volume on /root/myfiles
 - name: Mount Gluster volume
+  become: yes
   mount:
     path: /root/hlft-store
     src: "{{ gluster_cluster_host0 }}:/{{gluster_cluster_volume}}"
