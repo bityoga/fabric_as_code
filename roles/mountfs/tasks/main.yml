@@ -12,6 +12,7 @@
 
   # Install glusterfs-clients
 - name: Add an RPM signing key, uses whichever key is at the URL
+  become: yes
   rpm_key:
     key: http://download.gluster.org/pub/gluster/glusterfs/{{ glusterd_version }}/rsa.pub
     state: present
