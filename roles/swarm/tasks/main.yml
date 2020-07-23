@@ -3,6 +3,8 @@
 # Setup and Create a docker swarm creating the relevent managers and slaves as described in inventory/hosts
 
 - name: "Get docker info"
+  become: yes
+  become_user: "root"
   shell: docker info
   register: docker_info
   changed_when: false
