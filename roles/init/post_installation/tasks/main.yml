@@ -1,9 +1,8 @@
-
-  # Docker Swarm & Services modules needs the GOLANG GOPATH to be set
+# Docker Swarm & Services modules needs the GOLANG GOPATH to be set
 - name: Set GOPATH ENV variable
   become: yes
   become_user: "root"
-  lineinfile: 
+  lineinfile:
     dest: /root/.bashrc
     insertafter: EOF
     line: "export GOPATH=/root/.go"
@@ -19,14 +18,8 @@
     mode: 0775
 
 - name: Start Docker service
-  become: yes  
+  become: yes
   service:
     name: docker
     state: started
     enabled: yes
-
-# Current version of ansible copy and template has issues with redhats
-# - name: Disable SELinux
-#   selinux:
-#     state: disabled
-#   when: ansible_os_family == 'RedHat'

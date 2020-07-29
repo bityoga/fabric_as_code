@@ -68,13 +68,13 @@ swarm_network: "hlfnet"
 tlsca: { switch: "on", image: "hyperledger/fabric-ca", tag: "1.4", replicas: -1, port: 8081,
  path: "/root/{{tlsca_user}}",
  db: "{{sqlite}}",
- name: "{{tlsca_user}}", password: "{{tlsca_password}}"
+ name: "{{tlsca_user}}", password: "{{tlsca_password}}", type="tls"
 }
 
 orgca: { switch: "on", image: "hyperledger/fabric-ca", tag: "1.4", replicas: -1, port: 8052,
  path: "/root/{{orgca_user}}",
  db: "{{sqlite}}",
- name: "{{orgca_user}}", password: "{{orgca_password}}"
+ name: "{{orgca_user}}", password: "{{orgca_password}}", type="org"
  }
 
 
@@ -164,7 +164,6 @@ portainer_agent : {
 
 services:
   - "{{caservices}}"
-  - "{{orderer}}"
   - "{{peerservices}}"
   - "{{explorerservices}}"
   - "{{vizservices}}"
@@ -176,6 +175,7 @@ caservices:
 peerservices:
   - "{{peer1}}"
   - "{{peer2}}"
+  - "{{orderer}}"
 
 explorerservices:
   - "{{hlf_explorer_db}}"

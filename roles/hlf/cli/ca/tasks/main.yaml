@@ -1,16 +1,16 @@
 # ---
 
 # HLF CA CLI Services
-  
+
 # Stop all CLI Services services
 - name: Stop CLI Service - {{ item.name }}_cli
   become: yes
-  docker_swarm_service:   
+  docker_swarm_service:
     name: "{{ item.name }}_cli"
     state: absent
     networks:
       - "{{swarm_network}}"
-  loop: "{{ caservices }}"      
+  loop: "{{ caservices }}"
 
 # Copy the relevent scripts
 - name: Copy scripts
@@ -22,8 +22,8 @@
     force: yes
   loop: "{{ caservices }}"
 
-  # Enroll Admin on each CA service
-- name: ENROLL ADMIN Fabric Service - {{ item.name }}
+  # Enroll Root Admin on each CA service
+- name: ENROLL Root ADMIN Fabric Service - {{ item.name }}
   become: yes
   docker_swarm_service:
     name: "{{ item.name }}_cli"
@@ -34,24 +34,26 @@
     mode: replicated
     replicas: "-1"
     command: >
-      bash -c "/{{item.path}}/enroll_admin.sh {{item.name}};"
+      bash -c "/{{item.path}}/enroll_admin.sh {{idx}} {{item[0].type}};"
     mounts:
-      - source: "/root/hlft-store/{{item.name}}/"
-        target: "{{item.path}}"
-        type: bind     
-    env: 
-      - "HOST_HOME={{item.path}}"
-      - "FABRIC_CA_NAME={{item.name}}"
-      - "FABRIC_CA_SECRET={{item.password}}"
+      - source: "/root/hlft-store/{{item[0].name}}/"
+        target: "{{item[0].path}}"
+        type: bind
+    env:
+      - "HOST_HOME={{item[0].path}}"
+      - "FABRIC_CA_NAME={{item[0].name}}"
+      - "FABRIC_CA_SECRET={{item[0].password}}"
       - "FABRIC_CA_PORT=7054"
       - "CORE_PEER_LOCALMSPID={{org.name}}MSP"
-      # - "ORDERER_HOST={{orderer.name}}"
-      # - "ORDERER_SECRET={{orderer.password}}"
-      # - "PEER_HOST={{peer.name}}"
-      # - "PEER_SECRET={{peer.password}}"
-    placement:      
+      - "AGENT_HOST={{item[1].name}}"
+      - "AGENT_SECRET={{item[1].password}}"
+    placement:
       constraints:
-        - node.role == worker     
-    force_update: yes 
-  loop: "{{ caservices }}" 
+        - node.role == worker
+    force_update: yes
+  with_nested:
+    - "{{caservices}}"
+    - "{{peerservices}}"
+  loop_control:
+    index_var: idx
   when: item.switch == "on"
