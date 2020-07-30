@@ -26,6 +26,9 @@ org:
   unit: "bityoga"
 
 # Creds of various agents
+admin_user: "admin1"
+admin_password: "admin1pw"
+
 tlsca_user: "tlsca"
 tlsca_password: "tlscapw"
 
@@ -164,6 +167,7 @@ portainer_agent : {
 
 services:
   - "{{caservices}}"
+  - "{{ordererservices}}"
   - "{{peerservices}}"
   - "{{explorerservices}}"
   - "{{vizservices}}"
@@ -175,6 +179,8 @@ caservices:
 peerservices:
   - "{{peer1}}"
   - "{{peer2}}"
+
+ordererservices:
   - "{{orderer}}"
 
 explorerservices:

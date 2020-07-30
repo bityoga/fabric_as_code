@@ -8,9 +8,7 @@
     state: absent
     networks:
       - "{{swarm_network}}"
-  loop:
-    - "{{peer1}}"
-    - "{{peer2}}"
+  loop: "{{peerservices}}"    
   when: item.dbtype == "CouchDB"
   
   # We create relevent folder structure in the mount locally for services
@@ -21,9 +19,7 @@
   file: 
     path: "/root/hlft-store/{{couchdb.name}}_{{peer}}"
     state: absent
-  loop:
-    - "{{peer1}}"
-    - "{{peer2}}"
+  loop: "{{peerservices}}"    
   when: item.dbtype == "CouchDB"
   
 - name: Create couchdb_{{peer}} Service folders in hlft-store
@@ -34,9 +30,7 @@
     path: "/root/hlft-store/{{couchdb.name}}_{{peer}}"
     state: directory
     mode: 0750
-  loop:
-    - "{{peer1}}"
-    - "{{peer2}}"
+  loop: "{{peerservices}}"    
   when: item.dbtype == "CouchDB"
 
   # Create & Start services for Peers 
@@ -68,7 +62,5 @@
       constraints:
         - node.role == worker      
     force_update: yes      
-  loop:
-    - "{{peer1}}"
-    - "{{peer2}}"
+  loop: "{{peerservices}}"    
   when: couchdb.switch == "on" and item.dbtype == "CouchDB"

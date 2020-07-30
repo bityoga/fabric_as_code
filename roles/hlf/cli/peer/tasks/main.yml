@@ -6,39 +6,42 @@
 - name: Stop CLI Service
   become: yes
   docker_swarm_service:   
-    name: "peer_cli"
+    name: "{{item}}_cli"
     state: absent
     networks:
       - "{{swarm_network}}"
+    loop: "{{ peerservices }}"
     
 - name: Create CLI assets folders in hlft-store
   become: yes
   file: 
-    path: "/root/hlft-store/peer_cli"
+    path: "/root/hlft-store/{{item}}_cli"
     state: directory
     mode: 0750              
+  loop: "{{ peerservices }}"
 
 # Copy the relevent scripts
 - name: Copy scripts
   become: yes
   copy:
     src: "cli.sh"
-    dest: "/root/hlft-store/peer_cli/cli.sh"
+    dest: "/root/hlft-store/{{item}}_cli/cli.sh"
     mode: "0500"
     force: yes 
+  loop: "{{ peerservices }}"
 
   # Create & Start service for CLI 
 - name: Fabric Service - {{ item.name }}
   become: yes
   docker_swarm_service:
-    name: "peer_cli"
-    hostname: "peer_cli"
+    name: "{{item}}_cli"
+    hostname: "{{item}}_cli"
     networks:
       - "{{swarm_network}}"
     image: "{{cli.image}}:{{cli.tag}}"
     command: >
-      bash -c "/root/peer_cli/cli.sh;"
-    working_dir: /root/peer_cli
+      bash -c "/root/{{item}}_cli/cli.sh;"
+    working_dir: /root/{{item.name}}_cli
     mounts:      
       - source: "/root/hlft-store/peer_cli/"
         target: "/root/peer_cli"

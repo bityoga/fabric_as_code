@@ -3,8 +3,15 @@
   hosts: localhost
   gather_facts: no
   tasks:
+    # - debug:
+    #     msg: "[ IDX={{item.1.0}} - HOST_HOME={{item.0.path}} - FABRIC_CA_NAME={{item.0.name}} - FABRIC_CA_SECRET={{item.0.password}} - FABRIC_CA_PORT=7054 - CORE_PEER_LOCALMSPID={{org.name}}MSP - AGENT_HOST={{item.1.1.name}} - AGENT_SECRET={{item.1.1.password}} - AGENT_TYPE={{item.1.1.type}} ]"
+    #   loop: "{{caservices | product( (peerservices + ordererservices) |enumerate) | list}}"
     - debug:
-        msg: "[ IDX={{item.1.0}} - HOST_HOME={{item.0.path}} - FABRIC_CA_NAME={{item.0.name}} - FABRIC_CA_SECRET={{item.0.password}} - FABRIC_CA_PORT=7054 - CORE_PEER_LOCALMSPID={{org.name}}MSP - AGENT_HOST={{item.1.1.name}} - AGENT_SECRET={{item.1.1.password}} - AGENT_TYPE={{item.1.1.type}} ]"
-      loop: "{{caservices | product(peerservices|enumerate) | list}}"
-      
-  
+        msg: "{{ item.0.name }} - {{item.1}} - {{item.2}}"
+      with_nested:        
+      - "{{ordererservices}}"
+      - [ ["{{orgca.name}}/admin/msp/signcerts/cert.pem", "admincerts"], 
+          ["{{orgca.name}}/ca-cert.pem", "cacerts"],
+          ["{{tlsca.name}}/ca-cert.pem", "tlscacerts"]
+        ]
+

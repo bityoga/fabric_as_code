@@ -8,8 +8,7 @@
     state: absent
     networks:
       - "{{swarm_network}}"
-  loop: 
-    - "{{ orderer }}"    
+  loop: "{{ ordererservices }}"    
 
   # We create relevent folder structure in the mount locally for the service 
 - name: Clean Orderer folders in hlft-store, if they exists
@@ -17,8 +16,7 @@
   file: 
     path: "/root/hlft-store/{{item.name}}"
     state: absent
-  loop:        
-    - "{{ orderer }}"
+  loop: "{{ ordererservices }}"
     
 - name: Create Orderer CA Server folders in hlft-store
   become: yes
@@ -26,8 +24,7 @@
     path: "/root/hlft-store/{{item.name}}"
     state: directory
     mode: 0750
-  loop:
-    - "{{ orderer }}" 
+  loop: "{{ ordererservices }}" 
 
 - name: Copy MSP folder
   become: yes
@@ -37,8 +34,7 @@
     mode: '0750'
     remote_src: yes
     force: yes
-  loop: 
-    - "{{ orderer }}"   
+  loop: "{{ ordererservices }}"   
 
 - name: Copy TLSMSP folder
   become: yes
@@ -48,8 +44,7 @@
     mode: '0750'
     remote_src: yes
     force: yes
-  loop: 
-    - "{{ orderer }}"
+  loop: "{{ ordererservices }}"
 
   # Create & Start service orderer with RAFT enabled
 - name: Start the fabric orderer
@@ -95,6 +90,5 @@
       constraints:
         - node.role == worker      
     force_update: yes
-  loop: 
-    - "{{ orderer }}"
+  loop: "{{ ordererservices }}"
   when: item.switch == "on"

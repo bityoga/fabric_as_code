@@ -8,9 +8,7 @@
     state: absent
     networks:
       - "{{swarm_network}}"
-  loop: 
-    - "{{ peer1 }}"    
-    - "{{ peer2 }}"        
+  loop: "{{ peerservices }}"        
 
   # We create relevent folder structure in the mount locally for services
 - name: Clean Peer folders in hlft-store, if they exists
@@ -18,9 +16,7 @@
   file: 
     path: "/root/hlft-store/{{item.name}}"
     state: absent
-  loop:        
-    - "{{ peer1 }}"    
-    - "{{ peer2 }}"     
+  loop: "{{ peerservices }}"        
 
 - name: Create Peer Service folders in hlft-store
   become: yes
@@ -28,9 +24,7 @@
     path: "/root/hlft-store/{{item.name}}"
     state: directory
     mode: 0750
-  loop:
-    - "{{ peer1 }}"    
-    - "{{ peer2 }}"     
+  loop: "{{ peerservices }}"        
 
 - name: Copy MSP folder
   become: yes
@@ -40,9 +34,7 @@
     mode: '0750'
     remote_src: yes
     force: yes
-  loop: 
-    - "{{ peer1 }}"
-    - "{{ peer2 }}"    
+  loop: "{{ peerservices }}"    
 
 - name: Copy TLSMSP folder
   become: yes
@@ -52,9 +44,7 @@
     mode: '0750'
     remote_src: yes
     force: yes
-  loop: 
-    - "{{ peer1 }}"
-    - "{{ peer2 }}"
+  loop: "{{ peerservices }}"    
 
   # Create & Start services for Peers 
 - name: Fabric Service - {{ item }}
@@ -105,7 +95,5 @@
       constraints:
         - node.role == worker      
     force_update: yes
-  loop: 
-    - "{{ peer1 }}"    
-    - "{{ peer2 }}"    
+  loop: "{{ peerservices }}"        
   when: item.switch == "on"
