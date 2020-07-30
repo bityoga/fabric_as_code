@@ -82,21 +82,21 @@ orgca: { switch: "on", image: "hyperledger/fabric-ca", tag: "1.4", replicas: -1,
 orderer: { switch: "on", image: "hyperledger/fabric-orderer", tag: "2.1", replicas: -1, port: 8053,
 caname: "{{orgca.name}}", anchorpeer: "{{peer1.name}}", anchorport: "{{peer1.port}}",
 path: "/root/{{orderer_user}}", type: "solo",
-name: "{{orderer_user}}", password: "{{orderer_password}}"
+name: "{{orderer_user}}", password: "{{orderer_password}}", type: "orderer"
 }
 
 ######################################### Peers #############################################
 peer1: { switch: "on", image: "hyperledger/fabric-peer", tag: "2.1", replicas: -1, port: 8054, 
 caname: "{{orgca.name}}", path: "/root/{{peer1_user}}", bootstrap: "",
 dbtype: "goleveldb",
-name: "{{peer1_user}}", password: "{{peer1_password}}",
+name: "{{peer1_user}}", password: "{{peer1_password}}", type: "peer",
 leader: "{peer1_user}}"
 }
 
 peer2: { switch: "on", image: "hyperledger/fabric-peer", tag: "2.1", replicas: -1, port: 8055,
 caname: "{{orgca.name}}", path: "/root/{{peer2_user}}", bootstrap: "{{peer1.name}}:7051",
 dbtype: "CouchDB",
-name: "{{peer2_user}}", password: "{{peer2_password}}",
+name: "{{peer2_user}}", password: "{{peer2_password}}", type: "peer",
 leader: "{{peer1_user}}"
 }
 

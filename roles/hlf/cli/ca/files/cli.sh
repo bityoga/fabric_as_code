@@ -12,15 +12,15 @@ if [$idx == 0]; then
   
   echo "Enroll CA admin for $FABRIC_CA_NAME"
   fabric-ca-client enroll -d -u https://ca-admin-$FABRIC_CA_NAME:$FABRIC_CA_SECRET@$FABRIC_CA_NAME:$FABRIC_CA_PORT
-  
-  echo "Regsiter orderer at $FABRIC_CA_NAME"
-  fabric-ca-client register -d --id.name $PEER1_HOST --id.secret $PEER1_SECRET --id.type peer -u https://$FABRIC_CA_NAME:$FABRIC_CA_PORT
+
+elif [ $idx != 0 && $type == $tlsca ]; then     
+  echo "Regsiter agent $AGENT_HOST of type $AGENT_TYPE at $FABRIC_CA_NAME"
+  fabric-ca-client register -d --id.name $AGENT_HOST --id.secret $AGENT_SECRET --id.type $AGENT_TYPE -u https://$FABRIC_CA_NAME:$FABRIC_CA_PORT
   
   echo "Regsiter peers at $FABRIC_CA_NAME"
   fabric-ca-client register -d --id.name $PEER2_HOST --id.secret $PEER2_SECRET --id.type peer -u https://$FABRIC_CA_NAME:$FABRIC_CA_PORT
-  fabric-ca-client register -d --id.name $ORDERER_HOST --id.secret $ORDERER_SECRET --id.type orderer -u https://$FABRIC_CA_NAME:$FABRIC_CA_PORT
+  fabric-ca-client register -d --id.name $ORDERER_HOST --id.secret $ORDERER_SECRET --id.type peer -u https://$FABRIC_CA_NAME:$FABRIC_CA_PORT
 
-elif [ $idx != 0 && $type == $tlsca ]; then     
   export FABRIC_CA_CLIENT_MSPDIR=tls-msp
   # Enroll Agent
   export FABRIC_CA_CLIENT_HOME=$HOST_HOME/peer1
