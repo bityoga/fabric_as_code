@@ -1,94 +1,89 @@
 # ---
   
 # Stop all Orderering services
-- name: Stop Orderer Service - {{ item.name }}
+- name: Stop Orderer Service - {{ orderer.name }}
   become: yes
   docker_swarm_service:   
-    name: "{{ item.name }}"
+    name: "{{ orderer.name }}"
     state: absent
     networks:
-      - "{{swarm_network}}"
-  loop: "{{ ordererservices }}"    
+      - "{{swarm_network}}"  
 
   # We create relevent folder structure in the mount locally for the service 
 - name: Clean Orderer folders in hlft-store, if they exists
   become: yes  
   file: 
-    path: "/root/hlft-store/{{item.name}}"
+    path: "/root/hlft-store/{{orderer.name}}"
     state: absent
-  loop: "{{ ordererservices }}"
+  
     
 - name: Create Orderer CA Server folders in hlft-store
   become: yes
   file: 
-    path: "/root/hlft-store/{{item.name}}"
+    path: "/root/hlft-store/{{orderer.name}}"
     state: directory
     mode: 0750
-  loop: "{{ ordererservices }}" 
 
 - name: Copy MSP folder
   become: yes
   copy:
-    src: "/root/hlft-store/{{orgca.name}}/{{item.name}}/msp/"
-    dest: "/root/hlft-store/{{item.name}}/msp"
+    src: "/root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp/"
+    dest: "/root/hlft-store/{{orderer.name}}/msp"
     mode: '0750'
     remote_src: yes
-    force: yes
-  loop: "{{ ordererservices }}"   
+    force: yes  
 
 - name: Copy TLSMSP folder
   become: yes
   copy:
-    src: "/root/hlft-store/{{tlsca.name}}/{{item.name}}/tls-msp/"
-    dest: "/root/hlft-store/{{item.name}}/tls-msp"
+    src: "/root/hlft-store/{{tlsca.name}}/{{orderer.name}}/tls-msp/"
+    dest: "/root/hlft-store/{{orderer.name}}/tls-msp"
     mode: '0750'
     remote_src: yes
-    force: yes
-  loop: "{{ ordererservices }}"
+    force: yes  
 
   # Create & Start service orderer with RAFT enabled
 - name: Start the fabric orderer
   become: yes
   docker_swarm_service:
-    name: "{{ item.name }}"
-    hostname: "{{ item.name }}"
+    name: "{{ orderer.name }}"
+    hostname: "{{ orderer.name }}"
     networks:
       - "{{swarm_network}}"
-    image: "{{item.image}}:{{item.tag}}"
+    image: "{{orderer.image}}:{{orderer.tag}}"
     mode: replicated
-    replicas: "{{item.replicas}}"    
+    replicas: "{{orderer.replicas}}"    
     mounts:
-      - source: "/root/hlft-store/{{item.name}}"
-        target: "{{item.path}}"
+      - source: "/root/hlft-store/{{orderer.name}}"
+        target: "{{orderer.path}}"
         type: bind 
-      - source: "/root/hlft-store/{{item.name}}_cli/genesis.block"
-        target: "{{item.path}}/genesis.block"
+      - source: "/root/hlft-store/{{orderer.name}}_cli/genesis.block"
+        target: "{{orderer.path}}/genesis.block"
         type: bind      
     publish:
-      - published_port: "{{item.port}}"
+      - published_port: "{{orderer.port}}"
         target_port: "7050"
         protocol: "tcp"     
     env: 
-      - "ORDERER_HOME={{item.path}}"
-      - "ORDERER_HOST={{item.name}}"
+      - "ORDERER_HOME={{orderer.path}}"
+      - "ORDERER_HOST={{orderer.name}}"
       - "ORDERER_GENERAL_LEDGERTYPE=file"
       - "ORDERER_GENERAL_LISTENADDRESS=0.0.0.0"
       - "ORDERER_GENERAL_LISTENPORT=7050"
       - "ORDERER_GENERAL_GENESISMETHOD=file"
-      - "ORDERER_GENERAL_GENESISFILE={{item.path}}/genesis.block"
+      - "ORDERER_GENERAL_GENESISFILE={{orderer.path}}/genesis.block"
       - "ORDERER_GENERAL_LOCALMSPID={{org.name}}MSP"
-      - "ORDERER_GENERAL_LOCALMSPDIR={{item.path}}/msp"
+      - "ORDERER_GENERAL_LOCALMSPDIR={{orderer.path}}/msp"
       - "ORDERER_GENERAL_TLS_ENABLED=true"
-      - "ORDERER_GENERAL_TLS_CERTIFICATE={{item.path}}/tls-msp/signcerts/cert.pem"
-      - "ORDERER_GENERAL_TLS_PRIVATEKEY={{item.path}}/tls-msp/keystore/key.pem"
-      - "ORDERER_GENERAL_TLS_ROOTCAS=[{{item.path}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem]"
+      - "ORDERER_GENERAL_TLS_CERTIFICATE={{orderer.path}}/tls-msp/signcerts/cert.pem"
+      - "ORDERER_GENERAL_TLS_PRIVATEKEY={{orderer.path}}/tls-msp/keystore/key.pem"
+      - "ORDERER_GENERAL_TLS_ROOTCAS=[{{orderer.path}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem]"
       - "ORDERER_GENERAL_LOGLEVEL=debug"
       - "ORDERER_DEBUG_BROADCASTTRACEDIR=data/logs"
       - "CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE={{swarm_network}}"
-    working_dir: "{{item.path}}"
+    working_dir: "{{orderer.path}}"
     placement:      
       constraints:
         - node.role == worker      
-    force_update: yes
-  loop: "{{ ordererservices }}"
+    force_update: yes  
   when: item.switch == "on"

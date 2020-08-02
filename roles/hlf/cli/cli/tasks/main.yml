@@ -1,20 +1,6 @@
 # ---
 
 # HLF CLI Service
-  
-  # Stop all Services services
-- name: Stop all CLI Services
-  become: yes
-  docker_swarm_service:   
-    name: "{{item}}"
-    state: absent
-    networks:
-      - "{{swarm_network}}"
-  loop:
-    - "peer_cli"
-    - "orderer_cli"
-    - "tlsca_cli"
-    - "orgca_cli"
 
 - name: Create chaincodes folders in hlft-store
   become: yes
@@ -55,13 +41,13 @@
       - source: "/root/hlft-store/{{orderer.name}}/"
         target: "{{orderer.path}}"
         type: bind 
-      - source: "/root/hlft-store/{{peer1.name}}/"
-        target: "{{peer1.path}}"
-        type: bind 
-      - source: "/root/hlft-store/{{peer2.name}}/"
-        target: "{{peer2.path}}"
-        type: bind   
-      - source: "/root/hlft-store/{{orgca.name}}/admin/"
+      # - source: "/root/hlft-store/{{peer1.name}}/"
+      #   target: "{{peer1.path}}"
+      #   type: bind 
+      # - source: "/root/hlft-store/{{peer2.name}}/"
+      #   target: "{{peer2.path}}"
+      #   type: bind   
+      - source: "/root/hlft-store/{{orgca.name}}/{{admin_user}}/"
         target: "/root/admin"
         type: bind
     env: 

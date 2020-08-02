@@ -7,9 +7,9 @@
 #                                                                                         #
 ###########################################################################################
 # gluster volume
-gluster_cluster_volume: "gv0"
+gluster_cluster_volume: "gfs0"
 # gluster cluster ips
-gluster_cluster_host0: "64.225.79.131"
+gluster_cluster_host0: "139.59.136.115"
 glusterd_version: '7'
 
 ###########################################################################################
@@ -39,7 +39,7 @@ orderer_user: "orderer"
 orderer_password: "ordererpw"
 
 peer1_user: "peer1"
-peer1_password: "peer2pw"
+peer1_password: "peer1pw"
 
 peer2_user: "peer2"
 peer2_password: "peer2pw"
@@ -71,13 +71,13 @@ swarm_network: "hlfnet"
 tlsca: { switch: "on", image: "hyperledger/fabric-ca", tag: "1.4", replicas: -1, port: 8081,
  path: "/root/{{tlsca_user}}",
  db: "{{sqlite}}",
- name: "{{tlsca_user}}", password: "{{tlsca_password}}", type="tls"
+ name: "{{tlsca_user}}", password: "{{tlsca_password}}", type: "tls"
 }
 
 orgca: { switch: "on", image: "hyperledger/fabric-ca", tag: "1.4", replicas: -1, port: 8052,
  path: "/root/{{orgca_user}}",
  db: "{{sqlite}}",
- name: "{{orgca_user}}", password: "{{orgca_password}}", type="org"
+ name: "{{orgca_user}}", password: "{{orgca_password}}", type: "org"
  }
 
 
@@ -167,7 +167,7 @@ portainer_agent : {
 
 services:
   - "{{caservices}}"
-  - "{{ordererservices}}"
+  - "{{orderer}}"
   - "{{peerservices}}"
   - "{{explorerservices}}"
   - "{{vizservices}}"
@@ -179,9 +179,6 @@ caservices:
 peerservices:
   - "{{peer1}}"
   - "{{peer2}}"
-
-ordererservices:
-  - "{{orderer}}"
 
 explorerservices:
   - "{{hlf_explorer_db}}"

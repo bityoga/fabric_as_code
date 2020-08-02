@@ -6,7 +6,7 @@
 - name: Stop CLI Service
   become: yes
   docker_swarm_service:   
-    name: "{{item}}_cli"
+    name: "{{item.name}}_cli"
     state: absent
     networks:
       - "{{swarm_network}}"
@@ -15,7 +15,7 @@
 - name: Create CLI assets folders in hlft-store
   become: yes
   file: 
-    path: "/root/hlft-store/{{item}}_cli"
+    path: "/root/hlft-store/{{item.name}}_cli"
     state: directory
     mode: 0750              
   loop: "{{ peerservices }}"
@@ -25,7 +25,7 @@
   become: yes
   copy:
     src: "cli.sh"
-    dest: "/root/hlft-store/{{item}}_cli/cli.sh"
+    dest: "/root/hlft-store/{{item.name}}_cli/cli.sh"
     mode: "0500"
     force: yes 
   loop: "{{ peerservices }}"
@@ -34,42 +34,43 @@
 - name: Fabric Service - {{ item.name }}
   become: yes
   docker_swarm_service:
-    name: "{{item}}_cli"
-    hostname: "{{item}}_cli"
+    name: "{{item.name}}_cli"
+    hostname: "{{item.name}}_cli"
     networks:
       - "{{swarm_network}}"
     image: "{{cli.image}}:{{cli.tag}}"
     command: >
-      bash -c "/root/{{item}}_cli/cli.sh;"
+      bash -c "/root/{{item.name}}_cli/cli.sh;"
     working_dir: /root/{{item.name}}_cli
     mounts:      
-      - source: "/root/hlft-store/peer_cli/"
-        target: "/root/peer_cli"
+      - source: "/root/hlft-store/{{item.name}}_cli/"
+        target: "/root/{{item.name}}"
         type: bind 
       - source: "/root/hlft-store/orderer_cli/"
-        target: "/root/peer_cli/artifacts"
+        target: "/root/{{item.name}}_cli/artifacts"
         type: bind
-      - source: "/root/hlft-store/{{peer1.name}}/"
-        target: "{{peer1.path}}"
-        type: bind 
-      - source: "/root/hlft-store/{{peer2.name}}/"
-        target: "{{peer2.path}}"
-        type: bind   
-      - source: "/root/hlft-store/{{orgca.name}}/admin/"
-        target: "/root/admin"
+      - source: "/root/hlft-store/{{item.name}}/"
+        target: "{{item.path}}"
+        type: bind       
+      - source: "/root/hlft-store/{{orgca.name}}/{{admin_user}}/"
+        target: "/root/{{admin_user}}"
         type: bind
     env: 
+      - "IDX={{idx}}"
       - "GOPATH=/opt/gopath"
       - "CORE_VM_ENDPOINT=unix:///var/run/docker.sock"
       - "FABRIC_LOGGING_SPEC=DEBUG"
       - "CORE_PEER_TLS_ENABLED=true"  
       - "CORE_PEER_LOCALMSPID={{org.name}}MSP"    
-      - "ORDERER_HOST={{orderer.name}}"
-      - "PEER1_HOST={{peer1.name}}"
-      - "PEER2_HOST={{peer2.name}}"
       - "TLSCA_HOST={{tlsca.name}}"
+      - "ORDERER_HOST={{orderer.name}}"
+      - "AGENT_HOST={{item.name}}" 
+      - "ADMIN_USER={{admin_user}}"           
     placement:      
       constraints:
         - node.role == worker      
     force_update: yes    
+    loop: "{{ peerservices }}"
+    loop_control:
+      index_var: idx
   when: cli.switch == "on"
