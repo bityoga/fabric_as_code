@@ -45,7 +45,7 @@
     dest: "/root/hlft-store/{{orderer.name}}_cli/orgMSP/{{item[1]}}"
     remote_src: yes
   loop:              
-    - ["{{orgca.name}}/admin/msp/signcerts/cert.pem", "admincerts"]
+    - ["{{orgca.name}}/{{admin_user}}/msp/signcerts/cert.pem", "admincerts"]
     - ["{{orgca.name}}/ca-cert.pem", "cacerts"]
     - ["{{tlsca.name}}/ca-cert.pem", "tlscacerts"]        
     # - ["/root/hlft-store/{{orgca.name}}/admin/msp/signcerts/cert.pem" ]

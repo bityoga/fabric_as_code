@@ -78,6 +78,9 @@
       - "ORDERER_GENERAL_TLS_CERTIFICATE={{orderer.path}}/tls-msp/signcerts/cert.pem"
       - "ORDERER_GENERAL_TLS_PRIVATEKEY={{orderer.path}}/tls-msp/keystore/key.pem"
       - "ORDERER_GENERAL_TLS_ROOTCAS=[{{orderer.path}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem]"
+      - "ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE={{orderer.path}}/tls-msp/signcerts/cert.pem"
+      - "ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY={{orderer.path}}/tls-msp/keystore/key.pem"
+      - "ORDERER_GENERAL_CLUSTER_ROOTCAS=[{{orderer.path}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem]"
       - "ORDERER_GENERAL_LOGLEVEL=debug"
       - "ORDERER_DEBUG_BROADCASTTRACEDIR=data/logs"
       - "CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE={{swarm_network}}"
@@ -86,4 +89,4 @@
       constraints:
         - node.role == worker      
     force_update: yes  
-  when: item.switch == "on"
+  when: orderer.switch == "on"

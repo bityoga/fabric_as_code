@@ -246,7 +246,7 @@ Channel: &ChannelDefaults
 ################################################################################
 Profiles:
 
-    OrdererGenesis:
+    SysChannel:
         <<: *ChannelDefaults
         Orderer:
             <<: *OrdererDefaults
@@ -257,8 +257,8 @@ Profiles:
         Consortiums:
             HLFConsortium:
                 Organizations:
-                    - *{{org.name}}                    
-    OrgChannel:
+
+    AppChannel:
         Consortium: HLFConsortium
         <<: *ChannelDefaults
         Application:

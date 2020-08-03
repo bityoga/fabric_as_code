@@ -10,7 +10,7 @@
     state: absent
     networks:
       - "{{swarm_network}}"
-    loop: "{{ peerservices }}"
+  loop: "{{ peerservices }}"
     
 - name: Create CLI assets folders in hlft-store
   become: yes
@@ -44,7 +44,7 @@
     working_dir: /root/{{item.name}}_cli
     mounts:      
       - source: "/root/hlft-store/{{item.name}}_cli/"
-        target: "/root/{{item.name}}"
+        target: "/root/{{item.name}}_cli"
         type: bind 
       - source: "/root/hlft-store/orderer_cli/"
         target: "/root/{{item.name}}_cli/artifacts"
@@ -70,7 +70,7 @@
       constraints:
         - node.role == worker      
     force_update: yes    
-    loop: "{{ peerservices }}"
-    loop_control:
-      index_var: idx
+  loop: "{{ peerservices }}"
+  loop_control:
+    index_var: idx
   when: cli.switch == "on"
