@@ -29,27 +29,9 @@
       bash -c "while true; do sleep 2; done;"
     working_dir: /root/CLI
     mounts:     
-      - source: "/root/hlft-store/chaincodes"
-        target: "/root/CLI/chaincodes"
-        type: bind 
-      - source: "/root/hlft-store/{{tlsca.name}}/"
-        target: "{{tlsca.path}}"
-        type: bind 
-      - source: "/root/hlft-store/{{orgca.name}}/"
-        target: "{{orgca.path}}"
-        type: bind 
-      - source: "/root/hlft-store/{{orderer.name}}/"
-        target: "{{orderer.path}}"
-        type: bind 
-      # - source: "/root/hlft-store/{{peer1.name}}/"
-      #   target: "{{peer1.path}}"
-      #   type: bind 
-      # - source: "/root/hlft-store/{{peer2.name}}/"
-      #   target: "{{peer2.path}}"
-      #   type: bind   
-      - source: "/root/hlft-store/{{orgca.name}}/{{admin_user}}/"
-        target: "/root/admin"
-        type: bind
+      - source: "/root/hlft-store"
+        target: "/root/CLI"
+        type: bind      
     env: 
       - "GOPATH=/opt/gopath"
       - "CORE_VM_ENDPOINT=unix:///var/run/docker.sock"
