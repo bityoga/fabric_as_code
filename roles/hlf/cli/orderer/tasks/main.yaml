@@ -11,51 +11,12 @@
     networks:
       - "{{swarm_network}}"  
 
-# We create relevent folder structure in the mount locally for the service
-- name: Clean OrdererCLI folders in hlft-store, if they exists
-  become: yes
-  file:
-    path: "/root/hlft-store/{{orderer.name}}_cli"
-    state: absent  
-
-- name: Create Orderer CLI Server folders in hlft-store
-  become: yes
-  file:
-    path: "/root/hlft-store/{{orderer.name}}_cli"
-    state: directory
-    mode: 0750
-
-- name: Create ORG MSP structure folder in hlft-store
-  become: yes
-  file:
-    path: "/root/hlft-store/{{orderer.name}}_cli/{{item}}"
-    state: directory
-    mode: 0750
-  loop:    
-    - "orgMSP"
-    - "orgMSP/admincerts"
-    - "orgMSP/cacerts"
-    - "orgMSP/tlscacerts"
-    - "orgMSP/users"
-
-- name: Populate the orgMSP
-  become: yes
-  copy:
-    src: "/root/hlft-store/{{item[0]}}"
-    dest: "/root/hlft-store/{{orderer.name}}_cli/orgMSP/{{item[1]}}"
-    remote_src: yes
-  loop:              
-    - ["{{orgca.name}}/{{admin_user}}/msp/signcerts/cert.pem", "admincerts"]
-    - ["{{orgca.name}}/ca-cert.pem", "cacerts"]
-    - ["{{tlsca.name}}/ca-cert.pem", "tlscacerts"]        
-    # - ["/root/hlft-store/{{orgca.name}}/admin/msp/signcerts/cert.pem" ]
-
 # Copy the relevent scripts
 - name: Copy scripts
   become: yes
   copy:
     src: "cli.sh"
-    dest: "/root/hlft-store/{{orderer.name}}_cli/cli.sh"
+    dest: "/root/hlft-store/{{admin_user}}/tx_gen.sh"
     mode: "0500"
     force: yes  
 
@@ -66,7 +27,7 @@
     configtx: "{{orderer}}"
   template:
     src: "configtx.yaml.j2"
-    dest: "/root/hlft-store/{{orderer.name}}_cli/configtx.yaml"
+    dest: "/root/hlft-store/{{admin_user}}/configtx.yaml"
     mode: 0660
     force: yes  
 
@@ -82,18 +43,18 @@
     mode: replicated
     replicas: "-1"
     command: >
-      bash -c "{{orderer.path}}_cli/cli.sh;"
+      bash -c "/root/{{admin_user}}/tx_gen.sh;"
     mounts:
-      - source: "/root/hlft-store/{{orderer.name}}_cli/"
-        target: "{{orderer.path}}_cli"
-        type: bind
+      - source: "/root/hlft-store/{{admin_user}}/"
+        target: "/root/{{admin_user}}"
+        type: bind      
       - source: "/root/hlft-store/{{orgca.name}}/{{orderer.name}}/"
         target: "{{orderer.path}}"
         type: bind
     env:
       - "HOST_HOME={{orderer.path}}"
       - "ORG={{org.name}}"
-    working_dir: "{{orderer.path}}_cli"
+    working_dir: "/root/{{admin_user}}"
     placement:
       constraints:
         - node.role == worker
