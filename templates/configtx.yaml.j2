@@ -16,7 +16,7 @@ Organizations:
 
     # SampleOrg defines an MSP using the sampleconfig.  It should never be used
     # in production but may be used as a template for other definitions
-    - &{{org.name}}
+    - &org1{{org.name}}
         # DefaultOrg defines the organization which is used in the sampleconfig
         # of the fabric.git development environment
         Name: {{org.name}}
@@ -251,19 +251,25 @@ Profiles:
         Orderer:
             <<: *OrdererDefaults
             Organizations:
-                - *{{org.name}}
+                - *org1{{org.name}}
             Capabilities:
                 <<: *OrdererCapabilities
+        # which organizations this orderer is going to serve 
+        # because one orderer can serve more than one organization
         Consortiums:
             HLFConsortium:
                 Organizations:
+                  - *org1{{org.name}}
 
     AppChannel:
+        # each organization can join more than one channel so we have to 
+        # provide the channel Consortium as well to let the channel know 
+        # who are our joining organizations to serve.
         Consortium: HLFConsortium
         <<: *ChannelDefaults
         Application:
             <<: *ApplicationDefaults
             Organizations:
-                - *{{org.name}}                
+                - *org1{{org.name}}                
             Capabilities:
                 <<: *ApplicationCapabilities

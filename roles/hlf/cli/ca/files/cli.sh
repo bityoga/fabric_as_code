@@ -26,10 +26,17 @@ if (($IDX == 0)); then
   export FABRIC_CA_CLIENT_HOME=$HOST_HOME/$ADMIN_USER  
   fabric-ca-client enroll -d -u https://$ADMIN_USER:$ADMIN_SECRET@$FABRIC_CA_NAME:$FABRIC_CA_PORT
 
-  # Delay the registration and enrollment of agents, by few seconds so that the registration and enrollment of admins are done first.
-  sleep 5s
+  # Transfer admincerts for admin
+  mkdir $HOST_HOME/$ADMIN_USER/msp/admincerts    
+  # CA root is its admin
+  cp $HOST_HOME/caadmin/msp/signcerts/cert.pem $HOST_HOME/$ADMIN_USER/msp/admincerts/ca-admin-$FABRIC_CA_NAME-cert.pem  
+  # Make itself admin as well
+  cp $HOST_HOME/$FABRIC_CA_NAME/msp/signcerts/cert.pem $HOST_HOME/$ADMIN_USER/msp/admincerts/${ADMIN_USER}-cert.pem  
 
 fi
+
+  # Delay the registration and enrollment of agents, by few seconds so that the registration and enrollment of admins are done first.
+  sleep 5s
 
 if [ $type == $tlsca ]; then      
   # We make sure that we are pointed to the admin user, prior to registering agents
@@ -60,6 +67,7 @@ elif [ $type == $orgca ]; then
 
   # Transfer admincerts
   mkdir $HOST_HOME/$AGENT_HOST/msp/admincerts    
+  # Make the admin user as admin for the agents
   cp $HOST_HOME/$ADMIN_USER/msp/signcerts/cert.pem $HOST_HOME/$AGENT_HOST/msp/admincerts/admin-cert.pem  
 
 else
