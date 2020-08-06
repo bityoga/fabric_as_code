@@ -46,9 +46,13 @@
       - "CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE={{swarm_network}}"
       - "FABRIC_LOGGING_SPEC=debug"
       - "CORE_PEER_TLS_ENABLED=true"
-      - "CORE_PEER_TLS_CERT_FILE={{item.path}}/tls-msp/signcerts/cert.pem"
-      - "CORE_PEER_TLS_KEY_FILE={{item.path}}/tls-msp/keystore/key.pem"
-      - "CORE_PEER_TLS_ROOTCERT_FILE={{item.path}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem"
+      - "CORE_PEER_TLS_CERT_FILE={{item.path}}/tls-msp/signcerts/cert.pem" #fully qualified path of the server certificate
+      - "CORE_PEER_TLS_KEY_FILE={{item.path}}/tls-msp/keystore/key.pem" #fully qualified path of the server private key
+      - "CORE_PEER_TLS_ROOTCERT_FILE={{item.path}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem" #fully qualified path of the CA chain file
+      - "CORE_PEER_TLS_CLIENTAUTHREQUIRED=false"
+      # - "CORE_PEER_TLS_CLIENTROOTCAS_FILES=tba" #fully qualified path of the CA chain file
+      # - "CORE_PEER_TLS_CLIENTCERT_FILE=tba" #fully qualified path of the client certificate
+      # - "CORE_PEER_TLS_CLIENTKEY_FILE=tba" #fully qualified path of the client private key      
       - "CORE_PEER_GOSSIP_USELEADERELECTION=true"
       - "CORE_PEER_GOSSIP_ORGLEADER=false"
       - "CORE_PEER_GOSSIP_EXTERNALENDPOINT={{item.name}}:7051"

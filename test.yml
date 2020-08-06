@@ -2,10 +2,13 @@
 - name: Test Playbook
   hosts: localhost
   gather_facts: no
-  tasks:
+  tasks:      
+    - name: Get IP addresses as a list for all swarm manager nodes
+      vars:
+        _swarm_manager_ip_list: "{{ groups['swarm_managers'] | map('extract', hostvars, ['ansible_host']) | list  | join(':{{orderer.port}},')  }}"            
+        __swarm_manager_ip_list: "{{_swarm_manager_ip_list}}:{{orderer.port}}"
+      set_fact:      
+        swarm_manager_ip_list: "{{ __swarm_manager_ip_list.split(',') }}"
+    
     - debug:
-        #msg: "[ IDX={{item.1.0}} - HOST_HOME={{item.0.path}} - FABRIC_CA_NAME={{item.0.name}} - FABRIC_CA_SECRET={{item.0.password}} - FABRIC_CA_PORT=7054 - CORE_PEER_LOCALMSPID={{org.name}}MSP - AGENT_HOST={{item.1.1.name}} - AGENT_SECRET={{item.1.1.password}} - AGENT_TYPE={{item.1.1.type}} ]"
-        msg: "FABRIC_CA_NAME={{item.0.name}}, AGENT_HOST={{item.1.1.name}}"
-      loop: "{{caservices | product((peerservices + [orderer]) | enumerate) | list}}"
-      #loop: "{{caservices | product( (peerservices + [orderer]) |enumerate) | list}}"
-      when: item.0.switch == "on"
+        msg: "{{swarm_manager_ip_list}}"

@@ -62,8 +62,7 @@ Organizations:
 
         # OrdererEndpoints is a list of all orderers this org runs which clients
         # and peers may to connect to to push transactions and receive blocks respectively.
-        OrdererEndpoints:
-            - {{orderer.name}}:7050
+        OrdererEndpoints: {{swarm_manager_ip_list}}            
 
         # AnchorPeers defines the location of peers which can be used for
         # cross-org gossip communication. Note, this value is only encoded in

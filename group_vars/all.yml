@@ -178,7 +178,7 @@ caservices:
 
 peerservices:
   - "{{peer1}}"
-  #- "{{peer2}}"
+  - "{{peer2}}"
 
 explorerservices:
   - "{{hlf_explorer_db}}"
