@@ -20,7 +20,7 @@ Organizations:
         # Name is the key by which this org will be referenced in channel
         # configuration transactions.
         # Name can include alphanumeric characters as well as dots and dashes.
-        Name: {{org.name}}
+        Name: {{org.name}}MSP
 
         # SkipAsForeign can be set to true for org definitions which are to be
         # inherited from the orderer system channel during channel creation.  This
@@ -35,7 +35,7 @@ Organizations:
         ID: {{org.name}}MSP
 
         # MSPDir is the filesystem path which contains the MSP configuration.
-        MSPDir: /root/{{org.name}}MSP
+        MSPDir: {{orderer.path}}/msp
 
         # Policies defines the set of policies at this level of the config tree
         # For organization policies, their canonical path is usually
@@ -322,8 +322,8 @@ Orderer: &OrdererDefaults
         Consenters:
             - Host: {{orderer.name}}
               Port: {{orderer.port}}
-              ClientTLSCert: /root/{{org.name}}MSP/tlscacerts/{{tlsca.name}}-ca-cert.pem
-              ServerTLSCert: /root/{{org.name}}MSP/tlscacerts/{{tlsca.name}}-ca-cert.pem            
+              ClientTLSCert: {{orderer.path}}/tls-msp/signcerts/cert.pem
+              ServerTLSCert: {{orderer.path}}/tls-msp/signcerts/cert.pem            
 
         # Options to be specified for all the etcd/raft nodes. The values here
         # are the defaults for all new channels and can be modified on a
@@ -492,7 +492,7 @@ Profiles:
                       <<: *SampleOrgPolicies
                       Admins:
                           Type: Signature
-                          Rule: "OR('org1{{org.name}}.member')"
+                          Rule: "OR('{{org.name}}MSP.member')"
         Application:
             <<: *ApplicationDefaults
             Organizations:
@@ -501,7 +501,7 @@ Profiles:
                       <<: *SampleOrgPolicies
                       Admins:
                           Type: Signature
-                          Rule: "OR('org1{{org.name}}.member')"
+                          Rule: "OR('{{org.name}}MSP.member')"
         Consortiums:
             SampleConsortium:
                 Organizations:
@@ -510,7 +510,7 @@ Profiles:
                           <<: *SampleOrgPolicies
                           Admins:
                               Type: Signature
-                              Rule: "OR('org1{{org.name}}.member')"
+                              Rule: "OR('{{org.name}}MSP.member')"
 
     # SampleDevModeKafka defines a configuration that differs from the
     # SampleDevModeSolo one only in that it uses the Kafka-based orderer.
@@ -525,7 +525,7 @@ Profiles:
                       <<: *SampleOrgPolicies
                       Admins:
                           Type: Signature
-                          Rule: "OR('org1{{org.name}}.member')"
+                          Rule: "OR('{{org.name}}MSP.member')"
         Application:
             <<: *ApplicationDefaults
             Organizations:
@@ -534,7 +534,7 @@ Profiles:
                       <<: *SampleOrgPolicies
                       Admins:
                           Type: Signature
-                          Rule: "OR('org1{{org.name}}.member')"
+                          Rule: "OR('{{org.name}}MSP.member')"
         Consortiums:
             SampleConsortium:
                 Organizations:
@@ -543,7 +543,7 @@ Profiles:
                           <<: *SampleOrgPolicies
                           Admins:
                               Type: Signature
-                              Rule: "OR('org1{{org.name}}.member')"
+                              Rule: "OR('{{org.name}}MSP.member')"
 
     # SampleSingleMSPChannel defines a channel with only the sample org as a
     # member. It is designed to be used in conjunction with SampleSingleMSPSolo
@@ -571,7 +571,7 @@ Profiles:
                       <<: *SampleOrgPolicies
                       Admins:
                           Type: Signature
-                          Rule: "OR('org1{{org.name}}.member')"
+                          Rule: "OR('{{org.name}}MSP.member')"
         Application:
             <<: *ApplicationDefaults
             Organizations:
@@ -580,7 +580,7 @@ Profiles:
                       <<: *SampleOrgPolicies
                       Admins:
                           Type: Signature
-                          Rule: "OR('org1{{org.name}}.member')"
+                          Rule: "OR('{{org.name}}MSP.member')"
         Consortiums:
             SampleConsortium:
                 Organizations:
@@ -589,4 +589,4 @@ Profiles:
                           <<: *SampleOrgPolicies
                           Admins:
                               Type: Signature
-                              Rule: "OR('org1{{org.name}}.member')"
+                              Rule: "OR('{{org.name}}MSP.member')"

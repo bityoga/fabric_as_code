@@ -57,9 +57,12 @@
     command: >
       bash -c "/root/{{orderer.name}}_cli/cli.sh;"
     mounts:
-      - source: "/root/hlft-store/{{org.name}}MSP/"
-        target: "/root/{{org.name}}MSP"
-        type: bind 
+      - source: "/root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp"
+        target: "{{orderer.path}}/msp"
+        type: bind
+      - source: "/root/hlft-store/{{tlsca.name}}/{{orderer.name}}/tls-msp"
+        target: "{{orderer.path}}/tls-msp"
+        type: bind
       - source: "/root/hlft-store/{{orderer.name}}_cli/"
         target: "/root/{{orderer.name}}_cli"
         type: bind
