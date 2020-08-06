@@ -56,6 +56,7 @@
 - name: Fabric Service - {{ orderer.name }}
   become: yes
   docker_swarm_service:
+    restart_policy: "none"
     name: "{{ orderer.name }}_cli"
     hostname: "{{ orderer.name }}_cli"
     networks:
@@ -66,12 +67,19 @@
     command: >
       bash -c "/root/{{orderer.name}}_cli/cli.sh;"
     mounts:
+      # MSP folder for organization in configtx
       - source: "/root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp"
         target: "{{orderer.path}}/msp"
         type: bind
+      # CONCENTER client TLS CERT
       - source: "/root/hlft-store/{{tlsca.name}}/{{orderer.name}}/tls-msp"
         target: "{{orderer.path}}/tls-msp"
-        type: bind
+        type: bind 
+      # CONCENTER server TLS CERT
+      - source: "/root/hlft-store/{{tlsca.name}}/{{admin_user}}/msp/"
+        target: "/root/{{admin_user}}/tls-msp"
+        type: bind 
+      # CLI dir
       - source: "/root/hlft-store/{{orderer.name}}_cli/"
         target: "/root/{{orderer.name}}_cli"
         type: bind

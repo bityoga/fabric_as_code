@@ -26,7 +26,7 @@
       docker_swarm:
         shell: "docker node rm $(docker node list -q)"    
       ignore_errors: yes
-      when: "inventory_hostname in groups.swarm_manager_prime"
+      when: "inventory_hostname in groups.swarm_workers"
 
     - name: Remove swarm managers
       docker_swarm:

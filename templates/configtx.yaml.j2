@@ -322,8 +322,7 @@ Orderer: &OrdererDefaults
             - Host: {{orderer.name}}
               Port: {{orderer.port}}
               ClientTLSCert: {{orderer.path}}/tls-msp/signcerts/cert.pem
-              ServerTLSCert: {{orderer.path}}/tls-msp/signcerts/cert.pem            
-
+              ServerTLSCert: /root/{{admin_user}}/tls-msp/signcerts/cert.pem
         # Options to be specified for all the etcd/raft nodes. The values here
         # are the defaults for all new channels and can be modified on a
         # per-channel basis via configuration updates.

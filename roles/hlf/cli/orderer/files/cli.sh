@@ -3,6 +3,6 @@ configtxgen -configPath ${HOST_HOME} -channelID syschannel -profile SampleDevMod
 configtxgen -configPath ${HOST_HOME} -channelID appchannel -profile SampleSingleMSPChannel -outputCreateChannelTx ${HOST_HOME}/artifacts/appchannel.tx
 configtxgen -configPath ${HOST_HOME} -channelID appchannel -profile SampleSingleMSPChannel -outputAnchorPeersUpdate ${HOST_HOME}/artifacts/appchannel_anchor.tx -asOrg ${ORG}MSP
 
-while true; do
-  sleep 0.1
-done
+# while true; do
+#   sleep 0.1
+# done

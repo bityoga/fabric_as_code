@@ -28,6 +28,9 @@
       - source: "/root/hlft-store/{{tlsca.name}}/{{item.name}}/tls-msp"
         target: "{{item.path}}/tls-msp"
         type: bind
+      - source: "/root/hlft-store/{{tlsca.name}}/{{admin_user}}/msp/"
+        target: "/root/{{admin_user}}/tls-msp"
+        type: bind 
       - source: "/var/run/docker.sock"
         target: "/var/run/docker.sock"
         type: bind      
@@ -46,8 +49,8 @@
       - "CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE={{swarm_network}}"
       - "FABRIC_LOGGING_SPEC=debug"
       - "CORE_PEER_TLS_ENABLED=true"
-      - "CORE_PEER_TLS_CERT_FILE={{item.path}}/tls-msp/signcerts/cert.pem" #fully qualified path of the server certificate
-      - "CORE_PEER_TLS_KEY_FILE={{item.path}}/tls-msp/keystore/key.pem" #fully qualified path of the server private key
+      - "CORE_PEER_TLS_CERT_FILE=/root/{{admin_user}}/tls-msp/signcerts/cert.pem" #fully qualified path of the server certificate
+      - "CORE_PEER_TLS_KEY_FILE=/root/{{admin_user}}/tls-msp/keystore/key.pem" #fully qualified path of the server private key
       - "CORE_PEER_TLS_ROOTCERT_FILE={{item.path}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem" #fully qualified path of the CA chain file
       - "CORE_PEER_TLS_CLIENTAUTHREQUIRED=false"
       # - "CORE_PEER_TLS_CLIENTROOTCAS_FILES=tba" #fully qualified path of the CA chain file
