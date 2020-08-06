@@ -9,39 +9,6 @@
     networks:
       - "{{swarm_network}}"  
 
-  # We create relevent folder structure in the mount locally for the service 
-- name: Clean Orderer folders in hlft-store, if they exists
-  become: yes  
-  file: 
-    path: "/root/hlft-store/{{orderer.name}}"
-    state: absent
-  
-    
-- name: Create Orderer CA Server folders in hlft-store
-  become: yes
-  file: 
-    path: "/root/hlft-store/{{orderer.name}}"
-    state: directory
-    mode: 0750
-
-- name: Copy MSP folder
-  become: yes
-  copy:
-    src: "/root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp/"
-    dest: "/root/hlft-store/{{orderer.name}}/msp"
-    mode: '0750'
-    remote_src: yes
-    force: yes  
-
-- name: Copy TLSMSP folder
-  become: yes
-  copy:
-    src: "/root/hlft-store/{{tlsca.name}}/{{orderer.name}}/tls-msp/"
-    dest: "/root/hlft-store/{{orderer.name}}/tls-msp"
-    mode: '0750'
-    remote_src: yes
-    force: yes  
-
   # Create & Start service orderer with RAFT enabled
 - name: Start the fabric orderer
   become: yes
@@ -52,12 +19,15 @@
       - "{{swarm_network}}"
     image: "{{orderer.image}}:{{orderer.tag}}"
     mode: replicated
-    replicas: "{{orderer.replicas}}"    
+    replicas: "{{orderer.replicas}}"        
     mounts:
-      - source: "/root/hlft-store/{{orderer.name}}"
+      - source: "/root/hlft-store/{{orgca.name}}/{{orderer.name}}"
         target: "{{orderer.path}}"
         type: bind 
-      - source: "/root/hlft-store/{{orderer.name}}_cli/genesis.block"
+      - source: "/root/hlft-store/{{tlsca.name}}/{{orderer.name}}/tls-msp"
+        target: "{{orderer.path}}/tls-msp"
+        type: bind 
+      - source: "/root/hlft-store/{{orderer.name}}_cli/artifacts/genesis.block"
         target: "{{orderer.path}}/genesis.block"
         type: bind      
     publish:

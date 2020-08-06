@@ -62,3 +62,39 @@
     force_update: yes   
   loop: "{{ caservices }}"
   when: item.switch == "on"
+
+# Pause for 5 seconds for the CAs to start
+- pause:
+    seconds: 5
+
+- name: Clean MSP for Org {{org.name}}
+  become: yes  
+  file: 
+    path: "/root/hlft-store/{{item}}"
+    state: absent  
+  loop:
+    - "{{org.name}}MSP"
+    - "{{org.name}}MSP/admincerts"
+    - "{{org.name}}MSP/cacerts"
+    - "{{org.name}}MSP/tlscacerts"
+    - "{{org.name}}MSP/users"
+
+- name: Create MSP for Org {{org.name}}
+  file:
+    path: /root/hlft-store/{{item}}
+    state: directory
+  loop:
+    - "{{org.name}}MSP"
+    - "{{org.name}}MSP/admincerts"
+    - "{{org.name}}MSP/cacerts"
+    - "{{org.name}}MSP/tlscacerts"
+    - "{{org.name}}MSP/users"
+
+- name: Populate cacerts and tlscacerts MSP dirs for Org {{org.name}}
+  copy:
+    src: "/root/hlft-store/{{item[0]}}"
+    dest: "/root/hlft-store/{{org.name}}MSP/{{item[1]}}"
+    remote_src: yes
+  loop:
+    - ["{{orgca.name}}/ca-cert.pem", "cacerts/{{orgca.name}}-ca-cert.pem"]
+    - ["{{tlsca.name}}/ca-cert.pem", "tlscacerts/{{tlsca.name}}-ca-cert.pem"]

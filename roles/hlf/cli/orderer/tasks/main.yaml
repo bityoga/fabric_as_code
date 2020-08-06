@@ -11,23 +11,35 @@
     networks:
       - "{{swarm_network}}"  
 
+
+- name: Clean CLI orderer folder in hlft-store
+  become: yes
+  file: 
+    path: "/root/hlft-store/{{orderer.name}}_cli"
+    state: absent    
+
+- name: Create CLI orderer folder in hlft-store
+  become: yes
+  file: 
+    path: "/root/hlft-store/{{orderer.name}}_cli"
+    state: directory
+    mode: 0750              
+
 # Copy the relevent scripts
 - name: Copy scripts
   become: yes
   copy:
     src: "cli.sh"
-    dest: "/root/hlft-store/{{admin_user}}/tx_gen.sh"
+    dest: "/root/hlft-store/{{orderer.name}}_cli/cli.sh"
     mode: "0500"
     force: yes  
 
   # Copy relevent config files to mount directories for the docker services
 - name: Config templating configtx.yaml
   become: yes
-  vars:
-    configtx: "{{orderer}}"
   template:
     src: "configtx.yaml.j2"
-    dest: "/root/hlft-store/{{admin_user}}/configtx.yaml"
+    dest: "/root/hlft-store/{{orderer.name}}_cli/configtx.yaml"
     mode: 0660
     force: yes  
 
@@ -43,18 +55,18 @@
     mode: replicated
     replicas: "-1"
     command: >
-      bash -c "/root/{{admin_user}}/tx_gen.sh;"
+      bash -c "/root/{{orderer.name}}_cli/cli.sh;"
     mounts:
-      - source: "/root/hlft-store/{{admin_user}}/"
-        target: "/root/{{admin_user}}"
-        type: bind      
-      - source: "/root/hlft-store/{{orgca.name}}/{{orderer.name}}/"
-        target: "{{orderer.path}}"
+      - source: "/root/hlft-store/{{org.name}}MSP/"
+        target: "/root/{{org.name}}MSP"
+        type: bind 
+      - source: "/root/hlft-store/{{orderer.name}}_cli/"
+        target: "/root/{{orderer.name}}_cli"
         type: bind
     env:
-      - "HOST_HOME={{orderer.path}}"
+      - "HOST_HOME=/root/{{orderer.name}}_cli"
       - "ORG={{org.name}}"
-    working_dir: "/root/{{admin_user}}"
+    working_dir: "/root/{{orderer.name}}_cli"
     placement:
       constraints:
         - node.role == worker

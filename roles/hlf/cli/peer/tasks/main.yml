@@ -12,7 +12,14 @@
       - "{{swarm_network}}"
   loop: "{{ peerservices }}"
     
-- name: Create CLI assets folders in hlft-store
+- name: Clean CLI {{item.name}}_cli folder in hlft-store
+  become: yes
+  file: 
+    path: "/root/hlft-store/{{item.name}}_cli"
+    state: absent               
+  loop: "{{ peerservices }}"
+  
+- name: Create CLI {{item.name}}_cli folder in hlft-store
   become: yes
   file: 
     path: "/root/hlft-store/{{item.name}}_cli"
@@ -46,11 +53,14 @@
       - source: "/root/hlft-store/{{item.name}}_cli/"
         target: "/root/{{item.name}}_cli"
         type: bind 
-      - source: "/root/hlft-store/orderer_cli/"
+      - source: "/root/hlft-store/orderer_cli/artifacts"
         target: "/root/{{item.name}}_cli/artifacts"
         type: bind
-      - source: "/root/hlft-store/{{item.name}}/"
+      - source: "/root/hlft-store/{{orgca.name}}/{{item.name}}/"
         target: "{{item.path}}"
+        type: bind
+      - source: "/root/hlft-store/{{tlsca.name}}/{{item.name}}/tls-msp"
+        target: "{{item.path}}/tls-msp"
         type: bind       
       - source: "/root/hlft-store/{{orgca.name}}/{{admin_user}}/"
         target: "/root/{{admin_user}}"
@@ -64,8 +74,8 @@
       - "CORE_PEER_LOCALMSPID={{org.name}}MSP"    
       - "TLSCA_HOST={{tlsca.name}}"
       - "ORDERER_HOST={{orderer.name}}"
-      - "AGENT_HOST={{item.name}}" 
-      - "ADMIN_USER={{admin_user}}"           
+      - "AGENT_HOST={{item.name}}"   
+      - "ADMIN_USER={{admin_user}}"        
     placement:      
       constraints:
         - node.role == worker      

@@ -24,14 +24,16 @@ if (($IDX == 0)); then
 
   printf "${GREEN}Enroll admin ($ADMIN_USER) for $FABRIC_CA_NAME${NC}\n"
   export FABRIC_CA_CLIENT_HOME=$HOST_HOME/$ADMIN_USER  
-  fabric-ca-client enroll -d -u https://$ADMIN_USER:$ADMIN_SECRET@$FABRIC_CA_NAME:$FABRIC_CA_PORT
+  fabric-ca-client enroll -d -u https://$ADMIN_USER:$ADMIN_SECRET@$FABRIC_CA_NAME:$FABRIC_CA_PORT  
 
-  # Transfer admincerts for admin
-  mkdir $HOST_HOME/$ADMIN_USER/msp/admincerts    
-  # CA root is its admin
-  cp $HOST_HOME/caadmin/msp/signcerts/cert.pem $HOST_HOME/$ADMIN_USER/msp/admincerts/ca-admin-$FABRIC_CA_NAME-cert.pem  
-  # Make itself admin as well
-  cp $HOST_HOME/$FABRIC_CA_NAME/msp/signcerts/cert.pem $HOST_HOME/$ADMIN_USER/msp/admincerts/${ADMIN_USER}-cert.pem  
+  if [ $type == $orgca ]; then
+    printf "${GREEN}Make $AGENT_HOST admin of itself${NC}\n"
+    mkdir -p $HOST_HOME/$ADMIN_USER/msp/admincerts        
+    cp $HOST_HOME/$ADMIN_USER/msp/signcerts/cert.pem $HOST_HOME/$ADMIN_USER/msp/admincerts/${ADMIN_USER}-cert.pem  
+
+    printf "${GREEN}Copy admincerts from user ($ADMIN_USER) to ORG MSP${NC}\n"
+    cp $HOST_HOME/$ADMIN_USER/msp/signcerts/cert.pem $ORG_MSP_HOME/admincerts/$ADMIN_USER-cert.pem
+  fi
 
 fi
 
@@ -63,12 +65,12 @@ elif [ $type == $orgca ]; then
   printf "${GREEN}Enroll agent $AGENT_HOST for $FABRIC_CA_NAME${NC}\n"
   export FABRIC_CA_CLIENT_MSPDIR=msp
   export FABRIC_CA_CLIENT_HOME=$HOST_HOME/$AGENT_HOST  
-  fabric-ca-client enroll -d -u https://$AGENT_HOST:$AGENT_SECRET@$FABRIC_CA_NAME:$FABRIC_CA_PORT    
+  fabric-ca-client enroll -d -u https://$AGENT_HOST:$AGENT_SECRET@$FABRIC_CA_NAME:$FABRIC_CA_PORT   
 
   # Transfer admincerts
   mkdir $HOST_HOME/$AGENT_HOST/msp/admincerts    
   # Make the admin user as admin for the agents
-  cp $HOST_HOME/$ADMIN_USER/msp/signcerts/cert.pem $HOST_HOME/$AGENT_HOST/msp/admincerts/admin-cert.pem  
+  cp $HOST_HOME/$ADMIN_USER/msp/signcerts/cert.pem $HOST_HOME/$AGENT_HOST/msp/admincerts/$ADMIN_USER-cert.pem   
 
 else
   printf "${RED}type not supplied!${NC}\n"  

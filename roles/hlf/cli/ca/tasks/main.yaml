@@ -40,9 +40,13 @@
       - source: "/root/hlft-store/{{item.0.name}}/"
         target: "{{item.0.path}}"
         type: bind
+      - source: "/root/hlft-store/{{org.name}}MSP/"
+        target: "/root/{{org.name}}MSP"
+        type: bind
     env:
       - "IDX={{item.1.0}}"
       - "HOST_HOME={{item.0.path}}"
+      - "ORG_MSP_HOME=/root/{{org.name}}MSP"
       - "FABRIC_CA_NAME={{item.0.name}}"
       - "FABRIC_CA_SECRET={{item.0.password}}"
       - "ADMIN_USER={{admin_user}}"
