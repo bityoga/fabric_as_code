@@ -1,7 +1,6 @@
 CORE_PEER_TLS_ROOTCERT_FILE=/root/${AGENT_HOST}/tls-msp/tlscacerts/tls-${TLSCA_HOST}-7054.pem
 CORE_PEER_MSPCONFIGPATH=/root/${ADMIN_USER}/msp 
 
-sleep 30000s;
 if (($IDX == 0)); then    
     
     # Create the application channel    
