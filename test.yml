@@ -3,12 +3,11 @@
   hosts: localhost
   gather_facts: no
   tasks:      
-    - name: Get IP addresses as a list for all swarm manager nodes
-      vars:
-        _swarm_manager_ip_list: "{{ groups['swarm_managers'] | map('extract', hostvars, ['ansible_host']) | list  | join(':{{orderer.port}},')  }}"            
-        __swarm_manager_ip_list: "{{_swarm_manager_ip_list}}:{{orderer.port}}"
-      set_fact:      
-        swarm_manager_ip_list: "{{ __swarm_manager_ip_list.split(',') }}"
-    
     - debug:
-        msg: "{{swarm_manager_ip_list}}"
+        msg: "{{item.0.name}} - {{item.1}} - {{item.2}}"
+      with_nested:
+        - "{{peerservices}}"
+        - [["tlscacerts/tls-{{tlsca.name}}-7054.pem", "ca.crt"],
+         ["signcerts/cert.pem", "server.crt"],
+         ["keystore/key.pem", "server.key"]]
+  

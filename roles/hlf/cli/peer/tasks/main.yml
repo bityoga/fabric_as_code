@@ -36,35 +36,6 @@
     mode: "0500"
     force: yes 
   loop: "{{ peerservices }}"
-  
-# Prep the TLS certs
-- name: Clean tls folder under /root/hlft-store/{{orgca.name}}/{{item.name}}/msp/tls
-  become: yes
-  file:
-    path: "/root/hlft-store/{{orgca.name}}/{{item.name}}/msp/tls"
-    state: absent
-    mode: '0755'
-  loop: "{{ peerservices }}"
-
-# Prep the TLS certs
-- name: Create tls folder under /root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp/tls
-  become: yes
-  file:
-    path: "/root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp/tls"
-    state: directory
-    mode: '0755'
-  loop: "{{ peerservices }}"
-
-# Copy tls certs
-- name: Copy TLS certs
-  copy:
-    src: "/root/hlft-store/{{tlsca.name}}/{{orderer.name}}/tls-msp/{{item[0]}}"
-    dest: "/root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp/tls/{{item[1]}}"
-    remote_src: yes
-  loop:
-    - ["tlscacerts/tls-{{tlsca.name}}-7054.pem", "ca.crt"]
-    - ["signcerts/cert.pem", "server.crt"]
-    - ["keystore/key.pem", "server.key"]
 
   # Create & Start service for CLI 
 - name: Fabric Service - {{ item.name }}
@@ -80,18 +51,19 @@
       bash -c "/root/{{item.name}}_cli/cli.sh;"
     working_dir: /root/{{item.name}}_cli
     mounts:      
+      # PEER CLI MOUNT
       - source: "/root/hlft-store/{{item.name}}_cli/"
         target: "/root/{{item.name}}_cli"
         type: bind 
+      # ORDERER ARTIFACTS, peer channel transactions
       - source: "/root/hlft-store/orderer_cli/artifacts"
         target: "/root/{{item.name}}_cli/artifacts"
         type: bind
+      # PEER MOUNT, for the TLS certs
       - source: "/root/hlft-store/{{orgca.name}}/{{item.name}}/"
         target: "{{item.path}}"
-        type: bind
-      - source: "/root/hlft-store/{{tlsca.name}}/{{item.name}}/tls-msp"
-        target: "{{item.path}}/tls-msp"
-        type: bind       
+        type: bind     
+      # ADMIN MOUNT, runs the channel commands as admin
       - source: "/root/hlft-store/{{orgca.name}}/{{admin_user}}/"
         target: "/root/{{admin_user}}"
         type: bind

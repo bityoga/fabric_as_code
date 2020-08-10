@@ -48,7 +48,7 @@
       - "ADMIN_USER={{admin_user}}"
       - "ADMIN_SECRET={{admin_password}}"
       - "FABRIC_CA_PORT=7054"
-      - "CORE_PEER_LOCALMSPID={{org.name}}MSP"
+      - "CORE_PEER_LOCALMSPID={{org.name}}MSP"      
       - "AGENT_HOST={{item.1.1.name}}"
       - "AGENT_SECRET={{item.1.1.password}}"
       - "AGENT_TYPE={{item.1.1.type}}"

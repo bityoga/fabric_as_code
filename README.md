@@ -174,8 +174,8 @@ Setting up of hyperledger fabric cluster requires the following steps. Creating 
         ```
         docker exec -it <<CLI_ID>> bash
         CORE_PEER_ADDRESS=peer2:7051
-        CORE_PEER_MSPCONFIGPATH=/root/CLI/orgca/admin1/
-        CORE_PEER_TLS_ROOTCERT_FILE=/root/CLI/${PEER2_HOST}/tls-msp/tlscacerts/tls-${TLSCA_HOST}-7054.pem
+        CORE_PEER_MSPCONFIGPATH=/root/CLI/orgca/admin1/msp
+        CORE_PEER_TLS_ROOTCERT_FILE=/root/CLI/orgca/${PEER2_HOST}/msp/tls/ca.crt
         ```
       - Install the chaincode on peer 2
       ```CORE_PEER_ADDRESS=peer2:7051 CORE_PEER_ADDRESS=$CORE_PEER_ADDRESS CORE_PEER_MSPCONFIGPATH=$CORE_PEER_MSPCONFIGPATH CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE peer chaincode install -n testcc -v 1.0 -l node -p /root/CLI/chaincodes/test_chaincode/node```

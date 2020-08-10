@@ -24,7 +24,7 @@ if (($IDX == 0)); then
 
   printf "${GREEN}Enroll admin ($ADMIN_USER) for $FABRIC_CA_NAME${NC}\n"
   export FABRIC_CA_CLIENT_HOME=$HOST_HOME/$ADMIN_USER  
-  fabric-ca-client enroll -d -u https://$ADMIN_USER:$ADMIN_SECRET@$FABRIC_CA_NAME:$FABRIC_CA_PORT  
+  fabric-ca-client enroll -d -u https://$ADMIN_USER:$ADMIN_SECRET@$FABRIC_CA_NAME:$FABRIC_CA_PORT
 
     printf "${GREEN}Make $AGENT_HOST admin of itself${NC}\n"
     mkdir -p $HOST_HOME/$ADMIN_USER/msp/admincerts        
@@ -44,7 +44,7 @@ if [ $type == $tlsca ]; then
   printf "${GREEN}Enroll agent $AGENT_HOST for $FABRIC_CA_NAME${NC}\n"
   export FABRIC_CA_CLIENT_MSPDIR=tls-msp
   export FABRIC_CA_CLIENT_HOME=$HOST_HOME/$AGENT_HOST  
-  fabric-ca-client enroll -d -u https://$AGENT_HOST:$AGENT_SECRET@$FABRIC_CA_NAME:$FABRIC_CA_PORT --enrollment.profile tls --csr.hosts $AGENT_HOST,127.0.0.1,localhost,0.0.0.0
+  fabric-ca-client enroll -d -u https://$AGENT_HOST:$AGENT_SECRET@$FABRIC_CA_NAME:$FABRIC_CA_PORT --enrollment.profile tls --csr.hosts ${AGENT_HOST}
 
   filename=$(ls $FABRIC_CA_CLIENT_HOME/$FABRIC_CA_CLIENT_MSPDIR/keystore | sort -n | head -1)
   mv $FABRIC_CA_CLIENT_HOME/$FABRIC_CA_CLIENT_MSPDIR/keystore/$filename $FABRIC_CA_CLIENT_HOME/$FABRIC_CA_CLIENT_MSPDIR/keystore/key.pem
@@ -53,13 +53,13 @@ elif [ $type == $orgca ]; then
   # We make sure that we are pointed to the admin user, prior to registering agents
   printf "${GREEN}Register agent $AGENT_HOST of type $AGENT_TYPE at $FABRIC_CA_NAME${NC}\n"
   export FABRIC_CA_CLIENT_HOME=$HOST_HOME/$ADMIN_USER  
-  fabric-ca-client register -d --id.name $AGENT_HOST --id.secret $AGENT_SECRET --id.type $AGENT_TYPE -u https://$FABRIC_CA_NAME:$FABRIC_CA_PORT
+  fabric-ca-client register -d --id.name $AGENT_HOST --id.secret $AGENT_SECRET --id.type $AGENT_TYPE -u https://$FABRIC_CA_NAME:$FABRIC_CA_PORT 
 
   # Enroll Agent 
   printf "${GREEN}Enroll agent $AGENT_HOST for $FABRIC_CA_NAME${NC}\n"
   export FABRIC_CA_CLIENT_MSPDIR=msp
   export FABRIC_CA_CLIENT_HOME=$HOST_HOME/$AGENT_HOST  
-  fabric-ca-client enroll -d -u https://$AGENT_HOST:$AGENT_SECRET@$FABRIC_CA_NAME:$FABRIC_CA_PORT   
+  fabric-ca-client enroll -d -u https://$AGENT_HOST:$AGENT_SECRET@$FABRIC_CA_NAME:$FABRIC_CA_PORT
 
   # Transfer admincerts
   mkdir $HOST_HOME/$AGENT_HOST/msp/admincerts    
