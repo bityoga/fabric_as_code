@@ -51,6 +51,70 @@
     mode: 0660
     force: yes  
 
+# Prep the TLS certs
+- name: Clean tls folder under /root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp/tls
+  become: yes
+  file:
+    path: "/root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp/tls"
+    state: absent
+    mode: '0755'
+
+# Prep the TLS certs
+- name: Create tls folder under /root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp/tls
+  become: yes
+  file:
+    path: "/root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp/tls"
+    state: directory
+    mode: '0755'
+
+# Copy tls certs
+- name: Copy TLS certs
+  copy:
+    src: "/root/hlft-store/{{tlsca.name}}/{{orderer.name}}/tls-msp/{{item[0]}}"
+    dest: "/root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp/tls/{{item[1]}}"
+    remote_src: yes
+  loop:
+    - ["tlscacerts/tls-{{tlsca.name}}-7054.pem", "ca.crt"]
+    - ["signcerts/cert.pem", "server.crt"]
+    - ["keystore/key.pem", "server.key"]
+
+# Create ORG MSP folder and subfolders
+- name: Clean org MSP-folder
+  become: yes
+  file: 
+    path: "/root/hlft-store/{{org.name}}MSP"
+    state: absent
+    mode: '0755'
+
+- name: Create org MSP-folder
+  become: yes
+  file: 
+    path: "/root/hlft-store/{{org.name}}MSP"
+    state: directory
+    mode: '0755'
+
+- name: Create subfolders folder under /root/hlft-store/{{org.name}}MSP
+  become: yes
+  file:
+    path: "/root/hlft-store/{{org.name}}MSP/{{item}}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "tlscacerts"
+    - "admincerts"
+    - "cacerts"
+    - "users"
+
+- name: Copy certs in the msp subfolder
+  copy:
+    src: "/root/hlft-store/{{item[0]}}"
+    dest: "/root/hlft-store/{{org.name}}MSP/{{item[1]}}"
+    remote_src: yes
+  loop:
+    - ["{{tlsca.name}}/{{orderer.name}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem", "tlscacerts/tls-{{tlsca.name}}-7054.pem"]
+    - ["{{orgca.name}}/{{orderer.name}}/msp/admincerts/{{admin_user}}-cert.pem", "admincerts/{{admin_user}}-cert.pem"]
+    - ["{{orgca.name}}/{{orderer.name}}/msp/cacerts/{{orgca.name}}-7054.pem", "cacerts/{{orgca.name}}-7054.pem"]    
+
 
   # Create & Start service for CLI
 - name: Fabric Service - {{ orderer.name }}
@@ -68,17 +132,13 @@
       bash -c "/root/{{orderer.name}}_cli/cli.sh;"
     mounts:
       # MSP folder for organization in configtx
-      - source: "/root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp"
-        target: "{{orderer.path}}/msp"
+      - source: "/root/hlft-store/{{org.name}}MSP"
+        target: "/root/{{org.name}}MSP"
         type: bind
-      # CONCENTER client TLS CERT
-      - source: "/root/hlft-store/{{tlsca.name}}/{{orderer.name}}/tls-msp"
-        target: "{{orderer.path}}/tls-msp"
-        type: bind 
-      # CONCENTER server TLS CERT
-      - source: "/root/hlft-store/{{tlsca.name}}/{{admin_user}}/msp/"
-        target: "/root/{{admin_user}}/tls-msp"
-        type: bind 
+      # CONCENTER TLS CERT
+      - source: "/root/hlft-store/{{orgca.name}}/{{orderer.name}}"
+        target: "{{orderer.path}}"
+        type: bind       
       # CLI dir
       - source: "/root/hlft-store/{{orderer.name}}_cli/"
         target: "/root/{{orderer.name}}_cli"

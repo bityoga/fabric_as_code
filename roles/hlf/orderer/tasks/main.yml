@@ -23,16 +23,10 @@
     mounts:
       - source: "/root/hlft-store/{{orgca.name}}/{{orderer.name}}"
         target: "{{orderer.path}}"
-        type: bind 
-      - source: "/root/hlft-store/{{tlsca.name}}/{{orderer.name}}/tls-msp"
-        target: "{{orderer.path}}/tls-msp"
-        type: bind 
+        type: bind       
       - source: "/root/hlft-store/{{orderer.name}}_cli/artifacts/genesis.block"
         target: "{{orderer.path}}/genesis.block"
-        type: bind      
-      - source: "/root/hlft-store/{{tlsca.name}}/{{admin_user}}/msp/"
-        target: "/root/{{admin_user}}/tls-msp"
-        type: bind      
+        type: bind       
     publish:
       - published_port: "{{orderer.port}}"
         target_port: "7050"
@@ -48,14 +42,14 @@
       - "ORDERER_GENERAL_LOCALMSPID={{org.name}}MSP"
       - "ORDERER_GENERAL_LOCALMSPDIR={{orderer.path}}/msp"
       - "ORDERER_GENERAL_TLS_ENABLED=true"      
-      - "ORDERER_GENERAL_TLS_PRIVATEKEY=/root/{{admin_user}}/tls-msp/keystore/key.pem" #fully qualified path of the file that contains the server private key
-      - "ORDERER_GENERAL_TLS_CERTIFICATE=/root/{{admin_user}}/tls-msp/signcerts/cert.pem" #fully qualified path of the file that contains the server certificate
-      - "ORDERER_GENERAL_TLS_ROOTCAS=[{{orderer.path}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem]" #fully qualified path of the file that contains the certificate chain of the CA that issued TLS server certificate
+      - "ORDERER_GENERAL_TLS_PRIVATEKEY={{orderer.path}}/msp/tls/server.key" #fully qualified path of the file that contains the server private key
+      - "ORDERER_GENERAL_TLS_CERTIFICATE={{orderer.path}}/msp/tls/server.crt" #fully qualified path of the file that contains the server certificate
+      - "ORDERER_GENERAL_TLS_ROOTCAS=[{{orderer.path}}/msp/tls/ca.crt]" #fully qualified path of the file that contains the certificate chain of the CA that issued TLS server certificate
       - "ORDERER_GENERAL_TLS_CLIENTAUTHREQUIRED=false"
       # - "ORDERER_GENERAL_TLS_CLIENTROOTCAS=tba" #fully qualified path of the file that contains the certificate chain of the CA that issued TLS server certificate
-      - "ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE={{orderer.path}}/tls-msp/signcerts/cert.pem"
-      - "ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY={{orderer.path}}/tls-msp/keystore/key.pem"
-      - "ORDERER_GENERAL_CLUSTER_ROOTCAS=[{{orderer.path}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem]"      
+      - "ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE={{orderer.path}}/msp/tls/server.crt"
+      - "ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY={{orderer.path}}/msp/tls/server.key"
+      - "ORDERER_GENERAL_CLUSTER_ROOTCAS=[{{orderer.path}}/msp/tls/ca.crt]"      
       - "ORDERER_GENERAL_LOGLEVEL=debug"
       - "ORDERER_DEBUG_BROADCASTTRACEDIR=data/logs"
       - "CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE={{swarm_network}}"

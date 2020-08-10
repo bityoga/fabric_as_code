@@ -35,7 +35,7 @@ Organizations:
         ID: {{org.name}}MSP
 
         # MSPDir is the filesystem path which contains the MSP configuration.
-        MSPDir: {{orderer.path}}/msp
+        MSPDir: /root/{{org.name}}MSP
 
         # Policies defines the set of policies at this level of the config tree
         # For organization policies, their canonical path is usually
@@ -321,8 +321,8 @@ Orderer: &OrdererDefaults
         Consenters:
             - Host: {{orderer.name}}
               Port: {{orderer.port}}
-              ClientTLSCert: {{orderer.path}}/tls-msp/signcerts/cert.pem
-              ServerTLSCert: /root/{{admin_user}}/tls-msp/signcerts/cert.pem
+              ClientTLSCert: {{orderer.path}}/msp/tls/server.crt
+              ServerTLSCert: {{orderer.path}}/msp/tls/server.crt
         # Options to be specified for all the etcd/raft nodes. The values here
         # are the defaults for all new channels and can be modified on a
         # per-channel basis via configuration updates.
