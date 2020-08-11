@@ -40,7 +40,7 @@
     mode: replicated
     replicas: "{{item.replicas}}"
     command: 
-      bash -c "fabric-ca-server start -d -b ca-admin-{{item.name}}:{{item.password}} --port 7054" 
+      bash -c "fabric-ca-server start -b ca-admin-{{item.name}}:{{item.password}} --port 7054 --loglevel {{LOG_LEVEL}}" 
     mounts:
       - source: "/root/hlft-store/{{item.name}}"
         target: "{{item.path}}"
@@ -54,8 +54,7 @@
       - "FABRIC_CA_SERVER_TLS_ENABLED=true"
       - "FABRIC_CA_SERVER_CSR_CN={{item.name}}"
       - "FABRIC_CA_SERVER_CSR_HOSTS={{item.name}}"
-      - "FABRIC_CA_SERVER_CA_NAME={{item.name}}"
-      - "FABRIC_CA_SERVER_DEBUG=true"
+      - "FABRIC_CA_SERVER_CA_NAME={{item.name}}"      
     placement:      
       constraints:
         - node.role == worker   

@@ -49,8 +49,8 @@
       # - "ORDERER_GENERAL_TLS_CLIENTROOTCAS=tba" #fully qualified path of the file that contains the certificate chain of the CA that issued TLS server certificate
       - "ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE={{orderer.path}}/msp/tls/server.crt"
       - "ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY={{orderer.path}}/msp/tls/server.key"
-      - "ORDERER_GENERAL_CLUSTER_ROOTCAS=[{{orderer.path}}/msp/tls/ca.crt]"      
-      - "ORDERER_GENERAL_LOGLEVEL=debug"
+      - "ORDERER_GENERAL_CLUSTER_ROOTCAS=[{{orderer.path}}/msp/tls/ca.crt]"            
+      - "FABRIC_LOGGING_SPEC={{LOG_LEVEL}}"
       - "ORDERER_DEBUG_BROADCASTTRACEDIR=data/logs"
       - "CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE={{swarm_network}}"
     working_dir: "{{orderer.path}}"

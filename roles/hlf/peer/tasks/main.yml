@@ -78,7 +78,7 @@
       - "CORE_PEER_MSPCONFIGPATH={{item.path}}/msp"
       - "CORE_VM_ENDPOINT=unix:///var/run/docker.sock"
       - "CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE={{swarm_network}}"
-      - "FABRIC_LOGGING_SPEC=debug"
+      - "FABRIC_LOGGING_SPEC={{LOG_LEVEL}}"
       - "CORE_PEER_TLS_ENABLED=true"
       - "CORE_PEER_TLS_CERT_FILE={{item.path}}/msp/tls/server.crt" #fully qualified path of the server certificate
       - "CORE_PEER_TLS_KEY_FILE={{item.path}}/msp/tls/server.key" #fully qualified path of the server private key
