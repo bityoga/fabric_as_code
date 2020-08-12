@@ -70,6 +70,6 @@ else
   printf "${RED}type not supplied!${NC}\n"  
 fi
 
-while true; do
-  sleep 0.1
-done
+# while true; do
+#   sleep 0.1
+# done
