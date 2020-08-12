@@ -56,7 +56,7 @@
         target: "/root/{{item.name}}_cli"
         type: bind 
       # ORDERER ARTIFACTS, peer channel transactions
-      - source: "/root/hlft-store/orderer_cli/artifacts"
+      - source: "/root/hlft-store/orderer_cli/artifacts/"
         target: "/root/{{item.name}}_cli/artifacts"
         type: bind
       # PEER MOUNT, for the TLS certs

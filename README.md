@@ -255,27 +255,6 @@ Setting up of hyperledger fabric cluster requires the following steps. Creating 
     - **user_name : admin**
     - **password : adminpw**
     
-**Troubleshoot**
-Peer Restart: If at all the peer service crashes or killed, it will be automatically be restarted by the docker swarm. However, the chaincodes are not maintained by the swarm. Therefore, the existing chaincode container dies when the peer restarts. In order to bring the peer back to working order we have to first join the peer again to the channel and then just install the chaincode so that the chaincode container is started. This way you wont loose any existing data.
-- Log into CLI and set env vars
-  ```bash
-  docker exec -it <<CLI_ID>> bash
-  PEER_HOST=peer2
-  CORE_PEER_ADDRESS=${PEER_HOST}:7051
-  CORE_PEER_MSPCONFIGPATH=/root/CLI/${ORGCA_HOST}/${ADMIN_USER}/msp
-  CORE_PEER_TLS_ROOTCERT_FILE=/root/CLI/${ORGCA_HOST}/${PEER_HOST}/msp/tls/ca.crt
-  ```
-
-- Join the peer to the application channel
-```bash
-CORE_PEER_ADDRESS=$CORE_PEER_ADDRESS CORE_PEER_MSPCONFIGPATH=$CORE_PEER_MSPCONFIGPATH peer channel join -b /root/${AGENT_HOST}_cli/artifacts/appchannel.block
-```
-- Install the chaincode again
-```bash
-CORE_PEER_ADDRESS=$CORE_PEER_ADDRESS CORE_PEER_MSPCONFIGPATH=$CORE_PEER_MSPCONFIGPATH CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE peer chaincode install -n testcc -v 1.0 -l node -p /root/CLI/chaincodes/test_chaincode/node
-```
-- Run the QUERY and INVOKE commands from above to verify
-
   **File Configuration Explanations**
 
   - All 'hlf_explorer' config files will be available under the directory "root/hlf-explorer/" , in the primary manager.

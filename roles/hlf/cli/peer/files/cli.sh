@@ -1,4 +1,3 @@
-
 set -e
 EXIT_CODE=0
 if (($IDX == 0)); then    

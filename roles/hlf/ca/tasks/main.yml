@@ -54,7 +54,8 @@
       - "FABRIC_CA_SERVER_TLS_ENABLED=true"
       - "FABRIC_CA_SERVER_CSR_CN={{item.name}}"
       - "FABRIC_CA_SERVER_CSR_HOSTS={{item.name}}"
-      - "FABRIC_CA_SERVER_CA_NAME={{item.name}}"      
+      - "FABRIC_CA_SERVER_CA_NAME={{item.name}}"  
+      - "FABRIC_CA_SERVER_DB_DATASOURCE={{item.path}}/fabric-ca-server.db"    
     placement:      
       constraints:
         - node.role == worker   

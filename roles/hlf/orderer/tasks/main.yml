@@ -33,7 +33,7 @@
         protocol: "tcp"     
     env: 
       - "ORDERER_HOME={{orderer.path}}"
-      - "ORDERER_HOST={{orderer.name}}"
+      - "ORDERER_HOST={{orderer.name}}"      
       - "ORDERER_GENERAL_LEDGERTYPE=file"
       - "ORDERER_GENERAL_LISTENADDRESS=0.0.0.0"
       - "ORDERER_GENERAL_LISTENPORT=7050"
@@ -50,6 +50,9 @@
       - "ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE={{orderer.path}}/msp/tls/server.crt"
       - "ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY={{orderer.path}}/msp/tls/server.key"
       - "ORDERER_GENERAL_CLUSTER_ROOTCAS=[{{orderer.path}}/msp/tls/ca.crt]"            
+      - "ORDERER_FILELEDGER_LOCATION={{orderer.path}}/ledger"
+      - "ORDERER_CONSENSUS_WALDIR={{orderer.path}}/wal"
+      - "ORDERER_CONSENSUS_SNAPDIR={{orderer.path}}/snap"
       - "FABRIC_LOGGING_SPEC={{LOG_LEVEL}}"
       - "ORDERER_DEBUG_BROADCASTTRACEDIR=data/logs"
       - "CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE={{swarm_network}}"
