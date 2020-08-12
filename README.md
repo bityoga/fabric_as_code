@@ -1,30 +1,55 @@
 # Fabric as Code
-The current project enables provisioning of Hyperledger Fabric (HLF) [https://www.hyperledger.org/projects/fabric] cluster over a host of machines managed by Docker Swarm [https://docs.docker.com/engine/swarm/]. It offers an easily configurable mechanism for initializing and setting up the cluster.
-Currently it support the spinning up of HLF cluster for just one organization, however, we are worrking towards mechanism for easily adding new organization to an exisiting cluster. Please see the Overview and TODO sections bellow
+The current project enables provisioning of Hyperledger Fabric (HLF) [https://www.hyperledger.org/projects/fabric] cluster over a host of machines managed by Docker Swarm [https://docs.docker.com/engine/swarm/]. 
 
-![Architecture Diagram](https://github.com/achak1987/fabric_as_code/blob/master/fabric_as_code.jpg)
+It offers an easily configurable mechanism for creating custom Hyperledger Fabric Blockchain deployment arcitecture.
+
+Current Blockchain as a Service offerings from IBM, Amazon, Microsoft or others tie you and your consortium to their infrastructure and ecosystem. The presented solution is cloud agnostic and can be deployed over any cloud provider or private data centers. Each organization that part of your blockchain can therefore choose their own infrastructure provider and by using the fabric-as-code solution can seamlessly deply a Hyperledger Fabric Blockchain.
+
+Currently it support the spinning up of HLF cluster for just one organization, however, we are worrking towards mechanism for easily adding new organization to an exisiting cluster. 
+
+Please see the Overview and TODO sections bellow
 
 ## Overview
-- Hyperledger Fabric v1.4.3
-- Create a Docker Swarm Network
-- Provision HLF over the Docker Swarm
-- TLS enabled 
-- Solo orderer
-- CouchDB and LevelDB peer databases
+- Hyperledger Fabric (HLF) v2.2 LTS
+- Cloud Deployment
+- Docker Swarm used for orchestration
+- Redundency, High Availability and Scalability of HLF services
+- Services:
+  - Certificate Authorities (CA)
+    - Organizational CA
+    - TLS CA
+  - Orderer
+    - RAFT
+  - Peers
+    - Configurable number of peers
+    - Chaincode support V1.X
+    - Support for both CouchDB and LevelDB databases
+  - TLS enabled for all services
+  - Persistent Filesystem for all services
 - Single Org Setup
-- Single Sys / App channel setup
+- Single Sys
+- Single App channel setup
 ## Todo
-- Customizable Policies for Channels (Sys and App)
+- PostGres support for CAs
+- Add new Organization to consortium
+  - System channel 
+  - Application channel
+- Update consortium
+  - System channel 
+  - Application channel
+- Add new Application Channel
+- Update existing Application Channel
+- Customizable Policies
+  - System Channel
+  - Application Channel
+  - Endorsement Channel
 - Mutual TLS
-- Raft as Orderer
-- Add new Organization to consortium: system channel, application channel
-- Add new Channel
-- Update/Remove Organization from consortium: system channel, application channel
-- Update/Remove Channel
+- Deployment User Interface
 
 ## Pre-requisites: 
-- Ensure that you have installed ansible version 2.9.x on your local machine. Please see [https://www.ansible.com/] for further details on installing ansible on your local machine.
-Once ensible is installed, you can verify its version using the command `ansible --version` on you bash shell. you should receive an output such as this:
+- Ensure that you have installed **ansible** version 2.9.x on your **local machine**. Please see [https://www.ansible.com/] for further details on installing ansible on your local machine.
+Once ansible is installed, you can verify its version using the command `ansible --version` on you bash shell. You should receive an output such as this:
+
 ```
 ansible 2.9.1
 config file = /Users/antorweep/Documents/dev/mysome_glusterfs/ansible.cfg
@@ -33,27 +58,16 @@ ansible python module location = /usr/local/lib/python3.7/site-packages/ansible
 executable location = /usr/local/bin/ansible
 python version = 3.7.4 (default, Jul  9 2019, 18:13:23) [Clang 10.0.1 (clang-1001.0.46.4)]
 ```
-- Furthermore, on your local machine you need to have some ansible plugins installed.
-  - Navigate to the folder `mysome_glusterfs`
-  - Execute the command `ansible-galaxy install -r requirements.yml`
 
-- The remote machines donot need ansible installed. However, all remote hosts **must** have python version `2.7.x` or `above`
-- Gluster FS [https://www.gluster.org/] is used as persistent storage for all docker services hosted by an organization. 
-  - In is required to have a seperate GlusterFS cluster in order to run this project.
-  - We have created an easily deployable package for creating a GlusterFS cluster.
-  Please check: [https://github.com/achak1987/mysome_glusterfs]
-
-Installation Guide Video:
-[![Installation Guide](installationGuideThumbnail.jpg)](https://youtu.be/b1DYPJG6_Xs)
+- Gluster FS  is used as persistent storage for all docker services hosted by an organization. In is required to have a seperate GlusterFS cluster in order to run this project on each of the **remote machines** that will host the HLF. We have created an easily deployable package for creating a GlusterFS cluster. Please check: [https://github.com/bityoga/mysome_glusterfs] and follow the ReadMe there!
 
 ## Configuration
 There are very few parameters to be configured currently. All configurations are made inside *group_vars/all.yml*. 
   - **GlusterFS Setup** !Required
-    - `gluster_cluster_volume` specifies the name of the created glusterfs volume. 
-    - `gluster_cluster_host0` the ip address of any one of the machines of your glusterfs cluster
+    - `gluster_cluster_volume` specifies the name of the created glusterfs volume. It should be the same value as the one used for creating the GlusterFS cluster. See pre-requisites step #2 about GlusterFS    
   - **config vars** [Optional]
     - Under the section *Hyperledger Fabric Network config vars*, there are various values for your organization and credentials of the agents and services running within you HLF cluster for your organization. 
-    - You may choose the change them
+    - You may choose the change them to more secure values
   - ** CAs ** [Optional]
     - This projects spins up two CAs
       - ORGCA: Generates the MSPs for the agents (peers, agents, clients, users, admins) to interact with the Blockchain Network
@@ -62,22 +76,39 @@ There are very few parameters to be configured currently. All configurations are
       - **Note: Postgres or MySQL is not supported as of now**
   - ** Orderer ** [Optional]
     - This projects spins up one Ordering service for each organization
-    - Currently, only solo ordering is supported. 
-    - However, the target is to support only RAFT based ordering. Therefore, the concept of hosting one ordering services per organization following a leader and follower model.
-    - You may choose the change the number of *replicas* hosted by Docker Swarm
+    - The only supported concensus protocal is **RAFT**    
+    - You may choose the change the number of *replicas* depending on your requirements to improve scalability, redundency and availability of the service
   - ** Peers **  [Optional]
-    - Two peers are supported currently
-    - Peer1: Is the Anchor and Comitter peer 
-    - Peer2- Is the endorser peer
-    - In future, mechanisms would be introduces for easily adding and configuring more number of peers
-    - You may choose the change the number of *replicas* for each of to peers
+    - By default two peers are created. 
+      - Peer1: Is the Anchor peer that will connect with other organization
+      - Peer2- Is the endorser peer which will have the chaincode installed
+    - However, as many number of peers can be created by changing the following configuration values
+      - Under *# Creds of various agents* section in *group_vars/all.yml* add a new entry for the peer user name and password. We show an example for adding peer3
+      ```json
+      peer3_user: "peer3"
+      peer3_password: "peer3pw"
+      ```
+      - Under *Peers* section in *group_vars/all.yml* add a new entry for a peer. We show an example of how to add the third peer bellow:
+      ```json
+      peer3: { switch: "on", image: "hyperledger/fabric-peer", tag: "2.2", replicas: -1, port: 8054, 
+      caname: "{{orgca.name}}", path: "/root/{{peer3_user}}", bootstrap: "",
+      dbtype: "goleveldb",
+      name: "{{peer3_user}}", password: "{{peer3_password}}", type: "peer",
+      leader: "{peer1_user}}"
+      }
+      ```
+     - Under *Service Summary* section in *group_vars/all.yml* add a new entry for a peer into **peerservices**. We show an example of how to add the third peer bellow:
+      ```json
+      peerservices:
+        - "{{peer1}}"
+        - "{{peer2}}"
+        - "{{peer3}}
+      ```    
+    - You may choose the change the number of *replicas* for each of to peers, depending on your requirements to improve scalability, redundency and availability of the service
 
 ## Defining the remote host machines
 In order to set up hlf cluster we would need a set of host machines. Ansible will comunicate with these machines and setup your cluster.
 
-### Setting up remote host machines [optional]
-Currently the automation of VM generation is configured for only Digital Ocean. You can use github project digital_ocean_automation [https://github.com/achak1987/digital_ocean_automation] for spinning up a set of host machines. However, if you already have a set of host machines either spinned up using the above project or any other method, configure the connections with these host machines as described bellow. 
- 
 ### Configuring connection to remote machine
 - Please navigate to the file `inventory/hosts_template`
 - It looks as follows:
@@ -96,8 +127,8 @@ swarm_workers
 [swarm_workers]
 
 ```
-- Rename this file as `inventory/hosts`
-- In order the specify the host machines, you need to populate this file `inventory/hosts_template` with the names of the host that you want to create. Each line/row in the file would represent a host machine. The lines with square brackets  `[]` represents groups for internal reference in the project and **must not be changed**. Please fill each line under a group in the format: 
+- Make a copy of this file as `inventory/hosts`
+- In order the specify the host machines, you need to populate this file `inventory/hosts` with the names of the host that you want to create. Each line/row in the file would represent a host machine. The lines with square brackets  `[]` represents groups for internal reference in the project and **must not be changed**. Please fill each line under a group in the format: 
 
 `hostname ansible_host=remote.machine1.ip.adress  ansible_python_interpreter="/usr/bin/python3"`
 
@@ -123,10 +154,12 @@ hlf2 ansible_host=157.245.79.195 ansible_python_interpreter=/usr/bin/python3
 hlf3 ansible_host=157.78.79.201 ansible_python_interpreter=/usr/bin/python3
 hlf4 ansible_host=157.190.65.188 ansible_python_interpreter=/usr/bin/python3
 ```
-- **!!!Required: Ensure that you have password less SSH for these host for the user root**
+- **!!!Required: Ensure that you have password less SSH for these host for a user. Later when you run the playbooks change the value for the playbooks with argument -u to the appropiate user that has passwordless SHH access to these machines**
 
 ## Setting up HLF
 Setting up of hyperledger fabric cluster requires the following steps. Creating the infrastructure with all dependencies installed and starting the hlf services in all the host machines. Finally, there is also mounting the glusterfs point.
+
+- **!!!In our case the user root has passwordless SSH access to all the remote machines. In your case, it its different, please change the value for the argument -u to the appropiate user.**
 
 - Playbook: `011.initialize_hosts.yml`
   - Execute: `ansible-playbook -v 011.initialize_hosts.yml -u root`
@@ -173,9 +206,10 @@ Setting up of hyperledger fabric cluster requires the following steps. Creating 
       - Install, Instanciate and Test Chaincode
         ```
         docker exec -it <<CLI_ID>> bash
-        CORE_PEER_ADDRESS=peer2:7051
-        CORE_PEER_MSPCONFIGPATH=/root/CLI/orgca/admin1/msp
-        CORE_PEER_TLS_ROOTCERT_FILE=/root/CLI/orgca/${PEER2_HOST}/msp/tls/ca.crt
+        PEER_HOST=peer2
+        CORE_PEER_ADDRESS=${PEER_HOST}:7051
+        CORE_PEER_MSPCONFIGPATH=/root/CLI/${ORGCA_HOST}/${ADMIN_USER}/msp
+        CORE_PEER_TLS_ROOTCERT_FILE=/root/CLI/${ORGCA_HOST}/${PEER_HOST}/msp/tls/ca.crt
         ```
       - Install the chaincode on peer 2
       ```CORE_PEER_ADDRESS=$CORE_PEER_ADDRESS CORE_PEER_MSPCONFIGPATH=$CORE_PEER_MSPCONFIGPATH CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE peer chaincode install -n testcc -v 1.0 -l node -p /root/CLI/chaincodes/test_chaincode/node```
@@ -183,15 +217,15 @@ Setting up of hyperledger fabric cluster requires the following steps. Creating 
       - Instanciate the chaincode
       ```CORE_PEER_ADDRESS=$CORE_PEER_ADDRESS CORE_PEER_MSPCONFIGPATH=$CORE_PEER_MSPCONFIGPATH CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE peer chaincode instantiate -C appchannel -n testcc -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -o ${ORDERER_HOST}:7050 --tls --cafile ${CORE_PEER_TLS_ROOTCERT_FILE}```
       - List the installed chaincodes
-      ```CORE_PEER_ADDRESS=peer2:7051 CORE_PEER_ADDRESS=$CORE_PEER_ADDRESS CORE_PEER_MSPCONFIGPATH=$CORE_PEER_MSPCONFIGPATH CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE peer chaincode list --installed``` 
+      ```CORE_PEER_ADDRESS=$CORE_PEER_ADDRESS CORE_PEER_MSPCONFIGPATH=$CORE_PEER_MSPCONFIGPATH CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE peer chaincode list --installed``` 
       - List the instanciated chaincodes
-      ```CORE_PEER_ADDRESS=peer2:7051 CORE_PEER_ADDRESS=$CORE_PEER_ADDRESS CORE_PEER_MSPCONFIGPATH=$CORE_PEER_MSPCONFIGPATH CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE peer chaincode list --instantiated -C appchannel```
+      ```CORE_PEER_ADDRESS=$CORE_PEER_ADDRESS CORE_PEER_MSPCONFIGPATH=$CORE_PEER_MSPCONFIGPATH CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE peer chaincode list --instantiated -C appchannel```
       - GET
-      ```CORE_PEER_ADDRESS=peer2:7051 CORE_PEER_MSPCONFIGPATH=/root/peer2/msp CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE peer chaincode query -C appchannel -n testcc -c '{"Args":["query","a"]}'```
+      ```CORE_PEER_ADDRESS=$CORE_PEER_ADDRESS CORE_PEER_MSPCONFIGPATH=/root/CLI/${ORGCA_HOST}/${PEER_HOST}/msp CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE peer chaincode query -C appchannel -n testcc -c '{"Args":["query","a"]}'```
       - PUT
-      ```CORE_PEER_ADDRESS=peer2:7051 CORE_PEER_MSPCONFIGPATH=/root/peer2/msp CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE peer chaincode invoke -C appchannel -n testcc -c '{"Args":["invoke","a","b","10"]}' --tls --cafile ${CORE_PEER_TLS_ROOTCERT_FILE}```
+      ```CORE_PEER_ADDRESS=$CORE_PEER_ADDRESS CORE_PEER_MSPCONFIGPATH=/root/CLI/${ORGCA_HOST}/${PEER_HOST}/msp CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE peer chaincode invoke -C appchannel -n testcc -c '{"Args":["invoke","a","b","10"]}' -o ${ORDERER_HOST}:7050 --tls --cafile ${CORE_PEER_TLS_ROOTCERT_FILE}```
       - GET
-      ```CORE_PEER_ADDRESS=peer2:7051 CORE_PEER_MSPCONFIGPATH=/root/peer2/msp CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE peer chaincode query -C appchannel -n testcc -c '{"Args":["query","a"]}```
+      ```CORE_PEER_ADDRESS=$CORE_PEER_ADDRESS CORE_PEER_MSPCONFIGPATH=/root/CLI/${ORGCA_HOST}/${PEER_HOST}/msp CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE peer chaincode query -C appchannel -n testcc -c '{"Args":["query","a"]}'```
       
 - Playbook: `104.deploy_hlf_explorer`
     - Execute: `ansible-playbook -v 104.deploy_hlf_explorer.yml --flush-cache -u root`

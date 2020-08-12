@@ -1,13 +1,9 @@
 ---
 - name: Test Playbook
-  hosts: localhost
-  gather_facts: no
-  tasks:      
-    - debug:
-        msg: "{{item.0.name}} - {{item.1}} - {{item.2}}"
-      with_nested:
-        - "{{peerservices}}"
-        - [["tlscacerts/tls-{{tlsca.name}}-7054.pem", "ca.crt"],
-         ["signcerts/cert.pem", "server.crt"],
-         ["keystore/key.pem", "server.key"]]
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Test hosts list
+      debug:
+        msg: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
   

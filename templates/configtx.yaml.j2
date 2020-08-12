@@ -104,9 +104,9 @@ Capabilities:
         # prior releases.
         # Prior to enabling V2.0 channel capabilities, ensure that all
         # orderers and peers on a channel are at v2.0.0 or later.
-        V2_0: true
-        # For backward compatibility of chaincodes that do not use external builders
-        V1_3: true
+        V2_0: false
+        # For backward compatibility, as Application Channels are still based on V1.4.2
+        V1_4_2: true
 
     # Orderer capabilities apply only to the orderers, and may be safely
     # used with prior release peers.
@@ -118,8 +118,6 @@ Capabilities:
         # Prior to enabling V2.0 orderer capabilities, ensure that all
         # orderers on a channel are at v2.0.0 or later.
         V2_0: true
-        # For backward compatibility of chaincodes that do not use external builders
-        V1_1: true
 
     # Application capabilities apply only to the peer network, and may be safely
     # used with prior release orderers.
@@ -129,10 +127,10 @@ Capabilities:
         # features and fixes of fabric v2.0.
         # Prior to enabling V2.0 orderer capabilities, ensure that all
         # orderers on a channel are at v2.0.0 or later.
-        V2_0: true
+        V2_0: false
 
-        # For backward compatibility of chaincodes that do not use external builders
-        V1_3: true
+        # For backward compatibility of chaincodes that do not use external builders 1.X
+        V1_4_2: true
 
 ################################################################################
 #

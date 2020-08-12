@@ -38,10 +38,9 @@
       - "CORE_PEER_TLS_ENABLED=true"  
       - "CORE_PEER_LOCALMSPID={{org.name}}MSP"    
       - "ORDERER_HOST={{orderer.name}}"
-      - "PEER1_HOST={{peer1.name}}"
-      - "PEER2_HOST={{peer2.name}}"
+      - "ADMIN_USER={{admin_user}}"      
       - "TLSCA_HOST={{tlsca.name}}"
-      - "ORGCA_HOST={{tlsca.name}}"
+      - "ORGCA_HOST={{orgca.name}}"
     placement:      
       constraints:
         - node.role == worker      
