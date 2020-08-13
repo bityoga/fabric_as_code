@@ -1,7 +1,6 @@
 # ---
 
 # HLF CA CLI Services
-
 # Stop all CLI Services services
 - name: Stop CLI Service - {{ orderer.name }}_cli
   become: yes
@@ -34,13 +33,21 @@
     mode: "0500"
     force: yes  
 
-# # Generate the list of swarm managers to be used as Orderer Endpoints in configtx
-# - name: Get IP addresses as a list for all swarm manager nodes
-#   vars:
-#     _swarm_manager_ip_list: "{{ groups['swarm_managers'] | map('extract', hostvars, ['ansible_host']) | list  | join(':{{orderer.port}},')  }}"            
-#     __swarm_manager_ip_list: "{{_swarm_manager_ip_list}}:{{orderer.port}}"
-#   set_fact:      
-#     swarm_manager_ip_list: "{{ __swarm_manager_ip_list.split(',') }}"
+# Generate the list of swarm managers to be used as Orderer Endpoints in configtx
+- name: Get IP addresses as a list for all swarm manager nodes
+  vars:
+    _swarm_manager_ip_list: "{{ groups['swarm_managers'] | map('extract', hostvars, ['ansible_host']) | list  | join(':{{orderer.port}},')  }}"            
+    __swarm_manager_ip_list: "{{_swarm_manager_ip_list}}:{{orderer.port}}"
+  set_fact:      
+    swarm_manager_ip_list: "{{ __swarm_manager_ip_list.split(',') }}"
+
+# Generate the list of swarm managers to be used in RAFT Consenters in configtx
+- name: Build a list of all consenter
+  set_fact:
+    Consenters: "{{ Consenters }} + [ {{ senter }} ]"
+  vars:         
+    senter: {Host: "{{item}}", Port: "{{orderer.port}}",ClientTLSCert: "{{orderer.path}}/msp/tls/server.crt",ServerTLSCert: "{{orderer.path}}/msp/tls/server.crt"}
+  loop: "{{groups['swarm_managers'] | map('extract', hostvars, ['ansible_host']) | list}}"
 
   # Copy relevent config files to mount directories for the docker services
 - name: Config templating configtx.yaml

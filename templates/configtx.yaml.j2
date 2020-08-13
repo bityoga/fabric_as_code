@@ -63,9 +63,12 @@ Organizations:
         # OrdererEndpoints is a list of all orderers this org runs which clients
         # and peers may to connect to to push transactions and receive blocks respectively.
         
-        #OrdererEndpoints: swarm_manager_ip_list
-        OrdererEndpoints:           
-          - {{orderer.name}}:7050
+        OrdererEndpoints: 
+        {% for endpoint in swarm_manager_ip_list %}
+        - {{endpoint}}
+        {% endfor %}
+        {# OrdererEndpoints:           
+          - {{orderer.name}}:7050 #}
 
         # AnchorPeers defines the location of peers which can be used for
         # cross-org gossip communication. Note, this value is only encoded in
@@ -327,10 +330,13 @@ Orderer: &OrdererDefaults
         # a subset of the host:port items enumerated in this list should be
         # replicated under the Orderer.Addresses key above.
         Consenters:
-            - Host: {{orderer.name}}
-              Port: {{orderer.port}}
-              ClientTLSCert: {{orderer.path}}/msp/tls/server.crt
-              ServerTLSCert: {{orderer.path}}/msp/tls/server.crt
+        {% for consenter in Consenters %}
+        - Host: {{consenter.Host}} 
+                  Port: {{consenter.Port}}
+                  ClientTLSCert: {{consenter.ClientTLSCert}}
+                  ServerTLSCert: {{consenter.ServerTLSCert}}         
+        {% endfor %}
+        
         # Options to be specified for all the etcd/raft nodes. The values here
         # are the defaults for all new channels and can be modified on a
         # per-channel basis via configuration updates.

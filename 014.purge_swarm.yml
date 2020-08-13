@@ -2,7 +2,7 @@
 
 # ansible-playbook -v 014.purge_swarm.yml -u root
 
-- name: Initialize the host machines
+- name: Purge all swarm services
   hosts: all
   gather_facts: no
   become: yes
@@ -13,10 +13,27 @@
       ignore_errors: yes
       when: "inventory_hostname in groups.swarm_manager_prime"
     
+    - name: "Remove an Overlay Docker Network"
+      become: yes
+      become_user: "root"
+      docker_network:    
+        name: "{{ swarm_network }}"
+        state: absent
+        force: yes
+      when: "inventory_hostname in groups.swarm_manager_prime"
+    
     - name: Remove any orphan containers on any machine
       shell: 'docker rm $(docker ps -aq)'
       ignore_errors: yes      
     
+    - name: Remove created volumes on any machone
+      shell: 'docker volume rm $(docker volume ls -q)'
+      ignore_errors: yes  
+
+    - name: prune all networks on any machine
+      shell: 'docker network prune  -f'
+      ignore_errors: yes         
+
     - name: Leave swarm for a node
       docker_swarm:
         state: absent
@@ -32,7 +49,7 @@
       docker_swarm:
         state: absent
         force: true    
-      when: "inventory_hostname in groups.swarm_managers"    
+      when: "inventory_hostname in groups.swarm_managers"          
     
     - name: Remove data for all services
       shell: "rm -rf /root/hlft-store/*"
