@@ -115,7 +115,7 @@ name: "{{couchdb_user}}", password: "{{couchdb_password}}"
 
 hlf_explorer_db : {
   image : "hyperledger/explorer-db",
-  tag : "1.0.0-rc2",
+  tag : "1.1.2",
   name : 'hlf_explorer_db',
   replicas: -1,
   db_name : "fabricexplorer",
@@ -128,7 +128,7 @@ hlf_explorer_db : {
 
 hlf_explorer : {
   image : "hyperledger/explorer",
-  tag : '1.0.0-rc2',
+  tag : '1.1.2',
   name : 'hlf_explorer',
   admin_user: "{{hlf_explorer_admin_user}}",
   admin_password: "{{hlf_explorer_admin_password}}",

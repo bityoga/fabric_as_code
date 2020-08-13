@@ -1,6 +1,6 @@
 
 # SPDX-License-Identifier: Apache-2.0
-version: '3.0'
+version: '2.1'
 
 volumes:
   {{hlf_explorer_db.name}}.{{hlf_explorer_db.volume}}:
@@ -21,10 +21,12 @@ services:
       - DATABASE_DATABASE={{hlf_explorer_db.db_name}}
       - DATABASE_USERNAME={{hlf_explorer_db.db_user_name}}
       - DATABASE_PASSWORD={{hlf_explorer_db.db_password}}
-      - POSTGRES_USER=postgress
+    healthcheck:
+      test: "pg_isready -h localhost -p 5432 -q -U postgres"
+      interval: 30s
+      timeout: 10s
+      retries: 5
     volumes:
-      - /root/hlf-explorer/docker-entrypoint.sh:/docker-entrypoint.sh
-      - /root/hlf-explorer/createdb.sh:/docker-entrypoint-initdb.d/createdb.sh
       - {{hlf_explorer_db.name}}.{{hlf_explorer_db.volume}}:/var/lib/postgresql/data
     ports:
       - {{hlf_explorer_db.port}}:5432
@@ -37,20 +39,27 @@ services:
     hostname: {{hlf_explorer.name}}
     environment:
       - DATABASE_HOST={{hlf_explorer_db.name}}
+      - DATABASE_DATABASE={{hlf_explorer_db.db_name}}
       - DATABASE_USERNAME={{hlf_explorer_db.db_user_name}}
       - DATABASE_PASSWD={{hlf_explorer_db.db_password}}
+      - LOG_LEVEL_APP=debug
+      - LOG_LEVEL_DB=debug
+      - LOG_LEVEL_CONSOLE=info
+      - LOG_CONSOLE_STDOUT=true
       - DISCOVERY_AS_LOCALHOST=false
     volumes:
       - /root/hlf-explorer/config.json:/opt/explorer/app/platform/fabric/config.json
       - /root/hlf-explorer/connection-profile:/opt/explorer/app/platform/fabric/connection-profile
       - /root/hlft-store:/tmp/crypto
       - {{hlf_explorer.name}}.{{hlf_explorer.volume}}:/opt/wallet
-    depends_on:
-      - {{hlf_explorer_db.name}}
-    links:
-      - {{hlf_explorer_db.name}}:db
-    command: sh -c "sleep 16&& node /opt/explorer/main.js && tail -f /dev/null"
+      
+    command: sh -c "node /opt/explorer/main.js && tail -f /dev/null"
     ports:
       - {{hlf_explorer.port}}:8080
+   
+    depends_on:
+      {{hlf_explorer_db.name}}:
+      condition: service_healthy
+    
     networks:
       - {{swarm_network}}

@@ -1,96 +1,51 @@
-# ---   
-  # Stop all hlf-explorer services
+# ---
+# Stop all hlf-explorer services
 - name: Stop Explorer Service - {{ item.name }}
   become: yes
-  docker_swarm_service:   
+  docker_swarm_service:
     name: "{{item.name}}"
     state: absent
     networks:
       - "{{swarm_network}}"
-  loop: 
-    - "{{hlf_explorer}}"    
-    - "{{hlf_explorer_db}}" 
-  when: hlf_explorer.switch == "on" and inventory_hostname in groups.swarm_manager_prime  
-
-
+  loop:
+    - "{{hlf_explorer}}"
+    - "{{hlf_explorer_db}}"
+  when: hlf_explorer.switch == "on" and inventory_hostname in groups.swarm_manager_prime
 
   # We create relevent folder structure in the mount locally for services
 - name: Clean hlf-explorer config files folders , if they exists
-  become: yes  
-  file: 
+  become: yes
+  file:
     path: "/root/hlf-explorer/*"
     state: absent
   when: hlf_explorer.switch == "on"
-    
+
 - name: Copy hlf explorer config file and folder structure
   become: yes
   copy:
     src: "hlf-explorer"
     dest: "/root"
-    mode: '0750'
-    force: yes
-  when: hlf_explorer.switch == "on"
-
-- name: Make docker-entry.sh as executable
-  become: yes
-  copy:
-    src: "hlf-explorer/docker-entrypoint.sh"
-    dest: "/root/hlf-explorer/docker-entrypoint.sh"
-    mode: '0777'
-    force: yes
-  when: hlf_explorer.switch == "on"
-
-- name: Make createdb.sh as executable
-  become: yes
-  copy:
-    src: "hlf-explorer/createdb.sh"
-    dest: "/root/hlf-explorer/createdb.sh"
-    mode: '0777'
+    mode: "0750"
     force: yes
   when: hlf_explorer.switch == "on"
 
 # We create relevent folder structure in the mount locally for services
-- name: Clean hlf-explorer pgdata folders , if they exists
-  become: yes  
-  file: 
-    path: "/root/hlf-explorer/pgdata/*"
-    state: absent
-  when: hlf_explorer.switch == "on"
-
-# We create relevent folder structure in the mount locally for services
-- name: Clean hlf-explorer wallet folders , if they exists
-  become: yes  
-  file: 
-    path: "/root/hlf-explorer/wallet/*"
-    state: absent
-  when: hlf_explorer.switch == "on"
-
-- name: Grant permissions to pgdata
-  become: yes
-  copy:
-    src: "hlf-explorer/pgdata"
-    dest: "/root/hlf-explorer/pgdata"
-    mode: '0777'
-    force: yes
-  when: hlf_explorer.switch == "on"
-
 
 - name: Template copy hlf explorer config json file
   become: yes
   template:
     src: "hlf-explorer-config.json"
     dest: "/root/hlf-explorer/config.json"
-    mode: '0750'
+    mode: "0750"
     force: yes
   when: hlf_explorer.switch == "on"
-   
 
 - name: Template Copy hlf explorer network connection profile json file
   become: yes
   template:
     src: "hlf-explorer-network.json"
     dest: "/root/hlf-explorer/connection-profile/hlf-explorer-network.json"
-    mode: '0750'
+    mode: "0750"
     force: yes
   when: hlf_explorer.switch == "on"
 
@@ -99,39 +54,23 @@
   template:
     src: "hlf-explorer-docker-compose.yaml"
     dest: "/root/hlf-explorer/hlf-explorer-docker-compose.yaml"
-    mode: '0750'
+    mode: "0750"
     force: yes
   when: hlf_explorer.switch == "on"
-  
 
-- shell: ls -tr /root/hlft-store/orgca/admin/msp/keystore/*_sk | tail -1
+- shell: ls -tr /root/hlft-store/orgca/admin1/msp/keystore/*_sk | tail -1
   register: admin_secret_key_file
 
 - name: Copy and Rename admin secret key '*_sk' file to a common name "admin_sk.key" which is specified in connection profile
   become: yes
   copy:
-    mode: '0750'
+    mode: "0750"
     force: yes
     src: "{{ item }}"
-    dest: "/root/hlft-store/orgca/admin/msp/keystore/admin_sk.key"
+    dest: "/root/hlft-store/orgca/admin1/msp/keystore/admin_sk.key"
     remote_src: yes
   with_items: "{{admin_secret_key_file.stdout_lines}}"
   when: hlf_explorer.switch == "on"
-
-
-
-
-
-
-   
-
-
-
-
-
-
-
-
 
 #  # Stop hlf explorer containers
 # - name: Stop Hlf-Explorer containers
@@ -139,13 +78,11 @@
 #       'docker-compose -f /root/hlf-explorer/hlf-explorer-docker-compose.yaml down 2>&1'
 #   when: hlf_explorer.switch == "on"
 
-
 #   # Create & Start hlf explorer containers
 # - name: Start Hlf-Explorer containers
 #   raw:
 #       'docker-compose -f /root/hlf-explorer/hlf-explorer-docker-compose.yaml up -d 2>&1'
 #   when: hlf_explorer.switch == "on"
-
 
 #  # Stop hlf explorer stack services
 # - name: Remove Hlf-Explorer stack services
@@ -153,47 +90,35 @@
 #       'docker stack rm explorer 2>&1'
 #   when: hlf_explorer.switch == "on" and inventory_hostname in groups.swarm_manager_prime
 
-
 #   # Stack Deploy hlf explorer services
 # - name: Stack deploy Hlf-Explorer services
 #   raw:
 #       'docker stack deploy --compose-file /root/hlf-explorer/hlf-explorer-docker-compose.yaml explorer 2>&1'
 #   when: hlf_explorer.switch == "on" and inventory_hostname in groups.swarm_manager_prime
 
-
-
-
-
-
-
-
 #   # Pause for 15 seconds to build app cache.
 # - name : Pause for 20 seconds for containers to start up
 #   pause:
 #     seconds: 20
 
-
 #   # Remove all hlf-explorer volumes
 # - name: Remove Explorer Volumes - {{item.name}}.{{item.volume}}
 #   become: yes
-#   docker_volume:   
+#   docker_volume:
 #     name: "{{item.name}}.{{item.volume}}"
 #     state: absent
-#   loop: 
-#     - "{{hlf_explorer}}"    
-#     - "{{hlf_explorer_db}}" 
+#   loop:
+#     - "{{hlf_explorer}}"
+#     - "{{hlf_explorer_db}}"
 #   when: hlf_explorer.switch == "on"
-
-
 
 #     # We create relevent folder structure in the mount locally for services
 # - name: Clean pgdata folder, if  they exists
-#   become: yes  
-#   file: 
+#   become: yes
+#   file:
 #     path: "/root/hlf-explorer/pgdata"
 #     state: absent
 #   when: hlf_explorer.switch == "on"
-
 
 # - name: Copy pgdata folder structure
 #   become: yes
@@ -204,15 +129,13 @@
 #     force: yes
 #   when: hlf_explorer.switch == "on"
 
-
 #       # We create relevent folder structure in the mount locally for services
 # - name: Clean wallet folder, if  they exists
-#   become: yes  
-#   file: 
+#   become: yes
+#   file:
 #     path: "/root/hlf-explorer/wallet"
 #     state: absent
 #   when: hlf_explorer.switch == "on"
-
 
 # - name: Copy wallet folder structure
 #   become: yes
@@ -223,9 +146,27 @@
 #     force: yes
 #   when: hlf_explorer.switch == "on"
 
+# Create & Start hlf_explorer_db service
+# Containers are placed in the managers
 
-  # Create & Start hlf_explorer_db service
-  # Containers are placed in the managers
+- name: Remove {{hlf_explorer_db.volume}} volume
+  docker_volume:
+    name: "{{hlf_explorer_db.volume}}"
+    state: absent
+
+- name: Remove {{hlf_explorer.volume}} volume
+  docker_volume:
+    name: "{{hlf_explorer.volume}}"
+    state: absent
+
+- name: Create {{hlf_explorer_db.volume}} volume
+  docker_volume:
+    name: "{{hlf_explorer_db.volume}}"
+
+- name: Create {{hlf_explorer.volume}} volume
+  docker_volume:
+    name: "{{hlf_explorer.volume}}"
+
 - name: Hlf-Explorer db Service
   become: yes
   docker_swarm_service:
@@ -234,52 +175,34 @@
     networks:
       - "{{swarm_network}}"
     image: "{{hlf_explorer_db.image}}:{{hlf_explorer_db.tag}}"
-
-
-    # command:
-    #   "bash /docker-entrypoint-initdb.d/createdb.sh &"
+    healthcheck:
+      # If this fails or timeouts, the healthcheck fails.
+      test: "pg_isready -h localhost -p {{hlf_explorer_db.port}} -q -U postgres"
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
     mode: replicated
     replicas: "{{hlf_explorer_db.replicas}}"
     mounts:
-      - source: "/root/hlf-explorer/createdb.sh"
-        target: "/docker-entrypoint-initdb.d/createdb.sh"
-        type: bind
-
-      - source: "/root/hlf-explorer/docker-entrypoint.sh"
-        target: "/docker-entrypoint.sh"
-        type: bind
-        
-
-      - source: "/root/hlf-explorer/pgdata"
+      - source: "{{hlf_explorer.volume}}"
         target: "/var/lib/postgresql/data"
-        type: bind
+        type: volume
 
-      # - source: "/root/hlft-store/hlf-explorer/pgdata"
-      #   target: "/var/lib/postgresql/data"
-      #   type: bind
-
-      # - source: "{{hlf_explorer_db.name}}.{{hlf_explorer_db.volume}}"
-      #   target: "/var/lib/postgresql/data"
-      #   type: volume      
-
-     
     publish:
       - published_port: "{{hlf_explorer_db.port}}"
         target_port: "5432"
         protocol: "tcp"
 
-    env:       
+    env:
       - "DATABASE_DATABASE={{hlf_explorer_db.db_name}}"
       - "DATABASE_USERNAME={{hlf_explorer_db.db_user_name}}"
       - "DATABASE_PASSWORD={{hlf_explorer_db.db_password}}"
-      - "POSTGRES_USER=postgress"
-      - "POSTGRES_PASSWORD=password"
     force_update: yes
-    debug : yes
+    debug: yes
   when: hlf_explorer_db.switch == "on" and inventory_hostname in groups.swarm_manager_prime
-  
-  # Create & Start hlf_explorer service 
+
+  # Create & Start hlf_explorer service
   # Containers are placed in the managers
 - name: Hlf-Explorer Service
   become: yes
@@ -289,15 +212,14 @@
     networks:
       - "{{swarm_network}}"
     image: "{{hlf_explorer.image}}:{{hlf_explorer.tag}}"
-    command:
-      sh -c "sleep 16&& node /opt/explorer/main.js && tail -f /dev/null"
-      #sh -c "node /opt/explorer/main.js && tail -f /dev/null"
+    command: sh -c "node /opt/explorer/main.js && tail -f /dev/null"
+
     mode: replicated
     replicas: "{{hlf_explorer.replicas}}"
     mounts:
       - source: "/root/hlf-explorer/config.json"
         target: "/opt/explorer/app/platform/fabric/config.json"
-        type: bind 
+        type: bind
       - source: "/root/hlf-explorer/connection-profile"
         target: "/opt/explorer/app/platform/fabric/connection-profile"
         type: bind
@@ -305,41 +227,31 @@
         target: "/tmp/crypto"
         type: bind
 
-      - source: "/root/hlf-explorer/wallet"
+      - source: "{{hlf_explorer.volume}}"
         target: "/opt/wallet"
-        type: bind
+        type: volume
 
-      # - source: "/root/hlft-store/hlf-explorer/wallet"
-      #   target: "/opt/wallet"
-      #   type: bind
-
-      # - source: "{{hlf_explorer.name}}.{{hlf_explorer.volume}}"
-      #   target: "/opt/wallet"
-      #   type: volume
-
-
-      #- source: "/root/hlft-store/orgca/admin/msp/keystore/27298680350d3b4418f20f83d62c45e568b9dcede7755d3eca1cfd39b0e2e09b_sk"
-        #target: "/tmp/crypto/orgca/admin/msp/keystore/admin_sk.key"
-        #type: bind      
     publish:
       - published_port: "{{hlf_explorer.port}}"
         target_port: "8080"
         protocol: "tcp"
-    env:       
+    env:
       - "DATABASE_HOST={{hlf_explorer_db.name}}"
+      - "DATABASE_DATABASE={{hlf_explorer_db.db_name}}"
       - "DATABASE_USERNAME={{hlf_explorer_db.db_user_name}}"
       - "DATABASE_PASSWD={{hlf_explorer_db.db_password}}"
+      - "LOG_LEVEL_APP=debug"
+      - "LOG_LEVEL_DB=debug"
+      - "LOG_LEVEL_CONSOLE=info"
+      - "LOG_CONSOLE_STDOUT=true"
       - "DISCOVERY_AS_LOCALHOST=false"
-      
+
     force_update: yes
   when: hlf_explorer.switch == "on" and inventory_hostname in groups.swarm_manager_prime
-
-
 # # Pause for 15 seconds to build app cache.
 # - name : Pause for 20 seconds for containers to start up
 #   pause:
 #     seconds: 20
-
 
 #    # Stop hlf explorer containers
 # - name: Execute createdb.sh script in hhf-explorer db container
