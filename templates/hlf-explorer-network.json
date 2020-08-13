@@ -21,8 +21,8 @@
   "channels": {
     "appchannel": {
       "peers": {
-        "{{peer1.name}}": { "discover": "false" },
-        "{{peer2.name}}": { "discover": "false" }
+        "{{peer1.name}}": {},
+        "{{peer2.name}}": {}
       },
       "connection": {
         "timeout": {
