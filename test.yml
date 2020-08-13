@@ -1,0 +1,9 @@
+---
+- name: Test Playbook
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Test hosts list
+      debug:
+        msg: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+  

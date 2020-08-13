@@ -6,67 +6,94 @@
 - name: Stop CLI Service
   become: yes
   docker_swarm_service:   
-    name: "peer_cli"
+    name: "{{item.name}}_cli"
     state: absent
     networks:
       - "{{swarm_network}}"
+  loop: "{{ peerservices }}"
     
-- name: Create CLI assets folders in hlft-store
+- name: Clean CLI {{item.name}}_cli folder in hlft-store
   become: yes
   file: 
-    path: "/root/hlft-store/peer_cli"
+    path: "/root/hlft-store/{{item.name}}_cli"
+    state: absent               
+  loop: "{{ peerservices }}"
+  
+- name: Create CLI {{item.name}}_cli folder in hlft-store
+  become: yes
+  file: 
+    path: "/root/hlft-store/{{item.name}}_cli"
     state: directory
     mode: 0750              
+  loop: "{{ peerservices }}"
 
 # Copy the relevent scripts
 - name: Copy scripts
   become: yes
   copy:
     src: "cli.sh"
-    dest: "/root/hlft-store/peer_cli/cli.sh"
+    dest: "/root/hlft-store/{{item.name}}_cli/cli.sh"
     mode: "0500"
     force: yes 
+  loop: "{{ peerservices }}"
 
   # Create & Start service for CLI 
 - name: Fabric Service - {{ item.name }}
   become: yes
   docker_swarm_service:
-    name: "peer_cli"
-    hostname: "peer_cli"
+    restart_policy: "none"
+    name: "{{item.name}}_cli"
+    hostname: "{{item.name}}_cli"
     networks:
       - "{{swarm_network}}"
     image: "{{cli.image}}:{{cli.tag}}"
     command: >
-      bash -c "/root/peer_cli/cli.sh;"
-    working_dir: /root/peer_cli
+      bash -c "/root/{{item.name}}_cli/cli.sh;"
+    working_dir: /root/{{item.name}}_cli
     mounts:      
-      - source: "/root/hlft-store/peer_cli/"
-        target: "/root/peer_cli"
+      # PEER CLI MOUNT
+      - source: "/root/hlft-store/{{item.name}}_cli/"
+        target: "/root/{{item.name}}_cli"
         type: bind 
-      - source: "/root/hlft-store/orderer_cli/"
-        target: "/root/peer_cli/artifacts"
+      # ORDERER ARTIFACTS, peer channel transactions
+      - source: "/root/hlft-store/orderer_cli/artifacts/"
+        target: "/root/{{item.name}}_cli/artifacts"
         type: bind
-      - source: "/root/hlft-store/{{peer1.name}}/"
-        target: "{{peer1.path}}"
-        type: bind 
-      - source: "/root/hlft-store/{{peer2.name}}/"
-        target: "{{peer2.path}}"
-        type: bind   
-      - source: "/root/hlft-store/{{orgca.name}}/admin/"
-        target: "/root/admin"
+      # PEER MOUNT, for the TLS certs
+      - source: "/root/hlft-store/{{orgca.name}}/{{item.name}}/"
+        target: "{{item.path}}"
+        type: bind     
+      # ADMIN MOUNT, runs the channel commands as admin
+      - source: "/root/hlft-store/{{orgca.name}}/{{admin_user}}/"
+        target: "/root/{{admin_user}}"
         type: bind
     env: 
+      - "IDX={{idx}}"
       - "GOPATH=/opt/gopath"
       - "CORE_VM_ENDPOINT=unix:///var/run/docker.sock"
-      - "FABRIC_LOGGING_SPEC=DEBUG"
-      - "CORE_PEER_TLS_ENABLED=true"  
-      - "CORE_PEER_LOCALMSPID={{org.name}}MSP"    
-      - "ORDERER_HOST={{orderer.name}}"
-      - "PEER1_HOST={{peer1.name}}"
-      - "PEER2_HOST={{peer2.name}}"
+      - "FABRIC_LOGGING_SPEC={{LOG_LEVEL}}"      
+      - "CORE_PEER_ID={{item.name}}"
+      - "CORE_PEER_ADDRESS={{item.name}}:7051"
+      - "CORE_PEER_LISTENADDRESS=0.0.0.0:7051"
+      - "CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052"
+      - "CORE_PEER_LOCALMSPID={{org.name}}MSP"          
+      - "CORE_PEER_TLS_ENABLED=true"
+      - "CORE_PEER_TLS_CERT_FILE={{item.path}}/msp/tls/server.crt" #fully qualified path of the server certificate
+      - "CORE_PEER_TLS_KEY_FILE={{item.path}}/msp/tls/server.key" #fully qualified path of the server private key
+      - "CORE_PEER_TLS_ROOTCERT_FILE={{item.path}}/msp/tls/ca.crt" #fully qualified path of the CA chain file
+      - "CORE_PEER_TLS_CLIENTAUTHREQUIRED=false"
+      # - "CORE_PEER_TLS_CLIENTROOTCAS_FILES=tba" #fully qualified path of the CA chain file
+      # - "CORE_PEER_TLS_CLIENTCERT_FILE=tba" #fully qualified path of the client certificate
+      # - "CORE_PEER_TLS_CLIENTKEY_FILE=tba" #fully qualified path of the client private key
       - "TLSCA_HOST={{tlsca.name}}"
+      - "ORDERER_HOST={{orderer.name}}"
+      - "AGENT_HOST={{item.name}}"   
+      - "ADMIN_USER={{admin_user}}"        
     placement:      
       constraints:
         - node.role == worker      
     force_update: yes    
+  loop: "{{ peerservices }}"
+  loop_control:
+    index_var: idx
   when: cli.switch == "on"

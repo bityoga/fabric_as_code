@@ -8,53 +8,38 @@
     state: absent
     networks:
       - "{{swarm_network}}"
-  loop: 
-    - "{{ peer1 }}"    
-    - "{{ peer2 }}"        
+  loop: "{{ peerservices }}"                            
 
-  # We create relevent folder structure in the mount locally for services
-- name: Clean Peer folders in hlft-store, if they exists
-  become: yes  
-  file: 
-    path: "/root/hlft-store/{{item.name}}"
+# Prep the TLS certs
+- name: Clean tls folder under /root/hlft-store/{{orgca.name}}/{{item.name}}/msp/tls
+  become: yes
+  file:
+    path: "/root/hlft-store/{{orgca.name}}/{{item.name}}/msp/tls"
     state: absent
-  loop:        
-    - "{{ peer1 }}"    
-    - "{{ peer2 }}"     
+    mode: '0755'
+  loop: "{{ peerservices }}"
 
-- name: Create Peer Service folders in hlft-store
+# Prep the TLS certs
+- name: Create tls folder under /root/hlft-store/{{orgca.name}}/{{item.name}}/msp/tls
   become: yes
-  file: 
-    path: "/root/hlft-store/{{item.name}}"
+  file:
+    path: "/root/hlft-store/{{orgca.name}}/{{item.name}}/msp/tls"
     state: directory
-    mode: 0750
-  loop:
-    - "{{ peer1 }}"    
-    - "{{ peer2 }}"     
+    mode: '0755'
+  loop: "{{ peerservices }}"
 
-- name: Copy MSP folder
-  become: yes
+# Copy tls certs
+- name: Copy TLS certs
   copy:
-    src: "/root/hlft-store/{{orgca.name}}/{{item.name}}/msp/"
-    dest: "/root/hlft-store/{{item.name}}/msp"
-    mode: '0750'
+    src: "/root/hlft-store/{{tlsca.name}}/{{item.0.name}}/tls-msp/{{item.1}}"
+    dest: "/root/hlft-store/{{orgca.name}}/{{item.0.name}}/msp/tls/{{item.2}}"
     remote_src: yes
-    force: yes
-  loop: 
-    - "{{ peer1 }}"
-    - "{{ peer2 }}"    
-
-- name: Copy TLSMSP folder
-  become: yes
-  copy:
-    src: "/root/hlft-store/{{tlsca.name}}/{{item.name}}/tls-msp/"
-    dest: "/root/hlft-store/{{item.name}}/tls-msp"
-    mode: '0750'
-    remote_src: yes
-    force: yes
-  loop: 
-    - "{{ peer1 }}"
-    - "{{ peer2 }}"
+  with_nested:
+    - "{{peerservices}}"
+    - [["tlscacerts/tls-{{tlsca.name}}-7054.pem", "ca.crt"],
+      ["signcerts/cert.pem", "server.crt"],
+      ["keystore/key.pem", "server.key"]]
+  
 
   # Create & Start services for Peers 
 - name: Fabric Service - {{ item }}
@@ -68,8 +53,14 @@
     mode: replicated
     replicas: "{{item.replicas}}"
     mounts:
-      - source: "/root/hlft-store/{{item.name}}"
+      - source: "/root/hlft-store/{{orgca.name}}/{{item.name}}"
         target: "{{item.path}}"
+        type: bind 
+      - source: "/root/hlft-store/{{tlsca.name}}/{{item.name}}/tls-msp"
+        target: "{{item.path}}/tls-msp"
+        type: bind
+      - source: "/root/hlft-store/{{tlsca.name}}/{{admin_user}}/msp/"
+        target: "/root/{{admin_user}}/tls-msp"
         type: bind 
       - source: "/var/run/docker.sock"
         target: "/var/run/docker.sock"
@@ -82,20 +73,26 @@
       - "CORE_PEER_ID={{item.name}}"
       - "CORE_PEER_ADDRESS={{item.name}}:7051"
       - "CORE_PEER_LISTENADDRESS=0.0.0.0:7051"
+      - "CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052"
       - "CORE_PEER_LOCALMSPID={{org.name}}MSP"
       - "CORE_PEER_MSPCONFIGPATH={{item.path}}/msp"
       - "CORE_VM_ENDPOINT=unix:///var/run/docker.sock"
       - "CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE={{swarm_network}}"
-      - "FABRIC_LOGGING_SPEC=debug"
+      - "FABRIC_LOGGING_SPEC={{LOG_LEVEL}}"
       - "CORE_PEER_TLS_ENABLED=true"
-      - "CORE_PEER_TLS_CERT_FILE={{item.path}}/tls-msp/signcerts/cert.pem"
-      - "CORE_PEER_TLS_KEY_FILE={{item.path}}/tls-msp/keystore/key.pem"
-      - "CORE_PEER_TLS_ROOTCERT_FILE={{item.path}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem"
+      - "CORE_PEER_TLS_CERT_FILE={{item.path}}/msp/tls/server.crt" #fully qualified path of the server certificate
+      - "CORE_PEER_TLS_KEY_FILE={{item.path}}/msp/tls/server.key" #fully qualified path of the server private key
+      - "CORE_PEER_TLS_ROOTCERT_FILE={{item.path}}/msp/tls/ca.crt" #fully qualified path of the CA chain file
+      - "CORE_PEER_TLS_CLIENTAUTHREQUIRED=false"
+      # - "CORE_PEER_TLS_CLIENTROOTCAS_FILES=tba" #fully qualified path of the CA chain file
+      # - "CORE_PEER_TLS_CLIENTCERT_FILE=tba" #fully qualified path of the client certificate
+      # - "CORE_PEER_TLS_CLIENTKEY_FILE=tba" #fully qualified path of the client private key      
       - "CORE_PEER_GOSSIP_USELEADERELECTION=true"
       - "CORE_PEER_GOSSIP_ORGLEADER=false"
       - "CORE_PEER_GOSSIP_EXTERNALENDPOINT={{item.name}}:7051"
       - "CORE_PEER_GOSSIP_SKIPHANDSHAKE=true"
       - "CORE_PEER_GOSSIP_BOOTSTRAP={{item.bootstrap}}"
+      - "CORE_PEER_FILESYSTEMPATH={{item.path}}/fs"
       - "CORE_LEDGER_STATE_STATEDATABASE={{item.dbtype}}"
       - "CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS={{couchdb.name}}_{{item.name}}:5984"
       - "CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME={{couchdb.name}}"
@@ -106,7 +103,5 @@
       constraints:
         - node.role == worker      
     force_update: yes
-  loop: 
-    - "{{ peer1 }}"    
-    - "{{ peer2 }}"    
+  loop: "{{ peerservices }}"        
   when: item.switch == "on"

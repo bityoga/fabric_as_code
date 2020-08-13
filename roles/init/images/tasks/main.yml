@@ -8,8 +8,7 @@
    docker_container:
      name: "{{ item.name }}"
      state: absent
-   with_items:
-    - "{{services}}"
+   with_items: "{{services}}"
 
  - name: Pull & Build Docker Image {{ item.image }}:{{ item.tag }}
    become: yes
@@ -18,8 +17,7 @@
       name: "{{ item.name }}"
       image: "{{ item.image }}:{{ item.tag }}"
       state: started
-   with_items:
-    - "{{services}}" 
+   with_items: "{{services}}" 
     
     
  - name: Stop & Remove Container {{item.name}}, if it exist
@@ -28,5 +26,4 @@
    docker_container:
      name: "{{item.name}}"
      state: absent
-   with_items:
-    - "{{services}}"
+   with_items: "{{services}}"

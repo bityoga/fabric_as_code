@@ -1,18 +1,16 @@
 # ---
 
 # HLF CA CLI Services
-  
+
 # Stop all CLI Services services
-- name: Stop CLI Service - {{ item.name }}_cli
+- name: Stop CLI Service - "{{ item.0.name }}_{{item.1.1.name}}_cli"
   become: yes
-  docker_swarm_service:   
-    name: "{{ item.name }}_cli"
+  docker_swarm_service:
+    name: "{{ item.0.name }}_{{item.1.1.name}}_cli"
     state: absent
     networks:
       - "{{swarm_network}}"
-  loop: 
-    - "{{ tlsca }}"
-    - "{{ orgca }}"       
+  loop: "{{caservices | product((peerservices + [orderer]) | enumerate) | list}}"
 
 # Copy the relevent scripts
 - name: Copy scripts
@@ -22,44 +20,41 @@
     dest: "/root/hlft-store/{{item.name}}/cli.sh"
     mode: "0500"
     force: yes
-  loop: 
-    - "{{ tlsca }}" 
-    - "{{ orgca }}" 
+  loop: "{{ caservices }}"
 
-  # Create & Start service for CLI 
-- name: Fabric Service - {{ item.name }}
+  # Enroll Agents on each CA service
+- name: ENROLL Agents for Fabric Service - "{{ item.0.name }}_{{item.1.1.name}}_cli"
   become: yes
   docker_swarm_service:
-    name: "{{ item.name }}_cli"
-    hostname: "{{ item.name }}_cli"
+    restart_policy: "none"
+    name: "{{ item.0.name }}_{{item.1.1.name}}_cli"
+    hostname: "{{ item.0.name }}_{{item.1.1.name}}_cli"
     networks:
       - "{{swarm_network}}"
-    image: "{{item.image}}:{{item.tag}}"
+    image: "{{item.0.image}}:{{item.0.tag}}"
     mode: replicated
     replicas: "-1"
     command: >
-      bash -c "/{{item.path}}/cli.sh {{item.name}};"
+      bash -c "/{{item.0.path}}/cli.sh {{item.0.type}};"
     mounts:
-      - source: "/root/hlft-store/{{item.name}}/"
-        target: "{{item.path}}"
-        type: bind     
-    env: 
-      - "HOST_HOME={{item.path}}"
-      - "FABRIC_CA_NAME={{item.name}}"
-      - "FABRIC_CA_SECRET={{item.password}}"
+      - source: "/root/hlft-store/{{item.0.name}}/"
+        target: "{{item.0.path}}"
+        type: bind
+    env:
+      - "IDX={{item.1.0}}"
+      - "HOST_HOME={{item.0.path}}"      
+      - "FABRIC_CA_NAME={{item.0.name}}"
+      - "FABRIC_CA_SECRET={{item.0.password}}"
+      - "ADMIN_USER={{admin_user}}"
+      - "ADMIN_SECRET={{admin_password}}"
       - "FABRIC_CA_PORT=7054"
-      - "CORE_PEER_LOCALMSPID={{org.name}}MSP"
-      - "ORDERER_HOST={{orderer.name}}"
-      - "ORDERER_SECRET={{orderer.password}}"
-      - "PEER1_HOST={{peer1.name}}"
-      - "PEER1_SECRET={{peer1.password}}"
-      - "PEER2_HOST={{peer2.name}}"
-      - "PEER2_SECRET={{peer2.password}}"      
-    placement:      
+      - "CORE_PEER_LOCALMSPID={{org.name}}MSP"      
+      - "AGENT_HOST={{item.1.1.name}}"
+      - "AGENT_SECRET={{item.1.1.password}}"
+      - "AGENT_TYPE={{item.1.1.type}}"
+    placement:
       constraints:
-        - node.role == worker     
-    force_update: yes 
-  loop: 
-     - "{{ tlsca }}"
-     - "{{ orgca }}"    
-  when: item.switch == "on"
+        - node.role == worker
+    force_update: yes
+  loop: "{{caservices | product((peerservices + [orderer]) | enumerate) | list}}"
+  when: item.0.switch == "on"

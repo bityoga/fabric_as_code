@@ -10,9 +10,7 @@
     state: absent
     networks:
       - "{{swarm_network}}"
-  loop: 
-    - "{{ tlsca }}"
-    - "{{ orgca }}"
+  loop: "{{ caservices }}"
 
   # We create relevent folder structure in mount locally for service
 - name: Clean Fabric CA Server folders in hlft-store, if they exists
@@ -20,9 +18,7 @@
   file: 
     path: "/root/hlft-store/{{item.name}}"
     state: absent
-  loop:        
-    - "{{ tlsca }}"
-    - "{{ orgca }}"
+  loop: "{{ caservices }}"
 
 - name: Create Fabric CA Server folders in hlft-store
   become: yes
@@ -30,9 +26,7 @@
     path: "/root/hlft-store/{{item.name}}"
     state: directory
     mode: 0750
-  loop:
-    - "{{ tlsca }}"
-    - "{{ orgca }}"
+  loop: "{{ caservices }}"
 
 # Create & Start service TLS CA 
 - name: Fabric CA - {{ item }}
@@ -46,7 +40,7 @@
     mode: replicated
     replicas: "{{item.replicas}}"
     command: 
-      bash -c "fabric-ca-server start -d -b ca-admin-{{item.name}}:{{item.password}} --port 7054" 
+      bash -c "fabric-ca-server start -b ca-admin-{{item.name}}:{{item.password}} --port 7054 --loglevel {{LOG_LEVEL}}" 
     mounts:
       - source: "/root/hlft-store/{{item.name}}"
         target: "{{item.path}}"
@@ -60,13 +54,15 @@
       - "FABRIC_CA_SERVER_TLS_ENABLED=true"
       - "FABRIC_CA_SERVER_CSR_CN={{item.name}}"
       - "FABRIC_CA_SERVER_CSR_HOSTS={{item.name}}"
-      - "FABRIC_CA_SERVER_CA_NAME={{item.name}}"
-      - "FABRIC_CA_SERVER_DEBUG=true"
+      - "FABRIC_CA_SERVER_CA_NAME={{item.name}}"  
+      - "FABRIC_CA_SERVER_DB_DATASOURCE={{item.path}}/fabric-ca-server.db"    
     placement:      
       constraints:
         - node.role == worker   
     force_update: yes   
-  loop: 
-    - "{{ tlsca }}"
-    - "{{ orgca }}"
+  loop: "{{ caservices }}"
   when: item.switch == "on"
+
+# Pause for 5 seconds for the CAs to start
+- pause:
+    seconds: 5

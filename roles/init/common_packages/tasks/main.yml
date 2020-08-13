@@ -16,6 +16,8 @@
   when: ansible_os_family == 'RedHat'
   
   # Setup relevent repos
+
+  # GOLANG Repos
 - name: Set up the golang APT repository
   become: yes
   apt_repository:
@@ -30,11 +32,34 @@
     state: present
   when: ansible_os_family == 'RedHat'
 
+  # Docker Repos
 - name: Set up the Docker CE YUM repository
   become: yes
   get_url:
     url: https://mirror.go-repo.io/centos/go-repo.repo
     dest: /etc/yum.repos.d/go-repo.repo
+  when: ansible_os_family == 'RedHat'
+
+  # GlusterFS Repos
+- name: Add new apt source for GlusterFS
+  apt_repository:
+    repo: ppa:gluster/glusterfs-{{ glusterd_version }}
+    filename: gluster.list
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: Add an RPM signing key for GusterFS, uses whichever key is at the URL
+  rpm_key:
+    key: http://download.gluster.org/pub/gluster/glusterfs/{{ glusterd_version }}/rsa.pub
+    state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: Add new yum source for GlusterFS
+  yum_repository:
+    name: glusterfs
+    description: glusterfs YUM repo
+    baseurl: https://download.gluster.org/pub/gluster/glusterfs/{{ glusterd_version }}/LATEST/RHEL/glusterfs-rhel8.repo
+    state: present
   when: ansible_os_family == 'RedHat'
 
   # Install the packages specified in defaults/main.yml

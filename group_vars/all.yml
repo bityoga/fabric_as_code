@@ -1,5 +1,6 @@
 ---
-###########################################################################################
+LOG_LEVEL: "INFO"
+  ###########################################################################################
 #                                                                                         #
 #                                                                                         #
 #                       GlusterFS Cluster conf vars                                       #
@@ -7,9 +8,7 @@
 #                                                                                         #
 ###########################################################################################
 # gluster volume
-gluster_cluster_volume: "gv0"
-# gluster cluster ips
-gluster_cluster_host0: "64.225.79.131"
+gluster_cluster_volume: "gfs0"
 glusterd_version: '7'
 
 ###########################################################################################
@@ -26,6 +25,9 @@ org:
   unit: "bityoga"
 
 # Creds of various agents
+admin_user: "admin1"
+admin_password: "admin1pw"
+
 tlsca_user: "tlsca"
 tlsca_password: "tlscapw"
 
@@ -36,7 +38,7 @@ orderer_user: "orderer"
 orderer_password: "ordererpw"
 
 peer1_user: "peer1"
-peer1_password: "peer2pw"
+peer1_password: "peer1pw"
 
 peer2_user: "peer2"
 peer2_password: "peer2pw"
@@ -68,40 +70,40 @@ swarm_network: "hlfnet"
 tlsca: { switch: "on", image: "hyperledger/fabric-ca", tag: "1.4", replicas: -1, port: 8081,
  path: "/root/{{tlsca_user}}",
  db: "{{sqlite}}",
- name: "{{tlsca_user}}", password: "{{tlsca_password}}"
+ name: "{{tlsca_user}}", password: "{{tlsca_password}}", type: "tls"
 }
 
 orgca: { switch: "on", image: "hyperledger/fabric-ca", tag: "1.4", replicas: -1, port: 8052,
  path: "/root/{{orgca_user}}",
  db: "{{sqlite}}",
- name: "{{orgca_user}}", password: "{{orgca_password}}"
+ name: "{{orgca_user}}", password: "{{orgca_password}}", type: "org"
  }
 
 
 ######################################### Orderer #############################################
-orderer: { switch: "on", image: "hyperledger/fabric-orderer", tag: "1.4", replicas: -1, port: 8053,
+orderer: { switch: "on", image: "hyperledger/fabric-orderer", tag: "2.2", replicas: -1, port: 8053,
 caname: "{{orgca.name}}", anchorpeer: "{{peer1.name}}", anchorport: "{{peer1.port}}",
 path: "/root/{{orderer_user}}", type: "solo",
-name: "{{orderer_user}}", password: "{{orderer_password}}"
+name: "{{orderer_user}}", password: "{{orderer_password}}", type: "orderer"
 }
 
 ######################################### Peers #############################################
-peer1: { switch: "on", image: "hyperledger/fabric-peer", tag: "1.4", replicas: -1, port: 8054, 
+peer1: { switch: "on", image: "hyperledger/fabric-peer", tag: "2.2", replicas: -1, port: 8054, 
 caname: "{{orgca.name}}", path: "/root/{{peer1_user}}", bootstrap: "",
 dbtype: "goleveldb",
-name: "{{peer1_user}}", password: "{{peer1_password}}",
+name: "{{peer1_user}}", password: "{{peer1_password}}", type: "peer",
 leader: "{peer1_user}}"
 }
 
-peer2: { switch: "on", image: "hyperledger/fabric-peer", tag: "1.4", replicas: -1, port: 8055,
+peer2: { switch: "on", image: "hyperledger/fabric-peer", tag: "2.2", replicas: -1, port: 8055,
 caname: "{{orgca.name}}", path: "/root/{{peer2_user}}", bootstrap: "{{peer1.name}}:7051",
 dbtype: "CouchDB",
-name: "{{peer2_user}}", password: "{{peer2_password}}",
+name: "{{peer2_user}}", password: "{{peer2_password}}", type: "peer",
 leader: "{{peer1_user}}"
 }
 
 ######################################### CLI #############################################
-cli: { switch: "on", image: "hyperledger/fabric-tools", tag: "1.4"}
+cli: { switch: "on", image: "hyperledger/fabric-tools", tag: "2.2"}
 ######################################### DBs #############################################
 sqlite: {type: "sqlite3", source: "fabric-ca-server.db"}
 
@@ -162,14 +164,34 @@ portainer_agent : {
   switch: "on",
 }
 
+###########################################################################################
+#                                                                                         #
+#                                                                                         #
+#                                   Service Summary                                       #
+#                                                                                         #
+#                                                                                         #
+###########################################################################################
+
 services:
+  - "{{caservices}}"
+  - "{{orderer}}"
+  - "{{peerservices}}"
+  - "{{explorerservices}}"
+  - "{{vizservices}}"
+  
+caservices:
   - "{{tlsca}}"
   - "{{orgca}}"
-  - "{{orderer}}"
-  - "{{ peer1 }}"    
-  - "{{ peer2 }}"
+
+peerservices:
+  - "{{peer1}}"
+  - "{{peer2}}"
+
+explorerservices:
   - "{{hlf_explorer_db}}"
   - "{{hlf_explorer}}"
+
+vizservices:
   - "{{swarm_visualizer}}"
   - "{{portainer}}"
   - "{{portainer_agent}}"

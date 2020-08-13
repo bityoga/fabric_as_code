@@ -13,6 +13,7 @@ debian_package_list:
   - libtool
   - libltdl-dev
   - python3-pip
+  - glusterfs-client
 
 redhat_package_list:
   - yum-utils
@@ -25,6 +26,7 @@ redhat_package_list:
   - libtool
   - libtool-ltdl-devel
   - python3-pip  
+  - glusterfs-client
 
 pip_packages:
   - docker

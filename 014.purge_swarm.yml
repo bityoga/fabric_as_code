@@ -1,0 +1,38 @@
+---
+
+# ansible-playbook -v 014.purge_swarm.yml -u root
+
+- name: Initialize the host machines
+  hosts: all
+  gather_facts: no
+  become: yes
+  become_user: "root"
+  tasks:
+    - name: Remove docker services
+      shell: 'docker service rm $(docker service ls -q)'
+      ignore_errors: yes
+      when: "inventory_hostname in groups.swarm_manager_prime"
+    
+    - name: Remove any orphan containers on any machine
+      shell: 'docker rm $(docker ps -aq)'
+      ignore_errors: yes      
+    
+    - name: Leave swarm for a node
+      docker_swarm:
+        state: absent
+      when: "inventory_hostname in groups.swarm_workers"
+    
+    - name: Remove node from swarm
+      docker_swarm:
+        shell: "docker node rm $(docker node list -q)"    
+      ignore_errors: yes
+      when: "inventory_hostname in groups.swarm_workers"
+
+    - name: Remove swarm managers
+      docker_swarm:
+        state: absent
+        force: true    
+      when: "inventory_hostname in groups.swarm_managers"    
+    
+    - name: Remove data for all services
+      shell: "rm -rf /root/hlft-store/*"
