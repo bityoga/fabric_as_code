@@ -97,6 +97,7 @@
       - "CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS={{couchdb.name}}_{{item.name}}:5984"
       - "CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME={{couchdb.name}}"
       - "CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD={{couchdb.password}}"
+      - "CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:{{item.tag}}"
     working_dir: "{{item.path}}"
     placement:      
       constraints:

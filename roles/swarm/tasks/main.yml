@@ -3,6 +3,8 @@
 # Setup and Create a docker swarm creating the relevent managers and slaves as described in inventory/hosts
 
 - name: "Get docker info"
+  become: yes
+  become_user: "root"
   shell: docker info
   register: docker_info
   changed_when: false
@@ -40,7 +42,7 @@
   docker_swarm:
     state: join
     join_token: "{{ hostvars[groups.swarm_manager_prime[0]]['result'].swarm_facts.JoinTokens.Manager }}"
-    advertise_addr: "eth0:4567"
+    advertise_addr: "{{ ansible_host }}:4567"
     remote_addrs: ["{{ hostvars[groups.swarm_manager_prime[0]]['ansible_host'] }}:2377" ]
   retries: 3
   delay: 15
@@ -53,7 +55,7 @@
   docker_swarm:
     state: join
     join_token: "{{ hostvars[groups.swarm_manager_prime[0]]['result'].swarm_facts.JoinTokens.Worker }}"
-    advertise_addr: "eth0:4567"
+    advertise_addr: "{{ ansible_host }}:4567"
     remote_addrs: "{{ hostvars[groups.swarm_manager_prime[0]]['ansible_host'] }}"
   retries: 3
   delay: 20

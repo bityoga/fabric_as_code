@@ -61,6 +61,14 @@ python version = 3.7.4 (default, Jul  9 2019, 18:13:23) [Clang 10.0.1 (clang-100
 
 - Gluster FS  is used as persistent storage for all docker services hosted by an organization. In is required to have a seperate GlusterFS cluster in order to run this project on each of the **remote machines** that will host the HLF. We have created an easily deployable package for creating a GlusterFS cluster. Please check: [https://github.com/bityoga/mysome_glusterfs] and follow the ReadMe there!
 
+## ansible-semaphore Setup Instructions:
+
+These instructions is to be used only when utilising ansible-semaphore for deployment. 
+
+**Refer :** [ansible-semaphore-setup-instructions](/wiki/semaphore_instructions/)
+
+For normal deployment process, ignore this and follow the instructions below.
+
 ## Configuration
 There are very few parameters to be configured currently. All configurations are made inside *group_vars/all.yml*. 
   - **GlusterFS Setup** !Required
