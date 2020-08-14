@@ -5,52 +5,13 @@
   vars:
     Consenters: []
   tasks:
-    # Generate the list of swarm managers to be used as Orderer Endpoints in configtx
-    # - name: Get IP addresses as a list for all swarm manager nodes
-    #   vars:
-    #     _swarm_manager_ip_list: "{{ groups['swarm_managers'] | map('extract', hostvars, ['ansible_host']) | list  | join(':{{orderer.port}},')  }}"            
-    #     __swarm_manager_ip_list: "{{_swarm_manager_ip_list}}:{{orderer.port}}"
-    #   set_fact:      
-    #     swarm_manager_ip_list: "{{ __swarm_manager_ip_list.split(',') }}"
-
-    # - name: Test hosts list
-    #   debug:
-    #     msg: "{{ swarm_manager_ip_list }}"
-
-    # - name: Build a list of all consenter
-    #   set_fact:
-    #     Consenters: "{{ Consenters }} + [ {{ senter }} ]"
-    #   vars:         
-    #     senter: {Host: "{{item}}", Port: "{{orderer.port}}",ClientTLSCert: "{{orderer.path}}/msp/tls/server.crt",ServerTLSCert: "{{orderer.path}}/msp/tls/server.crt"}
-    #   loop: "{{groups['swarm_managers'] | map('extract', hostvars, ['ansible_host']) | list}}"
-
-    # - name: Test consenters list
-    #   debug:
-    #     msg: "{{ Consenters }}"
-
-
-    # # Copy relevent config files to mount directories for the docker services
-    # - name: Config templating configtx.yaml
-    #   become: yes  
-    #   template:
-    #     src: "configtx.yaml.j2"
-    #     dest: "/root/hlft-store/configtx.yaml"
-    #     mode: 0660
-    #     force: yes  
-    
-    - name: Get IP addresses as a list for all swarm manager nodes to be used as anchor ips   
-      set_fact:      
-        swarm_manager_ip_list_anchor: "{{ groups['swarm_managers'] | map('extract', hostvars, ['ansible_host']) | list  }}"  
-
-    - name:
+    # - name: Remove orphan CLIs
+    #   become: yes
+    #   docker_swarm_service:    
+    #     name: "{{item.name}}_cli"
+    #     state: absent
+    #   loop: "{{ peerservices + [orderer] + caservices }}"
+    - name: Remove orphan CLIs
       debug:
-        msg: "{{swarm_manager_ip_list}}"
-
-    # Copy relevent config files to mount directories for the docker services
-    - name: Config templating configtx.yaml
-      become: yes  
-      template:
-        src: "configtx.yaml.j2"
-        dest: "/root/hlft-store/configtx.yaml"
-        mode: 0660
-        force: yes
+        msg: "{{item.name}}_cli"        
+      loop: "{{ peerservices + [orderer] + caservices }}"

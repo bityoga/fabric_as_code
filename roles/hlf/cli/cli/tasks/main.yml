@@ -46,3 +46,7 @@
         - node.role == worker      
     force_update: yes    
   when: cli.switch == "on"
+
+- name: Remove orphan CLIs
+  become: yes
+  shell: 'docker service ls --format "{{.Name}}" | grep _cli'
