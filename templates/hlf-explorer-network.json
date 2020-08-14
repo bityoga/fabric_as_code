@@ -1,69 +1,71 @@
 {
-        "name": "{{org.name}}-{{org.unit}}",
-        "version": "1.0.0",
-        "client": {
-                "tlsEnable": true,
-                "adminUser": "{{hlf_explorer.admin_user}}",
-                "adminPassword": "{{hlf_explorer.admin_password}}",
-                "enableAuthentication": true,
-                "organization": "{{org.name}}",
-                "connection": {
-                        "timeout": {
-                                "peer": {
-                                        "endorser": "300"
-                                },
-                                "orderer": "300"
-                        }
-                }
+  "name": "{{org.name}}-{{org.unit}}",
+  "version": "1.0.0",
+  "client": {
+    "tlsEnable": true,
+    "adminCredential": {
+      "id": "{{hlf_explorer.admin_user}}",
+      "password": "{{hlf_explorer.admin_password}}"
+    },
+    "enableAuthentication": true,
+    "organization": "{{org.name}}",
+    "connection": {
+      "timeout": {
+        "peer": {
+          "endorser": "300"
         },
-        "channels": {
-                "appchannel": {
-                        "peers": {
-                                "{{peer1.name}}": {},
-                                "{{peer2.name}}": {}
-                        },
-                        "connection": {
-                                "timeout": {
-                                        "peer": {
-                                                "endorser": "6000",
-                                                "eventHub": "6000",
-                                                "eventReg": "6000"
-                                        }
-                                }
-                        }
-                }
-        },
-        "organizations": {
-                "{{org.name}}": {
-                        "mspid": "{{org.name}}MSP",
-                        "fullpath": true,
-                        "adminPrivateKey": {
-                                "path": "/tmp/crypto/orgca/admin/msp/keystore/admin_sk.key"
-                        },
-                        "signedCert": {
-                                "path": "/tmp/crypto/orgca/admin/msp/signcerts/cert.pem"
-                        }
-                }
-        },
-        "peers": {
-                "{{peer1.name}}": {
-                        "tlsCACerts": {
-                                "path": "/tmp/crypto/peer1/tls-msp/tlscacerts/tls-tlsca-7054.pem"
-                        },
-                        "url": "grpcs://{{ hostvars[groups.swarm_manager_prime[0]]['ansible_host'] }}:{{peer1.port}}",
-                        "grpcOptions": {
-                                "ssl-target-name-override": "{{peer1.name}}"
-                        }
-                },
-                "{{peer2.name}}": {
-                        "tlsCACerts": {
-                                "path": "/tmp/crypto/peer2/tls-msp/tlscacerts/tls-tlsca-7054.pem"
-                        },
-                        "url": "grpcs://{{ hostvars[groups.swarm_manager_prime[0]]['ansible_host'] }}:{{peer2.port}}",
-                        "grpcOptions": {
-                                "ssl-target-name-override": "{{peer2.name}}"
-                        }
-                }
+        "orderer": "300"
+      }
+    }
+  },
+  "channels": {
+    "appchannel": {
+      "peers": {
+        "{{peer1.name}}": {},
+        "{{peer2.name}}": {}
+      },
+      "connection": {
+        "timeout": {
+          "peer": {
+            "endorser": "6000",
+            "eventHub": "6000",
+            "eventReg": "6000"
+          }
         }
+      }
+    }
+  },
+  "organizations": {
+    "{{org.name}}": {
+      "mspid": "{{org.name}}MSP",
+      "fullpath": true,
+      "peers": ["{{peer1.name}}", "{{peer2.name}}"],
+      "adminPrivateKey": {
+        "path": "/tmp/crypto/orgca/admin1/msp/keystore/admin_sk.key"
+      },
+      "signedCert": {
+        "path": "/tmp/crypto/orgca/admin1/msp/signcerts/cert.pem"
+      }
+    }
+  },
+  "peers": {
+    "{{peer1.name}}": {
+      "tlsCACerts": {
+        "path": "/tmp/crypto/tlsca/peer1/tls-msp/tlscacerts/tls-tlsca-7054.pem"
+      },
+      "url": "grpcs://{{ ansible_default_ipv4.address }}:{{peer1.port}}",
+      "grpcOptions": {
+        "ssl-target-name-override": "{{peer1.name}}"
+      }
+    },
+    "{{peer2.name}}": {
+      "tlsCACerts": {
+        "path": "/tmp/crypto/tlsca/peer2/tls-msp/tlscacerts/tls-tlsca-7054.pem"
+      },
+      "url": "grpcs://{{ ansible_default_ipv4.address }}:{{peer2.port}}",
+      "grpcOptions": {
+        "ssl-target-name-override": "{{peer2.name}}"
+      }
+    }
+  }
 }
-                     
