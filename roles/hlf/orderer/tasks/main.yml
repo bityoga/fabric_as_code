@@ -45,8 +45,8 @@
       - "ORDERER_GENERAL_TLS_PRIVATEKEY={{orderer.path}}/msp/tls/server.key" #fully qualified path of the file that contains the server private key
       - "ORDERER_GENERAL_TLS_CERTIFICATE={{orderer.path}}/msp/tls/server.crt" #fully qualified path of the file that contains the server certificate
       - "ORDERER_GENERAL_TLS_ROOTCAS=[{{orderer.path}}/msp/tls/ca.crt]" #fully qualified path of the file that contains the certificate chain of the CA that issued TLS server certificate
-      - "ORDERER_GENERAL_TLS_CLIENTAUTHREQUIRED=false"
-      # - "ORDERER_GENERAL_TLS_CLIENTROOTCAS=tba" #fully qualified path of the file that contains the certificate chain of the CA that issued TLS server certificate
+      - "ORDERER_GENERAL_TLS_CLIENTAUTHREQUIRED=true"
+      - "ORDERER_GENERAL_TLS_CLIENTROOTCAS=[{{orderer.path}}/msp/tls/ca.crt]" #fully qualified path of the file that contains the certificate chain of the CA that issued TLS server certificate
       - "ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE={{orderer.path}}/msp/tls/server.crt"
       - "ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY={{orderer.path}}/msp/tls/server.key"
       - "ORDERER_GENERAL_CLUSTER_ROOTCAS=[{{orderer.path}}/msp/tls/ca.crt]"            

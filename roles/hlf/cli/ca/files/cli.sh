@@ -44,7 +44,7 @@ if [ $type == $tlsca ]; then
   printf "${GREEN}Enroll agent $AGENT_HOST for $FABRIC_CA_NAME${NC}\n"
   export FABRIC_CA_CLIENT_MSPDIR=tls-msp
   export FABRIC_CA_CLIENT_HOME=$HOST_HOME/$AGENT_HOST  
-  fabric-ca-client enroll -d -u https://$AGENT_HOST:$AGENT_SECRET@$FABRIC_CA_NAME:$FABRIC_CA_PORT --enrollment.profile tls --csr.hosts ${AGENT_HOST}
+  fabric-ca-client enroll -d -u https://$AGENT_HOST:$AGENT_SECRET@$FABRIC_CA_NAME:$FABRIC_CA_PORT --enrollment.profile tls --csr.hosts ${CSR_HOSTS}
 
   filename=$(ls $FABRIC_CA_CLIENT_HOME/$FABRIC_CA_CLIENT_MSPDIR/keystore | sort -n | head -1)
   mv $FABRIC_CA_CLIENT_HOME/$FABRIC_CA_CLIENT_MSPDIR/keystore/$filename $FABRIC_CA_CLIENT_HOME/$FABRIC_CA_CLIENT_MSPDIR/keystore/key.pem

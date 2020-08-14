@@ -74,8 +74,10 @@ Organizations:
         # cross-org gossip communication. Note, this value is only encoded in
         # the genesis block in the Application section context.
         AnchorPeers:
-            - Host: {{orderer.anchorpeer}}
-              Port: 7051
+        {% for endpoint in swarm_manager_ip_list_anchor %}
+        - Host: {{endpoint}}
+                  Port: {{orderer.anchorport}}
+        {% endfor %}            
 
 ################################################################################
 #

@@ -22,6 +22,12 @@
     force: yes
   loop: "{{ caservices }}"
 
+- name: Build a list for all --csr.hosts
+  vars:
+    csrhostslist: "{{ peerservices | map(attribute='name')| list  + [ orderer.name ]  + groups['swarm_managers'] | map('extract', hostvars, ['ansible_host']) | list }}"
+  set_fact:
+    csrhosts: "{{csrhostslist | join(',')}}"  
+
   # Enroll Agents on each CA service
 - name: ENROLL Agents for Fabric Service - "{{ item.0.name }}_{{item.1.1.name}}_cli"
   become: yes
@@ -52,6 +58,7 @@
       - "AGENT_HOST={{item.1.1.name}}"
       - "AGENT_SECRET={{item.1.1.password}}"
       - "AGENT_TYPE={{item.1.1.type}}"
+      - "CSR_HOSTS={{csrhosts}}"
     placement:
       constraints:
         - node.role == worker
