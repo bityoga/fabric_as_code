@@ -1,0 +1,18 @@
+{
+    "orgca": {
+        "caname": "orgca",
+        "url": "https://orgca:7054",
+        "enrollmentID": "admin1",
+        "enrollmentSecret": "admin1pw",
+        "mspid": "hlfMSP"
+
+    },
+    "tlsca": {
+        "caname": "tlsca",
+        "url": "https://tlsca:7054",
+        "enrollmentID": "admin1",
+        "enrollmentSecret": "admin1pw",
+        "mspid": "hlfMSP"
+
+    }
+}

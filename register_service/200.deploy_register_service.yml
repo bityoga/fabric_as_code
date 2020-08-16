@@ -1,0 +1,52 @@
+---
+
+# ansible-playbook -v 200.deploy_register_service.yml -u root
+
+- name: Deploy Register Service
+  hosts: all
+  gather_facts: no
+  tasks:  
+    - name: Clean Register Folder Structure
+      file:
+        path: "/root/hlft-store/{{register.name}}"
+        state: absent
+
+    - name: Create Register Folder Structure
+      file:
+        path: "/root/hlft-store/{{register.name}}"
+        state: directory
+
+    - name: Copy required scripts
+      copy:
+        src: "{{item}}"
+        dest: "/root/hlft-store/{{register.name}}/{{item}}"
+      loop:
+        - server.js
+        - package.json
+        - config/
+      
+    - name: Start the Registration Service
+      become: yes
+      docker_swarm_service:
+        name: "{{ register.name }}"
+        hostname: "{{ register.name }}"
+        networks:
+          - "{{swarm_network}}"
+        image: "{{register.image}}:{{register.tag}}"
+        mode: replicated
+        replicas: "{{register.replicas}}"        
+        mounts:
+          - source: "/root/hlft-store/{{register.name}}"
+            target: "{{register.path}}"
+            type: bind       
+        publish:
+          - published_port: "{{register.port}}"
+            target_port: "8080"
+            protocol: "tcp"
+        working_dir: "{{register.path}}"
+        command: >
+          sh -c "sleep 30000s;"
+        placement:      
+          constraints:
+            - node.role == worker      
+        force_update: yes        
