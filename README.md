@@ -210,7 +210,8 @@ Setting up of hyperledger fabric cluster requires the following steps. Creating 
     - Contains mounts of MSPs for all agents (admin, orderer, peers, ...)
     - Can perfrom any and all operations on the blockchain by changing its profile to any of the mounted agents
     - Mounts a test chaincode under `/root/CLI/chaincodes/test_chaincode`
-    - Sanity Check the working of the cluster
+    - Sanity Check the working of the cluster [OPTIONAL]
+      - Test chaincode is automatically installed when *INSTALL_TEST_CHAINCODE: "yes"* in *group_vars/all.yml*. If, *INSTALL_TEST_CHAINCODE: "no"* then you can install it manually, if needed, by following the steps bellow:
       - Install, Instanciate and Test Chaincode
         ```bash
         docker exec -it <<CLI_ID>> bash
