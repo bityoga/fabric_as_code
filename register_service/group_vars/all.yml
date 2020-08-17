@@ -1,23 +1,27 @@
 ---
-# Organization Details
 org:
   name: "hlf"
   unit: "bityoga"
 
-# Creds of various agents
-admin_user: "admin1"
-admin_password: "admin1pw"
+admin:
+  name: "admin1"
+  password: "admin1pw"
+  orgca: "orgca"
+  tlsca: "tlsca"
+  path: "/root/admin1"
+
+user: ""
 
 # Name of the swarm network that would host the services
 swarm_network: "hlfnet"
 
-register_name: "registerjs"
+registrar_name: "registrar"
 
 # Image information for the registration service
-register: 
-  name: "{{register_name}}"
+registrar: 
+  name: "{{registrar_name}}"
   image: "node"
   tag: "current-alpine3.11"
   replicas: -1
-  path: "/root/{{register_name}}"
+  path: "/root/{{registrar_name}}"
   port: 8088
