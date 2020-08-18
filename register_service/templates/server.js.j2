@@ -18,14 +18,14 @@ const ccp = JSON.parse(ccpJSON);
 const ORGANISATION_MSP = "{{org.name}}MSP";
 const CA_ORGANISATION_NAME = "{{admin.orgca}}";
 
-function enrollAdmin() {
+async function enrollAdmin() {
     try {
 
 
         // Create a new CA client for interacting with the CA.
         const caInfo = ccp.certificateAuthorities[CA_ORGANISATION_NAME];
         console.log(caInfo);
-        const caTLSCACerts = ["{{admin.path/ca.crt}}"];
+        const caTLSCACerts = ["{{admin.path}}/ca.crt"];
         //const caTLSCACerts = caInfo.tlsCACerts.pem;
         const ca = new FabricCAServices(caInfo.url, { trustedRoots: caTLSCACerts, verify: false }, caInfo.caName);
 
@@ -61,13 +61,14 @@ const https = require('https');
 const express = require('express');
 const bodyParser = require('body-parser');
 
-
 // Setting up https
 var options = {
-    key: fs.readFileSync('{{admin.path}}/tls/server.key'),
-    cert: fs.readFileSync('{{admin.path}}/tls/server.crt'),
-    ca: fs.readFileSync('{{admin.path}}/tls/ca.crt')
+    key: fs.readFileSync('{{registrar.path}}/tls-{{admin.name}}/server.key'),
+    cert: fs.readFileSync('{{registrar.path}}/tls-{{admin.name}}/server.crt'),
+    ca: fs.readFileSync('{{registrar.path}}/tls-{{admin.name}}/ca.crt')
 }
+
+var server_config = require('./server.json');
 
 // Create a service (the app object is just a callback).
 var app = express();
@@ -118,8 +119,8 @@ app.post('/register', async function (req, res) {
 
 
         // Register the user, enroll the user, and import the new identity into the wallet.
-        await ca.register({ enrollmentID: req.body.username, role: "client", enrollmentSecret: req.body.password }, adminIdentity);
-        console.log('Successfully registered user "' + req.body.username + '" with role client"');
+        await ca.register({ enrollmentID: req.body.username, role: server_config.userrole, enrollmentSecret: req.body.password }, adminIdentity);
+        console.log('Successfully registered user "' + req.body.username + '" with role "' + server_config.userrole);
 
     } catch (error) {
         console.error(`Failed to register user": ${error}`);
@@ -131,6 +132,7 @@ var server = https.createServer(options, app);
 
 server.listen(server_config.port, function () {
     console.info('****************** SERVER STARTED ************************');
-    console.info('***************  https://%s:%s  ******************', server_config.host, server_config.port);
+    console.info('***************  https://%s:%s  ******************', server_config.host, server_config.port);    
+    //Enroll the Admin User
     enrollAdmin();
 });

@@ -21,7 +21,7 @@ registrar_name: "registrar"
 registrar: 
   name: "{{registrar_name}}"
   image: "node"
-  tag: "current-alpine3.11"
+  tag: "12.15"
   replicas: -1
   path: "/root/{{registrar_name}}"
   port: 8088

@@ -13,18 +13,56 @@
 
     - name: Create Registrar Folder Structure
       file:
-        path: "/root/hlft-store/{{Registrar.name}}"
+        path: "/root/hlft-store/{{registrar.name}}"
+        state: directory
+    
+    - name: Create tls-admin Folder Structure
+      file:
+        path: "/root/hlft-store/{{registrar.name}}/tls-{{admin.name}}"
         state: directory
 
-    - name: Copy required scripts
+    - name: Copy relevent files
       copy:
-        src: "{{item}}"
-        dest: "/root/hlft-store/{{Registrar.name}}/{{item}}"
+        src: "{{item[0]}}"
+        dest: "/root/hlft-store/{{registrar.name}}/{{item[0]}}"
+        mode: "{{item[1]}}"
       loop:
-        - server.js
-        - package.json
-        - config/
+        - ["package.json", 400]
+        - ["server.json", 400]
+        - ["setup.sh", 500]
       
+    - name: Template required files
+      become: yes
+      template:
+        src: "{{item}}.j2"
+        dest: "/root/hlft-store/{{registrar.name}}/{{item}}"
+        mode: '0750'
+        force: yes
+      loop:
+        - "connection_profile.json"
+        - "server.js"
+
+    - name: Get keystore filename for admin user
+      shell: ls /root/hlft-store/{{admin.tlsca}}/{{admin.name}}/msp/keystore | sort -n | head -1
+      register: key_filename
+      ignore_errors: True
+
+    - name: Copy relevent tls files for admin user
+      copy:
+        src: "/root/hlft-store/{{admin.tlsca}}/{{admin.name}}/msp/{{item[0]}}" 
+        dest: "/root/hlft-store/{{registrar.name}}/tls-{{admin.name}}/{{item[1]}}"
+        remote_src: yes
+      loop:
+         - ["cacerts/{{admin.tlsca}}-7054.pem", "ca.crt"]
+         - ["signcerts/cert.pem", "server.crt"]
+         - ["keystore/{{key_filename.stdout}}", "server.key"]
+
+    - name: Stop the Registrar Service
+      become: yes
+      docker_swarm_service:
+        name: "{{ registrar.name }}"
+        state: absent
+
     - name: Start the Registrar Service
       become: yes
       docker_swarm_service:
@@ -38,15 +76,20 @@
         mounts:
           - source: "/root/hlft-store/{{registrar.name}}"
             target: "{{registrar.path}}"
-            type: bind       
+            type: bind        
         publish:
           - published_port: "{{registrar.port}}"
             target_port: "8080"
             protocol: "tcp"
         working_dir: "{{registrar.path}}"
         command: >
-          sh -c "sleep 30000s;"
+          bash -c "{{registrar.path}}/setup.sh;"
         placement:      
           constraints:
             - node.role == worker      
         force_update: yes        
+
+    # Pause for 25 seconds for yarn install to complete
+    - name: Pause for 30 seconds for yarn install to complete
+      pause:
+        seconds: 30
