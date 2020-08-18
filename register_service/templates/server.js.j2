@@ -6,7 +6,7 @@
 
 // Hyperledger Fabric CA Related imports
 const FabricCAServices = require('fabric-ca-client');
-const { FileSystemWallet, X509WalletMixin } = require('fabric-network');
+const { FileSystemWallet, Gateway, X509WalletMixin } = require('fabric-network');
 
 const fs = require('fs');
 const path = require('path');
@@ -86,7 +86,9 @@ app.post('/', async function (req, res) {
 })
 
 app.post('/register', async function (req, res) {
+    res.setHeader('Content-Type', 'application/json');
     var status = false;
+    var msg = ""
     try {
 
         // Create a new file system based wallet for managing identities.
@@ -94,38 +96,45 @@ app.post('/register', async function (req, res) {
         const wallet = new FileSystemWallet(walletPath);
         console.log(`Wallet path: ${walletPath}`);
 
-        // Check to see if we've already enrolled the user.
-        const userExists = await wallet.exists(req.body.username);
-        if (userExists) {
-            console.log('An identity for the user "' + req.body.username + '" already exists in the wallet');
-            return;
-        }
-
         // Check to see if we've already enrolled the admin user.
         const adminExists = await wallet.exists("{{admin.name}}");
         if (!adminExists) {
             console.log('An identity for the admin user "{{admin.name}}" does not exist in the wallet');
-            return;
+            msg = "System issue. See logs!"
+            res.status(400).json({
+            status: status,
+            message: msg
+            });                
+        } else {
+            // Create a new gateway for connecting to our peer node.
+            const gateway = new Gateway();
+            await gateway.connect(ccpPath, { wallet, identity: "{{admin.name}}", discovery: { enabled: true, asLocalhost: true } });
+
+
+            // Get the CA client object from the gateway for interacting with the CA.
+            const ca = gateway.getClient().getCertificateAuthority();
+            const adminIdentity = gateway.getCurrentIdentity();
+
+
+            // Register the user, enroll the user, and import the new identity into the wallet.
+            await ca.register({ enrollmentID: req.body.username, role: server_config.userrole, enrollmentSecret: req.body.password }, adminIdentity);
+            console.log('Successfully registered user "' + req.body.username + '" with role "' + server_config.userrole);
+            msg = 'Successfully registered user "' + req.body.username + '" with role "' + server_config.userrole;
+            status=true;            
         }
-
-        // Create a new gateway for connecting to our peer node.
-        const gateway = new Gateway();
-        await gateway.connect(ccpPath, { wallet, identity: "{{admin.name}}", discovery: { enabled: true, asLocalhost: true } });
-
-
-        // Get the CA client object from the gateway for interacting with the CA.
-        const ca = gateway.getClient().getCertificateAuthority();
-        const adminIdentity = gateway.getCurrentIdentity();
-
-
-        // Register the user, enroll the user, and import the new identity into the wallet.
-        await ca.register({ enrollmentID: req.body.username, role: server_config.userrole, enrollmentSecret: req.body.password }, adminIdentity);
-        console.log('Successfully registered user "' + req.body.username + '" with role "' + server_config.userrole);
-
+        
     } catch (error) {
-        console.error(`Failed to register user": ${error}`);
-        process.exit(1);
-    }
+        console.error(`"Failed to register user:" + ${error}`);   
+        msg = `"Failed to register user:" + ${error}`;
+        res.status(400).json({
+        status: status,
+        message: msg
+        });                
+    }    
+    res.status(200).json({
+        status: status,
+        message: msg
+        });    
 })
 
 var server = https.createServer(options, app);

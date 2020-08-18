@@ -1,7 +1,7 @@
 # MySoMe Network - Register Server (HTTPS Enabled)
 ## Allows registration of users to the MySoMeNetwork
-- Test connection: *curl -k -X POST https://167.99.129.174:8080*
-- Register a user: *curl -k -X POST -d "username=user1&password=password" https://167.99.129.174:8080/register*
+- Test connection: *curl -k -X POST https://165.232.76.37:8088*
+- Register a user: *curl -k -X POST -d "username=user1&password=user1pw" https://165.232.76.37:8088/register*
 
 ## Start the server locally
 ### Via localhost. You have to generate the relevent keys/cert for running it in https mode

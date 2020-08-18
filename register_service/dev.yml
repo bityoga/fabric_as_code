@@ -1,0 +1,14 @@
+---
+- name: Test Playbook
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Template required files
+      become: yes
+      template:
+        src: "{{item}}.j2"
+        dest: "/root/hlft-store/{{registrar.name}}/{{item}}"
+        mode: '0750'
+        force: yes
+      loop:
+        - "server.js"
