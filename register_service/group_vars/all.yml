@@ -6,8 +6,9 @@ org:
 admin:
   name: "admin1"
   password: "admin1pw"
-  orgca: "orgca"
-  tlsca: "tlsca"
+  cas: 
+    orgca: "orgca"
+    tlsca: "tlsca"
   path: "/root/admin1"
 
 user: ""

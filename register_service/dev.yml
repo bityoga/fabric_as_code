@@ -1,7 +1,7 @@
 ---
 - name: Test Playbook
   hosts: all
-  gather_facts: no
+  gather_facts: no  
   tasks:
     - name: Template required files
       become: yes
@@ -12,3 +12,5 @@
         force: yes
       loop:
         - "server.js"
+    # - debug:
+    #     msg: "{{ admin.cas.values() | list }}"

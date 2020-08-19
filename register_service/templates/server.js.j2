@@ -16,7 +16,7 @@ const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
 const ccp = JSON.parse(ccpJSON);
 
 const ORGANISATION_MSP = "{{org.name}}MSP";
-const CA_ORGANISATION_NAME = "{{admin.orgca}}";
+const CA_ORGANISATION_NAME = "{{admin.cas.orgca}}";
 
 async function enrollAdmin() {
     try {
@@ -106,20 +106,24 @@ app.post('/register', async function (req, res) {
             message: msg
             });                
         } else {
+            // for loop for cas will come here
             // Create a new gateway for connecting to our peer node.
             const gateway = new Gateway();
             await gateway.connect(ccpPath, { wallet, identity: "{{admin.name}}", discovery: { enabled: true, asLocalhost: true } });
+            var ca;
+            var adminIdentity;
 
-
+            {% for ca_name in admin.cas.values() | list %}
             // Get the CA client object from the gateway for interacting with the CA.
-            const ca = gateway.getClient().getCertificateAuthority();
-            const adminIdentity = gateway.getCurrentIdentity();
-
+            ca = gateway.getClient().getCertificateAuthority("{{ca_name}}");
+            adminIdentity = gateway.getCurrentIdentity();
 
             // Register the user, enroll the user, and import the new identity into the wallet.
             await ca.register({ enrollmentID: req.body.username, role: server_config.userrole, enrollmentSecret: req.body.password }, adminIdentity);
-            console.log('Successfully registered user "' + req.body.username + '" with role "' + server_config.userrole);
-            msg = 'Successfully registered user "' + req.body.username + '" with role "' + server_config.userrole;
+            console.log('Successfully registered user "' + req.body.username + '" with role "' + server_config.userrole + "onto ca " + "{{ca_name}}");
+            msg += 'Successfully registered user "' + req.body.username + '" with role "' + server_config.userrole + "onto ca " + "{{ca_name}}" + '\n';
+
+            {% endfor %}                     
             status=true;            
         }
         
