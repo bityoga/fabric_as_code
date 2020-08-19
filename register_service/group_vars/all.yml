@@ -1,21 +1,21 @@
 ---
-org:
-  name: "hlf"
-  unit: "bityoga"
+# Name of the user that is already registered with the fabric network. This user should have admin rights, so that it is able to register other users
+admin_name: "admin1" # Argument to change
+admin_password: "admin1pw" # Argument to change
 
+# Advances settings. Change these, if you know what you are doing.
 admin:
-  name: "admin1"
-  password: "admin1pw"
+  name: "{{admin_name}}"
+  password: "{{admin_password}}"
   cas: 
     orgca: "orgca"
     tlsca: "tlsca"
-  path: "/root/admin1"
+  path: "/root/{{admin_name}}"
 
 user: ""
 
 # Name of the swarm network that would host the services
 swarm_network: "hlfnet"
-
 registrar_name: "registrar"
 
 # Image information for the registration service
@@ -26,3 +26,8 @@ registrar:
   replicas: -1
   path: "/root/{{registrar_name}}"
   port: 8088
+
+# Info about the organization that hosts the CA(s)
+org:
+  name: "hlf"
+  unit: "bityoga"
