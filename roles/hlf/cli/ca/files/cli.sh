@@ -26,9 +26,9 @@ if (($IDX == 0)); then
   export FABRIC_CA_CLIENT_HOME=$HOST_HOME/$ADMIN_USER  
   fabric-ca-client enroll -d -u https://$ADMIN_USER:$ADMIN_SECRET@$FABRIC_CA_NAME:$FABRIC_CA_PORT
 
-    printf "${GREEN}Make $AGENT_HOST admin of itself${NC}\n"
-    mkdir -p $HOST_HOME/$ADMIN_USER/msp/admincerts        
-    cp $HOST_HOME/$ADMIN_USER/msp/signcerts/cert.pem $HOST_HOME/$ADMIN_USER/msp/admincerts/${ADMIN_USER}-cert.pem
+  printf "${GREEN}Make $AGENT_HOST admin of itself${NC}\n"
+  mkdir -p $HOST_HOME/$ADMIN_USER/msp/admincerts        
+  cp $HOST_HOME/$ADMIN_USER/msp/signcerts/cert.pem $HOST_HOME/$ADMIN_USER/msp/admincerts/${ADMIN_USER}-cert.pem
 fi
 
   # Delay the registration and enrollment of agents, by few seconds so that the registration and enrollment of admins are done first.

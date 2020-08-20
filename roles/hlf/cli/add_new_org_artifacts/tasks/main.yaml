@@ -1,0 +1,29 @@
+# ---
+- name: Clean the import directory if present
+  file: 
+    path: "/root/hlft-store/new_org_artifacts"
+    state: absent
+
+- name: Create the import directory
+  file: 
+    path: "/root/hlft-store/new_org_artifacts"
+    state: directory
+
+- name: Copy new org artifact to remote machine
+  copy:
+    src: "{{artifact_path}}"
+    dest: "/root/hlft-store/new_org_artifacts/artifact.tgz"     
+
+- name: Extract /root/hlft-store/new_org_artifacts/artifact.tgz into /root/hlft-store/new_org_artifacts/
+  unarchive:
+    src: /root/hlft-store/new_org_artifacts/artifact.tgz
+    dest: /root/hlft-store/new_org_artifacts
+    remote_src: yes
+
+- name: Remove the archive /root/hlft-store/new_org_artifacts/artifact.tgz
+  file: 
+    path: "/root/hlft-store/new_org_artifacts/artifact.tgz"
+    state: absent
+
+- debug:
+    msg: "Log into CLI and do the rest."

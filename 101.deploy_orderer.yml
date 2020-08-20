@@ -8,5 +8,5 @@
   vars:
     Consenters: []
   roles:
-    - hlf/cli/orderer
+    - hlf/cli/orderer_prime
     - hlf/orderer    

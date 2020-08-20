@@ -22,8 +22,8 @@ glusterd_version: '7'
 
 # Organization Details
 org:
-  name: "hlf"
-  unit: "bityoga"
+  name: "newOrg"
+  unit: "somethingsomething"
 
 # Creds of various agents
 admin_user: "admin1"

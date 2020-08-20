@@ -1,0 +1,2 @@
+#adding new orgs
+configtxgen -printOrg newOrgMSP > orgnewOrg.json -configPath /root/CLI/new_org_artifacts

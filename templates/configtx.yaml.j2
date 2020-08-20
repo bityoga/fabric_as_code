@@ -16,11 +16,15 @@ Organizations:
 
     # SampleOrg defines an MSP using the sampleconfig. It should never be used
     # in production but may be used as a template for other definitions.
-    - &org1{{org.name}}
+    - &org{{org.name}}
         # Name is the key by which this org will be referenced in channel
         # configuration transactions.
         # Name can include alphanumeric characters as well as dots and dashes.
         Name: {{org.name}}MSP
+
+        # ID is the key by which this org's MSP definition will be referenced.
+        # ID can include alphanumeric characters as well as dots and dashes.
+        ID: {{org.name}}MSP
 
         # SkipAsForeign can be set to true for org definitions which are to be
         # inherited from the orderer system channel during channel creation.  This
@@ -29,10 +33,7 @@ Organizations:
         # this property must always be set to false for orgs included in block
         # creation.
         SkipAsForeign: false
-
-        # ID is the key by which this org's MSP definition will be referenced.
-        # ID can include alphanumeric characters as well as dots and dashes.
-        ID: {{org.name}}MSP
+        
 
         # MSPDir is the filesystem path which contains the MSP configuration.
         MSPDir: /root/{{org.name}}MSP
@@ -67,8 +68,6 @@ Organizations:
         {% for endpoint in swarm_manager_ip_list %}
         - {{endpoint}}
         {% endfor %}
-        {# OrdererEndpoints:           
-          - {{orderer.name}}:7050 #}
 
         # AnchorPeers defines the location of peers which can be used for
         # cross-org gossip communication. Note, this value is only encoded in
@@ -449,11 +448,11 @@ Profiles:
         Orderer:
             <<: *OrdererDefaults
             Organizations:
-                - *org1{{org.name}}
+                - *org{{org.name}}
         Consortiums:
             SampleConsortium:
                 Organizations:
-                    - *org1{{org.name}}
+                    - *org{{org.name}}
 
     # SampleSingleMSPKafka defines a configuration that differs from the
     # SampleSingleMSPSolo one only in that it uses the Kafka-based orderer.
@@ -463,11 +462,11 @@ Profiles:
             <<: *OrdererDefaults
             OrdererType: kafka
             Organizations:
-                - *org1{{org.name}}
+                - *org{{org.name}}
         Consortiums:
             SampleConsortium:
                 Organizations:
-                    - *org1{{org.name}}
+                    - *org{{org.name}}
 
     # SampleInsecureSolo defines a configuration which uses the Solo orderer,
     # contains no MSP definitions, and allows all transactions and channel
@@ -501,7 +500,7 @@ Profiles:
         Orderer:
             <<: *OrdererDefaults
             Organizations:
-                - <<: *org1{{org.name}}
+                - <<: *org{{org.name}}
                   Policies:
                       <<: *SampleOrgPolicies
                       Admins:
@@ -510,7 +509,7 @@ Profiles:
         Application:
             <<: *ApplicationDefaults
             Organizations:
-                - <<: *org1{{org.name}}
+                - <<: *org{{org.name}}
                   Policies:
                       <<: *SampleOrgPolicies
                       Admins:
@@ -519,7 +518,7 @@ Profiles:
         Consortiums:
             SampleConsortium:
                 Organizations:
-                    - <<: *org1{{org.name}}
+                    - <<: *org{{org.name}}
                       Policies:
                           <<: *SampleOrgPolicies
                           Admins:
@@ -534,7 +533,7 @@ Profiles:
             <<: *OrdererDefaults
             OrdererType: kafka
             Organizations:
-                - <<: *org1{{org.name}}
+                - <<: *org{{org.name}}
                   Policies:
                       <<: *SampleOrgPolicies
                       Admins:
@@ -543,7 +542,7 @@ Profiles:
         Application:
             <<: *ApplicationDefaults
             Organizations:
-                - <<: *org1{{org.name}}
+                - <<: *org{{org.name}}
                   Policies:
                       <<: *SampleOrgPolicies
                       Admins:
@@ -552,7 +551,7 @@ Profiles:
         Consortiums:
             SampleConsortium:
                 Organizations:
-                    - <<: *org1{{org.name}}
+                    - <<: *org{{org.name}}
                       Policies:
                           <<: *SampleOrgPolicies
                           Admins:
@@ -570,7 +569,7 @@ Profiles:
         Application:
             <<: *ApplicationDefaults
             Organizations:
-                - <<: *org1{{org.name}}
+                - <<: *org{{org.name}}
 
     # SampleDevModeEtcdRaft defines a configuration that differs from the
     # SampleDevModeSolo one only in that it uses the etcd/raft-based orderer.
@@ -580,7 +579,7 @@ Profiles:
             <<: *OrdererDefaults
             OrdererType: etcdraft
             Organizations:
-                - <<: *org1{{org.name}}
+                - <<: *org{{org.name}}
                   Policies:
                       <<: *SampleOrgPolicies
                       Admins:
@@ -589,7 +588,7 @@ Profiles:
         Application:
             <<: *ApplicationDefaults
             Organizations:
-                - <<: *org1{{org.name}}
+                - <<: *org{{org.name}}
                   Policies:
                       <<: *SampleOrgPolicies
                       Admins:
@@ -598,7 +597,7 @@ Profiles:
         Consortiums:
             SampleConsortium:
                 Organizations:
-                    - <<: *org1{{org.name}}
+                    - <<: *org{{org.name}}
                       Policies:
                           <<: *SampleOrgPolicies
                           Admins:
