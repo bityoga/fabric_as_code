@@ -16,9 +16,8 @@ const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
 const ccp = JSON.parse(ccpJSON);
 
 const ORGANISATION_MSP = "{{org.name}}MSP";
-const CA_ORGANISATION_NAME = "{{admin.cas.orgca}}";
 
-async function enrollAdmin() {
+async function enrollAdmin(CA_ORGANISATION_NAME) {
     try {
 
 
@@ -36,20 +35,20 @@ async function enrollAdmin() {
         console.log(`Wallet path: ${walletPath}`);
 
         // Check to see if we've already enrolled the admin user.
-        const adminExists = await wallet.exists("{{admin.name}}");
+        const adminExists = await wallet.exists("{{admin.name}}-" + CA_ORGANISATION_NAME);
         if (adminExists) {
-            console.log('An identity for the admin user "{{admin.name}}" already exists in the wallet');
+            console.log('An identity for the admin user "{{admin.name}}-' + CA_ORGANISATION_NAME + 'already exists in the wallet');
             return;
         }
 
         // Enroll the admin user, and import the new identity into the wallet.
         const enrollment = await ca.enroll({ enrollmentID: "{{admin.name}}", enrollmentSecret: "{{admin.password}}" });
         const identity = X509WalletMixin.createIdentity(ORGANISATION_MSP, enrollment.certificate, enrollment.key.toBytes());
-        await wallet.import("{{admin.name}}", identity);
-        console.log('Successfully enrolled admin user "{{admin.name}}" and imported it into the wallet');
+        await wallet.import("{{admin.name}}-" + CA_ORGANISATION_NAME, identity);
+        console.log('Successfully enrolled admin user {{admin.name}}-' + CA_ORGANISATION_NAME + ' and imported it into the wallet');
 
     } catch (error) {
-        console.error(`Failed to enroll admin user "{{admin.name}}": ${error}`);
+        console.error(`Failed to enroll admin user {{admin.name}}-${CA_ORGANISATION_NAME} : ${error}`);
         process.exit(1);
     }
 }
@@ -88,32 +87,35 @@ app.post('/', async function (req, res) {
 app.post('/register', async function (req, res) {
     res.setHeader('Content-Type', 'application/json');
     var status = false;
-    var msg = ""
+    var msg = "";
+    var current_ca = "";
     try {
 
         // Create a new file system based wallet for managing identities.
         const walletPath = path.join(process.cwd(), 'wallet');
         const wallet = new FileSystemWallet(walletPath);
-        console.log(`Wallet path: ${walletPath}`);
+        console.log(`Wallet path: ${walletPath}`);        
 
+        var adminExists;
+        // Create a new gateway for connecting to our peer node.
+        const gateway = new Gateway();            
+        var ca;
+        var adminIdentity;            
+
+        {% for ca_name in admin.cas.values() | list %}
+        current_ca = "{{ca_name}}";
         // Check to see if we've already enrolled the admin user.
-        const adminExists = await wallet.exists("{{admin.name}}");
+        adminExists = await wallet.exists("{{admin.name}}-{{ca_name}}");
         if (!adminExists) {
-            console.log('An identity for the admin user "{{admin.name}}" does not exist in the wallet');
+            console.log('An identity for the admin user "{{admin.name}}-{{ca_name}}" does not exist in the wallet');
             msg = "System issue. See logs!"
             res.status(400).json({
             status: status,
             message: msg
             });                
-        } else {
-            // for loop for cas will come here
-            // Create a new gateway for connecting to our peer node.
-            const gateway = new Gateway();
-            await gateway.connect(ccpPath, { wallet, identity: "{{admin.name}}", discovery: { enabled: true, asLocalhost: true } });
-            var ca;
-            var adminIdentity;
-
-            {% for ca_name in admin.cas.values() | list %}
+        } else {    
+            status=false;                   
+            await gateway.connect(ccpPath, { wallet, identity: "{{admin.name}}-{{ca_name}}", discovery: { enabled: true, asLocalhost: true } });
             // Get the CA client object from the gateway for interacting with the CA.
             ca = gateway.getClient().getCertificateAuthority("{{ca_name}}");
             adminIdentity = gateway.getCurrentIdentity();
@@ -122,14 +124,15 @@ app.post('/register', async function (req, res) {
             await ca.register({ enrollmentID: req.body.username, role: server_config.userrole, enrollmentSecret: req.body.password }, adminIdentity);
             console.log('Successfully registered user "' + req.body.username + '" with role "' + server_config.userrole + "onto ca " + "{{ca_name}}");
             msg += 'Successfully registered user "' + req.body.username + '" with role "' + server_config.userrole + "onto ca " + "{{ca_name}}" + '\n';
-
-            {% endfor %}                     
+                                 
             status=true;            
         }
+
+        {% endfor %}
         
     } catch (error) {
-        console.error(`"Failed to register user:" + ${error}`);   
-        msg = `"Failed to register user:" + ${error}`;
+        console.error(`Failed to register user for ${current_ca} ca with error ${error}`);   
+        msg = `Failed to register user for ${current_ca} ca with error ${error}`;
         res.status(400).json({
         status: status,
         message: msg
@@ -146,6 +149,8 @@ var server = https.createServer(options, app);
 server.listen(server_config.port, function () {
     console.info('****************** SERVER STARTED ************************');
     console.info('***************  https://%s:%s  ******************', server_config.host, server_config.port);    
-    //Enroll the Admin User
-    enrollAdmin();
+    //Enroll the Admin User for orgca
+    enrollAdmin("{{admin.cas.orgca}}");
+    //Enroll the Admin User for tlsca
+    enrollAdmin("{{admin.cas.tlsca}}");
 });
