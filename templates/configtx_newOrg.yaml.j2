@@ -29,7 +29,7 @@ Organizations:
         # creation.
         SkipAsForeign: false
 
-        MSPDir: /root/CLI/new_org_artifacts
+        MSPDir: /root/CLI/new_org_artifacts/msp
 
         Policies: &SampleOrgPolicies
             Readers:
@@ -50,14 +50,6 @@ Organizations:
             Endorsement:
                 Type: Signature
                 Rule: "OR('{{org.name}}MSP.member')"
-
-        # OrdererEndpoints is a list of all orderers this org runs which clients
-        # and peers may to connect to to push transactions and receive blocks respectively.
-        
-        OrdererEndpoints: 
-        {% for endpoint in swarm_manager_ip_list %}
-        - {{endpoint}}
-        {% endfor %}
 
         # AnchorPeers defines the location of peers which can be used for
         # cross-org gossip communication. Note, this value is only encoded in
