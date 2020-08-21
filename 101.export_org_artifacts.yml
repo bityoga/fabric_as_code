@@ -1,0 +1,9 @@
+---
+
+# ansible-playbook -v 101.export_org_artifacts.yml --flush-cache -u root 
+
+- name: Spawn a Hyperledger Fabric Topology
+  hosts: swarm_manager_prime
+  gather_facts: no  
+  roles:
+    - hlf/cli/gen_new_org_artifacts       

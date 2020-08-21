@@ -1,5 +1,6 @@
 ---
-LOG_LEVEL: "INFO"
+LOG_LEVEL: "DEBUG"
+INSTALL_TEST_CHAINCODE: "yes"
   ###########################################################################################
 #                                                                                         #
 #                                                                                         #
@@ -21,8 +22,8 @@ glusterd_version: '7'
 
 # Organization Details
 org:
-  name: "hlf"
-  unit: "bityoga"
+  name: "newOrg"
+  unit: "somethingsomething"
 
 # Creds of various agents
 admin_user: "admin1"
@@ -83,8 +84,8 @@ orgca: { switch: "on", image: "hyperledger/fabric-ca", tag: "1.4", replicas: -1,
 ######################################### Orderer #############################################
 orderer: { switch: "on", image: "hyperledger/fabric-orderer", tag: "2.2", replicas: -1, port: 8053,
 caname: "{{orgca.name}}", anchorpeer: "{{peer1.name}}", anchorport: "{{peer1.port}}",
-path: "/root/{{orderer_user}}", type: "solo",
-name: "{{orderer_user}}", password: "{{orderer_password}}", type: "orderer"
+path: "/root/{{orderer_user}}", type: "orderer",
+name: "{{orderer_user}}", password: "{{orderer_password}}"
 }
 
 ######################################### Peers #############################################
@@ -92,7 +93,7 @@ peer1: { switch: "on", image: "hyperledger/fabric-peer", tag: "2.2", replicas: -
 caname: "{{orgca.name}}", path: "/root/{{peer1_user}}", bootstrap: "",
 dbtype: "goleveldb",
 name: "{{peer1_user}}", password: "{{peer1_password}}", type: "peer",
-leader: "{peer1_user}}"
+leader: "{{peer1_user}}"
 }
 
 peer2: { switch: "on", image: "hyperledger/fabric-peer", tag: "2.2", replicas: -1, port: 8055,

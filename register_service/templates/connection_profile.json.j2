@@ -1,0 +1,97 @@
+{
+    "name": "{{org.name}}-{{org.unit}}",
+    "version": "1.0.0",
+    "client": {
+        "organization": "{{org.name}}",
+        "connection": {
+            "timeout": {
+                "peer": {
+                    "endorser": "300"
+                }
+            }
+        }
+    },
+    "channels": {
+        "appchannel": {
+            "orderers": [
+                "orderer"
+            ],
+            "peers": {
+                "peer2": {
+                    "endorsingPeer": "true",
+                    "chaincodeQuery": "false",
+                    "ledgerQuery": "false",
+                    "eventSource": "false",
+                    "discover": "true"
+                },
+                "peer1": {
+                    "endorsingPeer": "false",
+                    "chaincodeQuery": "true",
+                    "ledgerQuery": "false",
+                    "eventSource": "false",
+                    "discover": "true"
+                }
+            }
+        }
+    },
+    "organizations": {
+        "hlf": {
+            "mspid": "hlfMSP",
+            "peers": [
+                "peer2",
+                "peer1"
+            ],
+            "certificateAuthorities": [
+                "orgca",
+                "tlsca"
+            ]
+        }
+    },
+    "orderers": {
+        "orderer": {
+            "url": "grpcs://ip.address:8053",
+            "tlsCACerts": {
+                "path": "./hlft-store/hlfMSP/tlscacerts/tls-tlsca-7054.pem"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "orderer"
+            }
+        }
+    },
+    "peers": {
+        "peer1": {
+            "url": "grpcs://ip.address:8054",
+            "tlsCACerts": {
+                "path": "/root/{{user}}/msp/tls/ca.crt"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "peer1"
+            }
+        },
+        "peer2": {
+            "url": "grpcs://ip.address:8055",
+            "tlsCACerts": {
+                "path": "/root/{{user}}/msp/tls/ca.crt"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "peer2"
+            }
+        }
+    },
+    "certificateAuthorities": {
+        "orgca": {
+            "caName": "orgca",
+            "url": "https://orgca:7054",
+            "httpOptions": {
+                "verify": false
+            }
+        },
+        "tlsca": {
+            "caName": "tlsca",
+            "url": "https://tlsca:7054",
+            "httpOptions": {
+                "verify": false
+            }
+        }
+    }
+}

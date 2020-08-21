@@ -4,7 +4,9 @@
 
 - name: Spawn a Hyperledger Fabric Topology
   hosts: swarm_manager_prime
-  gather_facts: no
+  gather_facts: no  
+  vars:
+    Consenters: []
   roles:
-    - hlf/cli/orderer
+    - hlf/cli/orderer_prime
     - hlf/orderer    

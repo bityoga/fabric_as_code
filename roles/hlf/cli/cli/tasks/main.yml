@@ -15,6 +15,14 @@
     src: "test_chaincode/"
     dest: "/root/hlft-store/chaincodes/test_chaincode"
     mode: 0750
+
+- name: Copy CLI script
+  become: yes
+  copy:
+    src: "CLI.sh"
+    dest: "/root/hlft-store/CLI.sh"
+    mode: "0500"
+    force: yes 
                 
   # Create & Start service for CLI 
 - name: Fabric Service - {{ item.name }}
@@ -26,7 +34,7 @@
       - "{{swarm_network}}"
     image: "{{cli.image}}:{{cli.tag}}"
     command: >
-      bash -c "while true; do sleep 2; done;"
+      bash -c "/root/CLI/CLI.sh;"      
     working_dir: /root/CLI
     mounts:     
       - source: "/root/hlft-store"
@@ -41,8 +49,14 @@
       - "ADMIN_USER={{admin_user}}"      
       - "TLSCA_HOST={{tlsca.name}}"
       - "ORGCA_HOST={{orgca.name}}"
+      - "INSTALL_TEST_CHAINCODE={{INSTALL_TEST_CHAINCODE}}"
     placement:      
       constraints:
         - node.role == worker      
     force_update: yes    
   when: cli.switch == "on"
+
+- name: Remove orphan CLIs
+  become: yes
+  shell: docker service rm $(docker service ls | grep _cli | cut -b 1-12 | sed 's/ *$//g')
+  ignore_errors: yes

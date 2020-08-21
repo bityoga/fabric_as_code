@@ -1,9 +1,17 @@
 ---
 - name: Test Playbook
-  hosts: all
-  gather_facts: true
+  hosts: swarm_manager_prime
+  gather_facts: no
+  vars:
+    Consenters: []
   tasks:
-    - name: Test hosts list
+    # - name: Remove orphan CLIs
+    #   become: yes
+    #   docker_swarm_service:    
+    #     name: "{{item.name}}_cli"
+    #     state: absent
+    #   loop: "{{ peerservices + [orderer] + caservices }}"
+    - name: Remove orphan CLIs
       debug:
-        msg: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
-  
+        msg: "{{item.name}}_cli"        
+      loop: "{{ peerservices + [orderer] + caservices }}"

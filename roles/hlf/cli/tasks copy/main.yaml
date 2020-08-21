@@ -1,0 +1,109 @@
+# ---
+
+# HLF CA CLI Services
+# Stop all CLI Services services
+- name: Stop CLI Service - {{org.name}}_cli
+  become: yes
+  docker_swarm_service:
+    name: "{{org.name}}_cli"
+    state: absent
+    networks:
+      - "{{swarm_network}}"  
+
+
+- name: Clean the export directory if present
+  file: 
+    path: "/root/hlft-store/{{org.name}}_export"
+    state: absent
+
+- name: Create an export directory to be used for sending the relevent information for adding this organization to the existing hlf blockchain consortium
+  file: 
+    path: "/root/hlft-store/{{org.name}}_export"
+    state: directory              
+
+# Generate the list of swarm managers to be used as Orderer Endpoints in configtx
+- name: Get IP addresses as a list for all swarm manager nodes
+  vars:
+    _swarm_manager_ip_list: "{{ groups['swarm_managers'] | map('extract', hostvars, ['ansible_host']) | list  | join(':{{orderer.port}},')  }}"            
+    __swarm_manager_ip_list: "{{_swarm_manager_ip_list}}:{{orderer.port}}"
+  set_fact:      
+    swarm_manager_ip_list: "{{ __swarm_manager_ip_list.split(',') }}"    
+
+- name: Get IP addresses as a list for all swarm manager nodes to be used as anchor ips   
+  set_fact:      
+    swarm_manager_ip_list_anchor: "{{ groups['swarm_managers'] | map('extract', hostvars, ['ansible_host']) | list  }}"
+
+  # Copy relevent config files to mount directories for the docker services
+- name: Config templating configtx_newOrg.yaml
+  become: yes  
+  template:
+    src: "configtx_newOrg.yaml.j2"
+    dest: "/root/hlft-store/{{org.name}}_export/configtx.yaml"
+    mode: 0660
+    force: yes  
+
+# Prep the TLS certs
+- name: Create tls folder under /root/hlft-store/{{org.name}}_export/tls
+  become: yes
+  file:
+    path: "/root/hlft-store/{{org.name}}_export/tls"
+    state: directory
+    mode: '0755'
+
+# Copy tls certs
+- name: Copy TLS certs
+  copy:
+    src: "/root/hlft-store/{{tlsca.name}}/{{orderer.name}}/tls-msp/{{item[0]}}"
+    dest: "/root/hlft-store/{{org.name}}_export/tls/{{item[1]}}"
+    remote_src: yes
+  loop:
+    - ["tlscacerts/tls-{{tlsca.name}}-7054.pem", "ca.crt"]
+    - ["signcerts/cert.pem", "server.crt"]    
+
+- name: Create org MSP-folder
+  become: yes
+  file: 
+    path: "/root/hlft-store/{{org.name}}_export/msp"
+    state: directory
+    mode: '0755'
+
+- name: Create subfolders folder under /root/hlft-store/{{org.name}}_export/msp
+  become: yes
+  file:
+    path: "/root/hlft-store/{{org.name}}_export/msp/{{item}}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "tlscacerts"
+    - "admincerts"
+    - "cacerts"
+    - "users"
+
+- name: Copy certs in the msp subfolder
+  copy:
+    src: "/root/hlft-store/{{item[0]}}"
+    dest: "/root/hlft-store/{{org.name}}_export/msp/{{item[1]}}"
+    remote_src: yes
+  loop:
+    - ["{{tlsca.name}}/{{orderer.name}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem", "tlscacerts/tls-{{tlsca.name}}-7054.pem"]
+    - ["{{orgca.name}}/{{orderer.name}}/msp/admincerts/{{admin_user}}-cert.pem", "admincerts/{{admin_user}}-cert.pem"]
+    - ["{{orgca.name}}/{{orderer.name}}/msp/cacerts/{{orgca.name}}-7054.pem", "cacerts/{{orgca.name}}-7054.pem"]    
+  
+
+- name: Compress the export folder
+  archive:
+    path: "/root/hlft-store/{{org.name}}_export"
+    dest: "/tmp/{{org.name}}_export.tgz"
+
+- name: Fetch the exported folder to your local machine. Send it out to the organization that invited you to be part of the blockchain
+  fetch:
+    src: "/tmp/{{org.name}}_export.tgz"
+    dest: "/tmp/{{org.name}}_export.tgz"
+
+- name: Stop CLI Service - {{org.name}}_cli
+  become: yes
+  docker_swarm_service:
+    name: "{{org.name}}_cli"
+    state: absent
+    networks:
+      - "{{swarm_network}}"  

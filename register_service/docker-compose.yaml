@@ -1,0 +1,21 @@
+version: '3'
+networks:
+  mysomenet-ov:
+    # If network is created with deplyment, Chaincode container cannot connect to network
+    external:
+      name: mysomenet-ov
+
+services:
+  register-server:
+    image: 127.0.0.1:5000/register-server
+    build:
+      context: .
+      dockerfile: ./services/nodejs/Dockerfile
+    hostname: register-server
+    container_name: register-server          
+    working_dir: /home/node/register-server     
+    networks:
+      - mysomenet-ov
+    ports:
+      - "8080:8080"
+    command: node /home/node/register-server/server.js

@@ -1,0 +1,14 @@
+[all:children]
+swarm_manager_prime
+swarm_managers
+swarm_workers
+
+[swarm_manager_prime]
+hlf0 ansible_host=142.93.216.173 ansible_python_interpreter=/usr/bin/python3
+
+
+[swarm_managers]
+hlf0 ansible_host=142.93.216.173 ansible_python_interpreter=/usr/bin/python3
+
+[swarm_workers]
+hlf1 ansible_host=134.209.146.246 ansible_python_interpreter=/usr/bin/python3
