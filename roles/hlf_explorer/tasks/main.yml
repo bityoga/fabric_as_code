@@ -61,7 +61,7 @@
 
 - name: Register admin secret key name 
   become: yes
-  shell: ls -tr /root/hlft-store/orgca/admin/msp/keystore/*_sk | tail -1
+  shell: ls -tr /root/hlft-store/orgca/admin1/msp/keystore/*_sk | tail -1
   register: admin_secret_key_file
 
 - name: Copy and Rename admin secret key '*_sk' file to a common name "admin_sk.key" which is specified in connection profile
