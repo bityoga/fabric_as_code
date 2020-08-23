@@ -5,13 +5,11 @@
   vars:
     Consenters: []
   tasks:
-    # - name: Remove orphan CLIs
-    #   become: yes
-    #   docker_swarm_service:    
-    #     name: "{{item.name}}_cli"
-    #     state: absent
-    #   loop: "{{ peerservices + [orderer] + caservices }}"
-    - name: Remove orphan CLIs
-      debug:
-        msg: "{{item.name}}_cli"        
-      loop: "{{ peerservices + [orderer] + caservices }}"
+    - name: Build a list for all --csr.hosts
+      vars:
+        csrhostslist: "{{ caservices | map(attribute='name') | list + peerservices | map(attribute='name') | list  + [ orderer.name ] + [ cli.name ] + ['localhost'] + groups['swarm_managers'] | map('extract', hostvars, ['ansible_host']) | list }}"
+      set_fact:
+        csrhosts: "{{csrhostslist | join(',')}}"  
+    
+    - debug:
+        msg: "{{csrhosts}}"

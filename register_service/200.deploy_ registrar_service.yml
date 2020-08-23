@@ -53,9 +53,9 @@
         dest: "/root/hlft-store/{{registrar.name}}/tls-{{admin.name}}/{{item[1]}}"
         remote_src: yes
       loop:
-         - ["cacerts/{{admin.tlsca}}-7054.pem", "ca.crt"]
+         - ["tlscacerts/tls-{{tlsca.name}}-7054.pem", "ca.crt"]
          - ["signcerts/cert.pem", "server.crt"]
-         - ["keystore/{{key_filename.stdout}}", "server.key"]
+         - ["keystore/key.pem", "server.key"]
 
     - name: Stop the Registrar Service
       become: yes

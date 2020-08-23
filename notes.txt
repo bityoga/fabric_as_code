@@ -1,25 +1,27 @@
 #adding new orgs
-configtxgen -printOrg newOrgMSP > orgnewOrg.json -configPath /root/CLI/new_org_artifacts
-
-PEER_HOST=peer2
-CORE_PEER_ADDRESS=${PEER_HOST}:7051
-CORE_PEER_MSPCONFIGPATH=/root/CLI/${ORGCA_HOST}/${ADMIN_USER}/msp
-CORE_PEER_TLS_ROOTCERT_FILE=/root/CLI/${ORGCA_HOST}/${PEER_HOST}/msp/tls/ca.crt
-CORE_PEER_TLS_CLIENTAUTHREQUIRED=false
-CORE_PEER_TLS_CLIENTCERT_FILE=/root/CLI/${ORGCA_HOST}/${PEER_HOST}/msp/tls/server.crt #fully qualified path of the client certificate
-CORE_PEER_TLS_CLIENTKEY_FILE=/root/CLI/${ORGCA_HOST}/${PEER_HOST}/msp/tls/server.key #fully qualified path of the client private key
-CORE_PEER_LOCALMSPID=hlfMSP
-
+NEW_ORG_NAME=bityoga
 CHANNEL_NAME=syschannel
 
-CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE CORE_PEER_TLS_CLIENTAUTHREQUIRED=$CORE_PEER_TLS_CLIENTAUTHREQUIRED CORE_PEER_TLS_CLIENTCERT_FILE=$CORE_PEER_TLS_CLIENTCERT_FILE CORE_PEER_TLS_CLIENTKEY_FILE=$CORE_PEER_TLS_CLIENTKEY_FILE CORE_PEER_MSPCONFIGPATH=$CORE_PEER_MSPCONFIGPATH  peer channel fetch config config_block.pb -o ${ORDERER_HOST}:7050 -c $CHANNEL_NAME --tls --cafile /root/CLI/${ORGCA_HOST}/${ORDERER_HOST}/msp/tls/ca.crt --clientauth --certfile /root/CLI/${ORGCA_HOST}/${ORDERER_HOST}/msp/tls/server.crt --keyfile /root/CLI/${ORDERER_HOST}/${PEER_HOST}/msp/tls/server.key
+configtxgen -printOrg ${NEW_ORG_NAME}MSP > org${NEW_ORG_NAME}.json -configPath /root/CLI/new_org_artifacts
+
+PEER_HOST=peer1
+CORE_PEER_ADDRESS=${PEER_HOST}:7051
+CORE_PEER_MSPCONFIGPATH=/root/CLI/${ORGCA_HOST}/${ADMIN_USER}/msp
+
+CORE_PEER_TLS_ENABLED=true
+CORE_PEER_TLS_ROOTCERT_FILE=/root/CLI/${ORGCA_HOST}/${PEER_HOST}/msp/tls/ca.crt
+CORE_PEER_TLS_KEY_FILE=/root/CLI/${ORGCA_HOST}/${PEER_HOST}/msp/tls/server.key
+CORE_PEER_TLS_CERT_FILE=/root/CLI/${ORGCA_HOST}/${PEER_HOST}/msp/tls/server.crt
+CORE_PEER_TLS_CLIENTAUTHREQUIRED=false
+
+CORE_PEER_MSPCONFIGPATH=$CORE_PEER_MSPCONFIGPATH peer channel fetch config config_block.pb -o ${ORDERER_HOST}:7050 -c $CHANNEL_NAME --tls --cafile ${CORE_PEER_TLS_ROOTCERT_FILE} --clientauth --certfile ${CORE_PEER_TLS_CERT_FILE} --keyfile ${CORE_PEER_TLS_KEY_FILE}
 
 
 configtxlator proto_decode --input config_block.pb --type common.Block | jq .data.data[0].payload.data.config > config.json
 
-jq -s '.[0] * {"channel_group":{"groups":{"Orderer":{"groups": {"newOrgMSP":.[1]}}}}}' config.json orgnewOrg.json > config1.json
+jq -s '.[0] * {"channel_group":{"groups":{"Orderer":{"groups": {"'${NEW_ORG_NAME}MSP'":.[1]}}}}}' config.json org${NEW_ORG_NAME}.json > config1.json
 
-jq -s '.[0] * {"channel_group":{"groups":{"Consortiums":{"groups":{"SampleConsortium":{"groups": {"newOrgMSP":.[1]}}}}}}}' config1.json orgnewOrg.json > config2.json
+jq -s '.[0] * {"channel_group":{"groups":{"Consortiums":{"groups":{"SampleConsortium":{"groups": {"'${NEW_ORG_NAME}MSP'":.[1]}}}}}}}' config1.json org${NEW_ORG_NAME}.json > config2.json
 
 cert=`base64 ./tls/server.crt | sed ':a;N;$!ba;s/\n//g'`
 
@@ -28,10 +30,14 @@ cat config2.json | jq '.channel_group.groups.Orderer.values.ConsensusType.value.
 
 configtxlator proto_encode --input config.json --type common.Config --output config.pb
 configtxlator proto_encode --input modified_config.json --type common.Config --output modified_config.pb
-configtxlator compute_update --channel_id $CHANNEL_NAME --original config.pb --updated modified_config.pb --output newordorg.pb
-configtxlator proto_decode --input newordorg.pb --type common.ConfigUpdate | jq . > newordorg.json
-echo '{"payload":{"header":{"channel_header":{"channel_id":"syschannel", "type":2}},"data":{"config_update":'$(cat newordorg.json)'}}}' | jq . > ordorg_update_in_envelope.json
-configtxlator proto_encode --input ordorg_update_in_envelope.json --type common.Envelope --output ordorg_update_in_envelope.pb
+configtxlator compute_update --channel_id ${CHANNEL_NAME} --original config.pb --updated modified_config.pb --output neworg.pb
+configtxlator proto_decode --input neworg.pb --type common.ConfigUpdate | jq . > neworg.json
+echo '{"payload":{"header":{"channel_header":{"channel_id":"'$CHANNEL_NAME'", "type":2}},"data":{"config_update":'$(cat neworg.json)'}}}' | jq . > org_update_in_envelope.json
+configtxlator proto_encode --input org_update_in_envelope.json --type common.Envelope --output org_update_in_envelope.pb
 
 
-CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE CORE_PEER_TLS_CLIENTAUTHREQUIRED=$CORE_PEER_TLS_CLIENTAUTHREQUIRED CORE_PEER_TLS_CLIENTCERT_FILE=$CORE_PEER_TLS_CLIENTCERT_FILE CORE_PEER_TLS_CLIENTKEY_FILE=$CORE_PEER_TLS_CLIENTKEY_FILE CORE_PEER_MSPCONFIGPATH=$CORE_PEER_MSPCONFIGPATH peer channel update -o ${ORDERER_HOST}:7050 -c ${CHANNEL_NAME} -f ordorg_update_in_envelope.pb --tls true --cafile /root/CLI/${ORGCA_HOST}/${ORDERER_HOST}/msp/tls/ca.crt --clientauth --certfile /root/CLI/${ORGCA_HOST}/${ORDERER_HOST}/msp/tls/server.crt --keyfile /root/CLI/${ORGCA_HOST}/${ORDERER_HOST}/msp/tls/server.key --ordererTLSHostnameOverride tlsca --connTimeout 10  
+
+
+CORE_PEER_MSPCONFIGPATH=$CORE_PEER_MSPCONFIGPATH peer channel signconfigtx -f org_update_in_envelope.pb
+
+CORE_PEER_MSPCONFIGPATH=$CORE_PEER_MSPCONFIGPATH peer channel update -o ${ORDERER_HOST}:7050 -c ${CHANNEL_NAME} -f org_update_in_envelope.pb --tls --cafile ${ORDERER_CA} --clientauth --certfile ${CORE_PEER_TLS_CERT_FILE} --keyfile ${CORE_PEER_TLS_KEY_FILE}

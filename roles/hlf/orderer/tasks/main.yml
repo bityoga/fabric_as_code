@@ -9,6 +9,23 @@
     networks:
       - "{{swarm_network}}"  
 
+- name: Clean the tlscacerts directory in MSP
+  file:
+    path: /root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp/tlscacerts
+    state: absent
+
+- name: Create the tlscacerts directory in MSP
+  file:
+    path: /root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp/tlscacerts
+    state: directory
+
+- name: Copy tlscacerts
+  copy:
+    src: /root/hlft-store/{{tlsca.name}}/{{orderer.name}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem
+    dest: /root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp/tlscacerts/{{tlsca.name}}.{{org.name}}-cert.crt
+    remote_src: yes
+
+
   # Create & Start service orderer with RAFT enabled
 - name: Start the fabric orderer
   become: yes
@@ -27,6 +44,10 @@
       - source: "/root/hlft-store/{{orderer.name}}_cli/artifacts/genesis.block"
         target: "{{orderer.path}}/genesis.block"
         type: bind       
+      #  ROOT TLSCA
+      - source: "/root/hlft-store/{{tlsca.name}}/tls-cert.pem"
+        target: "{{orderer.path}}/tls-cert.pem"
+        type: bind 
     publish:
       - published_port: "{{orderer.port}}"
         target_port: "7050"

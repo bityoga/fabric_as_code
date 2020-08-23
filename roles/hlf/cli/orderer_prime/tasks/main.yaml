@@ -81,13 +81,13 @@
 # Copy tls certs
 - name: Copy TLS certs
   copy:
-    src: "/root/hlft-store/{{tlsca.name}}/{{orderer.name}}/tls-msp/{{item[0]}}"
+    src: "/root/hlft-store/{{tlsca.name}}/{{item[0]}}"
     dest: "/root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp/tls/{{item[1]}}"
     remote_src: yes
   loop:
-    - ["tlscacerts/tls-{{tlsca.name}}-7054.pem", "ca.crt"]
-    - ["signcerts/cert.pem", "server.crt"]
-    - ["keystore/key.pem", "server.key"]
+    - ["tls-cert.pem", "ca.crt"]
+    - ["{{orderer.name}}/tls-msp/signcerts/cert.pem", "server.crt"]
+    - ["{{orderer.name}}/tls-msp/keystore/key.pem", "server.key"]
 
 # Create ORG MSP folder and subfolders
 - name: Clean org MSP-folder
@@ -122,9 +122,9 @@
     dest: "/root/hlft-store/{{org.name}}MSP/{{item[1]}}"
     remote_src: yes
   loop:
-    - ["{{tlsca.name}}/{{orderer.name}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem", "tlscacerts/tls-{{tlsca.name}}-7054.pem"]
-    - ["{{orgca.name}}/{{orderer.name}}/msp/admincerts/{{admin_user}}-cert.pem", "admincerts/{{admin_user}}-cert.pem"]
-    - ["{{orgca.name}}/{{orderer.name}}/msp/cacerts/{{orgca.name}}-7054.pem", "cacerts/{{orgca.name}}-7054.pem"]    
+    - ["{{tlsca.name}}/ca-cert.pem", "tlscacerts/{{tlsca.name}}-7054.pem"]    
+    - ["{{orgca.name}}/ca-cert.pem", "cacerts/{{orgca.name}}-7054.pem"]   
+    - ["{{orgca.name}}/{{admin_user}}/msp/signcerts/cert.pem", "admincerts/{{admin_user}}-cert.pem"] 
 
 
   # Create & Start service for CLI

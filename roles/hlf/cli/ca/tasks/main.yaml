@@ -24,7 +24,7 @@
 
 - name: Build a list for all --csr.hosts
   vars:
-    csrhostslist: "{{ peerservices | map(attribute='name')| list  + [ orderer.name ]  + groups['swarm_managers'] | map('extract', hostvars, ['ansible_host']) | list }}"
+    csrhostslist: "{{ caservices | map(attribute='name') | list + peerservices | map(attribute='name') | list  + [ orderer.name ] + [ cli.name ] + ['localhost'] + groups['swarm_managers'] | map('extract', hostvars, ['ansible_host']) | list }}"
   set_fact:
     csrhosts: "{{csrhostslist | join(',')}}"  
 

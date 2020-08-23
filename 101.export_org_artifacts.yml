@@ -6,4 +6,4 @@
   hosts: swarm_manager_prime
   gather_facts: no  
   roles:
-    - hlf/cli/gen_new_org_artifacts       
+    - hlf/newOrg/gen_new_org_artifacts       

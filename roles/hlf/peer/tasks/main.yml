@@ -39,7 +39,25 @@
     - [["tlscacerts/tls-{{tlsca.name}}-7054.pem", "ca.crt"],
       ["signcerts/cert.pem", "server.crt"],
       ["keystore/key.pem", "server.key"]]
-  
+
+- name: Clean the tlscacerts directory in MSP
+  file:
+    path: /root/hlft-store/{{orgca.name}}/{{item.name}}/map/tlscacerts
+    state: absent
+  loop: "{{peerservices}}"
+
+- name: Create the tlscacerts directory in MSP
+  file:
+    path: /root/hlft-store/{{orgca.name}}/{{item.name}}/msp/tlscacerts
+    state: directory
+  loop: "{{peerservices}}"
+
+- name: Copy tlscacerts
+  copy:
+    src: /root/hlft-store/{{tlsca.name}}/{{item.name}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem
+    dest: /root/hlft-store/{{orgca.name}}/{{item.name}}/msp/tlscacerts/{{tlsca.name}}.{{org.name}}-cert.crt
+    remote_src: yes
+  loop: "{{peerservices}}"
 
   # Create & Start services for Peers 
 - name: Fabric Service - {{ item }}

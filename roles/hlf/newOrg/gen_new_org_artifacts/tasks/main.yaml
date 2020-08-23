@@ -1,16 +1,4 @@
 # ---
-
-# HLF CA CLI Services
-# Stop all CLI Services services
-- name: Stop CLI Service - {{org.name}}_cli
-  become: yes
-  docker_swarm_service:
-    name: "{{org.name}}_cli"
-    state: absent
-    networks:
-      - "{{swarm_network}}"  
-
-
 - name: Clean the export directory if present
   file: 
     path: "/root/hlft-store/{{org.name}}_export"
@@ -85,25 +73,24 @@
     dest: "/root/hlft-store/{{org.name}}_export/msp/{{item[1]}}"
     remote_src: yes
   loop:
-    - ["{{tlsca.name}}/{{orderer.name}}/tls-msp/tlscacerts/tls-{{tlsca.name}}-7054.pem", "tlscacerts/tls-{{tlsca.name}}-7054.pem"]
-    - ["{{orgca.name}}/{{orderer.name}}/msp/admincerts/{{admin_user}}-cert.pem", "admincerts/{{admin_user}}-cert.pem"]
-    - ["{{orgca.name}}/{{orderer.name}}/msp/cacerts/{{orgca.name}}-7054.pem", "cacerts/{{orgca.name}}-7054.pem"]    
+    - ["{{tlsca.name}}/ca-cert.pem", "tlscacerts/{{tlsca.name}}-7054.pem"]    
+    - ["{{orgca.name}}/ca-cert.pem", "cacerts/{{orgca.name}}-7054.pem"]   
+    - ["{{orgca.name}}/{{admin_user}}/msp/signcerts/cert.pem", "admincerts/{{admin_user}}-cert.pem"] 
   
 
 - name: Compress the export folder
   archive:
-    path: "/root/hlft-store/{{org.name}}_export"
-    dest: "/tmp/{{org.name}}_export.tgz"
+    path: "/root/hlft-store/{{org.name}}_export/"
+    dest: "/root/hlft-store/{{org.name}}_export.tgz"    
 
 - name: Fetch the exported folder to your local machine. Send it out to the organization that invited you to be part of the blockchain
   fetch:
-    src: "/tmp/{{org.name}}_export.tgz"
+    src: "/root/hlft-store/{{org.name}}_export.tgz"
     dest: "/tmp/{{org.name}}_export.tgz"
+    flat: yes
 
-- name: Stop CLI Service - {{org.name}}_cli
-  become: yes
-  docker_swarm_service:
-    name: "{{org.name}}_cli"
+- name: Remove the compress file from the remote machine
+  file:
+    path: "/root/hlft-store/{{org.name}}_export.tgz"
     state: absent
-    networks:
-      - "{{swarm_network}}"  
+    

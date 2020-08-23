@@ -28,7 +28,7 @@ if (($IDX == 0)); then
 
   printf "${GREEN}Make $AGENT_HOST admin of itself${NC}\n"
   mkdir -p $HOST_HOME/$ADMIN_USER/msp/admincerts        
-  cp $HOST_HOME/$ADMIN_USER/msp/signcerts/cert.pem $HOST_HOME/$ADMIN_USER/msp/admincerts/${ADMIN_USER}-cert.pem
+  cp $HOST_HOME/$ADMIN_USER/msp/signcerts/cert.pem $HOST_HOME/$ADMIN_USER/msp/admincerts/${ADMIN_USER}-cert.pem 
 fi
 
   # Delay the registration and enrollment of agents, by few seconds so that the registration and enrollment of admins are done first.
@@ -38,13 +38,13 @@ if [ $type == $tlsca ]; then
   # We make sure that we are pointed to the admin user, prior to registering agents
   printf "${GREEN}Register agent $AGENT_HOST of type $AGENT_TYPE at $FABRIC_CA_NAME${NC}\n"
   export FABRIC_CA_CLIENT_HOME=$HOST_HOME/$ADMIN_USER  
-  fabric-ca-client register -d --id.name $AGENT_HOST --id.secret $AGENT_SECRET --id.type $AGENT_TYPE -u https://$FABRIC_CA_NAME:$FABRIC_CA_PORT
+  fabric-ca-client register -d --id.name $AGENT_HOST --id.secret $AGENT_SECRET --id.type $AGENT_TYPE -u https://$FABRIC_CA_NAME:$FABRIC_CA_PORT 
     
   # Enroll Agent
   printf "${GREEN}Enroll agent $AGENT_HOST for $FABRIC_CA_NAME${NC}\n"
   export FABRIC_CA_CLIENT_MSPDIR=tls-msp
   export FABRIC_CA_CLIENT_HOME=$HOST_HOME/$AGENT_HOST  
-  fabric-ca-client enroll -d -u https://$AGENT_HOST:$AGENT_SECRET@$FABRIC_CA_NAME:$FABRIC_CA_PORT --enrollment.profile tls --csr.hosts ${CSR_HOSTS}
+  fabric-ca-client enroll -d -u https://$AGENT_HOST:$AGENT_SECRET@$FABRIC_CA_NAME:$FABRIC_CA_PORT --csr.hosts ${CSR_HOSTS} --enrollment.profile tls 
 
   filename=$(ls $FABRIC_CA_CLIENT_HOME/$FABRIC_CA_CLIENT_MSPDIR/keystore | sort -n | head -1)
   mv $FABRIC_CA_CLIENT_HOME/$FABRIC_CA_CLIENT_MSPDIR/keystore/$filename $FABRIC_CA_CLIENT_HOME/$FABRIC_CA_CLIENT_MSPDIR/keystore/key.pem

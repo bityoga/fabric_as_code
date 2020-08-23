@@ -25,20 +25,20 @@
     force: yes 
                 
   # Create & Start service for CLI 
-- name: Fabric Service - {{ item.name }}
+- name: Fabric Service - {{ cli.name }}
   become: yes
   docker_swarm_service:
-    name: "CLI"
-    hostname: "CLI"
+    name: "{{ cli.name }}"
+    hostname: "{{ cli.name }}"
     networks:
       - "{{swarm_network}}"
     image: "{{cli.image}}:{{cli.tag}}"
     command: >
-      bash -c "/root/CLI/CLI.sh;"      
-    working_dir: /root/CLI
+      bash -c "/root/{{ cli.name }}/CLI.sh;"      
+    working_dir: /root/{{ cli.name }}
     mounts:     
       - source: "/root/hlft-store"
-        target: "/root/CLI"
+        target: "/root/{{ cli.name }}"
         type: bind      
     env: 
       - "GOPATH=/opt/gopath"
