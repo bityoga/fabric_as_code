@@ -10,7 +10,7 @@ if [ $INSTALL_TEST_CHAINCODE == "yes" ]; then
   CORE_PEER_ADDRESS=${PEER_HOST}:7051
   CORE_PEER_MSPCONFIGPATH=/root/CLI/${ORGCA_HOST}/${ADMIN_USER}/msp
   CORE_PEER_TLS_ROOTCERT_FILE=/root/CLI/${ORGCA_HOST}/${PEER_HOST}/msp/tls/ca.crt
-  CORE_PEER_TLS_CLIENTAUTHREQUIRED=true
+  CORE_PEER_TLS_CLIENTAUTHREQUIRED=false
   CORE_PEER_TLS_CLIENTCERT_FILE=/root/CLI/${ORGCA_HOST}/${PEER_HOST}/msp/tls/server.crt #fully qualified path of the client certificate
   CORE_PEER_TLS_CLIENTKEY_FILE=/root/CLI/${ORGCA_HOST}/${PEER_HOST}/msp/tls/server.key #fully qualified path of the client private key
 
