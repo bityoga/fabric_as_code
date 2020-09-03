@@ -30,6 +30,7 @@
 
 # Copy tls certs
 - name: Copy TLS certs
+  become: yes
   copy:
     src: "/root/hlft-store/{{tlsca.name}}/{{item.0.name}}/tls-msp/{{item.1}}"
     dest: "/root/hlft-store/{{orgca.name}}/{{item.0.name}}/msp/tls/{{item.2}}"
