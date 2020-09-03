@@ -153,20 +153,24 @@
 # Containers are placed in the managers
 
 - name: Remove {{hlf_explorer_db.volume}} volume
+  become: yes
   docker_volume:
     name: "{{hlf_explorer_db.volume}}"
     state: absent
 
 - name: Remove {{hlf_explorer.volume}} volume
+  become: yes
   docker_volume:
     name: "{{hlf_explorer.volume}}"
     state: absent
 
 - name: Create {{hlf_explorer_db.volume}} volume
+  become: yes
   docker_volume:
     name: "{{hlf_explorer_db.volume}}"
 
 - name: Create {{hlf_explorer.volume}} volume
+  become: yes
   docker_volume:
     name: "{{hlf_explorer.volume}}"
 
