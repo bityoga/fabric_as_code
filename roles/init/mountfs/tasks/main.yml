@@ -1,5 +1,4 @@
 ---
-
 # Setup GlusterFS as local mount on each node
 # Check if GlusterFS is already mounted, if yes, unmount it
 - name: Unmount GlusterFS if already mounted
@@ -28,6 +27,7 @@
 
 # Mount the volume on /root/myfiles
 - name: Mount Gluster volume
+  become: yes
   mount:
     path: /root/hlft-store
     src: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:/{{gluster_cluster_volume}}"
