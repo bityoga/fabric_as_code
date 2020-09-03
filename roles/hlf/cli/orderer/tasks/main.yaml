@@ -69,6 +69,7 @@
 
 # Copy tls certs
 - name: Copy TLS certs
+  become: yes
   copy:
     src: "/root/hlft-store/{{tlsca.name}}/{{orderer.name}}/tls-msp/{{item[0]}}"
     dest: "/root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp/tls/{{item[1]}}"
@@ -106,6 +107,7 @@
     - "users"
 
 - name: Copy certs in the msp subfolder
+  become: yes
   copy:
     src: "/root/hlft-store/{{item[0]}}"
     dest: "/root/hlft-store/{{org.name}}MSP/{{item[1]}}"
