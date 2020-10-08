@@ -1,0 +1,8 @@
+---
+# ansible-playbook -v 105.deploy_bank_app.yml --flush-cache -u root
+
+- name: Deploy Sample Bank App service
+  hosts: swarm_manager_prime
+  gather_facts: yes
+  roles:
+    - bank_app
