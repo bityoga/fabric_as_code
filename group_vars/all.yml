@@ -164,6 +164,15 @@ portainer_agent : {
   switch: "on",
 }
 
+bank_app : {
+  git_repository : "https://github.com/bityoga/articonf-bank-app.git",
+  name : 'bank-service',
+  replicas: -1,
+  port : 3000,
+  switch: "on",
+}
+
+
 ###########################################################################################
 #                                                                                         #
 #                                                                                         #

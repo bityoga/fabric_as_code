@@ -1,0 +1,66 @@
+# ---
+# Stop all Bank App services
+- name: Stop Bank App  Service - {{ item.name }}
+  become: yes
+  docker_swarm_service:
+    name: "{{item.name}}"
+    state: absent
+    networks:
+      - "{{swarm_network}}"
+  loop:
+    - "{{bank_app}}"
+  when: bank_app.switch == "on" and inventory_hostname in groups.swarm_manager_prime
+
+  # Clean  bank-app files folders , if they exists
+- name: Clean  bank-app files folders , if they exists
+  become: yes
+  file:
+    path: "/root/articonf-bank-app/"
+    state: absent
+  when: bank_app.switch == "on"
+
+  # git clone  bank-app files
+- name: Git clone  bank-app files
+  become: yes
+  shell: git clone {{bank_app.git_repository}} /root/articonf-bank-app
+
+  # Copy orderer tls certificate to bank app folder
+- name: Copy orderer certificate to bank app folder
+  become: yes
+  shell: cp /root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp/tls/ca.crt /root/articonf-bank-app/fabric_node_sdk_helper/hlft-store/{{orderer.name}}/tls-msp/tlscacerts/ca.crt
+
+  # Copy peer2 tls certificate to bank app folder
+- name: Copy peer2 certificate to bank app folder
+  become: yes
+  shell: cp /root/hlft-store/{{orgca.name}}/{{peer2.name}}/msp/tls/ca.crt /root/articonf-bank-app/fabric_node_sdk_helper/hlft-store/{{peer2.name}}/tls-msp/tlscacerts/ca.crt
+
+# Template copy bank app network_config.json file
+- name: Template copy bank app network_config.json file
+  become: yes
+  template:
+    src: "bank_app_network_profile.json"
+    dest: "/root/articonf-bank-app/fabric_node_sdk_helper/network_profile.json"
+    mode: "0750"
+    force: yes
+  when: bank_app.switch == "on"
+
+# Template copy bank app Dockerfile
+- name: Template copy bank app Dockerfile
+  become: yes
+  template:
+    src: "bank_app_Dockerfile"
+    dest: "/root/articonf-bank-app/Dockerfile"
+    mode: "0750"
+    force: yes
+  when: bank_app.switch == "on"
+
+  # Build Docker Image
+- name: Build Docker Image for bank app
+  become: yes
+  shell: docker build --tag bank-app /root/articonf-bank-app/
+  ignore_errors: yes
+
+  # Run as docker service with replicas
+- name: Run as docker service with replicas
+  become: yes
+  shell: docker service create --name bank-service --replicas 1 -p 3000:3000 bank-app:latest
