@@ -284,3 +284,10 @@ Setting up of hyperledger fabric cluster requires the following steps. Creating 
       - This features are commented out currently. Only swarm service deployment is enabled in this commit.
       - However a docker-compose.yaml to deploy the hlf_explorer service is templated and configured dynamically for additional support.
       - This file will be available in the "root/hlf-explorer/hlf-explorer-docker-compose.yaml" in the prime manager machine.
+      
+- Playbook: `105.deploy_bank_app.yml`
+    - Execute: `ansible-playbook -v 105.deploy_bank_app.yml --flush-cache -u root`
+    - Deploys the sample bank app as a docker service as a demo prototype
+    - The service will be exposed in **port : 3000**.
+    - The app is developed and made open source in github : https://github.com/bityoga/articonf-bank-app
+    - The playbook clones the github repository and runs the app as a docker service in port 3000
