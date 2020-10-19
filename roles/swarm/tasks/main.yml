@@ -42,7 +42,7 @@
   docker_swarm:
     state: join
     join_token: "{{ hostvars[groups.swarm_manager_prime[0]]['result'].swarm_facts.JoinTokens.Manager }}"
-    advertise_addr: "{{ ansible_host }}:4567"
+    advertise_addr: "{{ ansible_host }}:2377"
     remote_addrs: ["{{ hostvars[groups.swarm_manager_prime[0]]['ansible_host'] }}:2377" ]
   retries: 3
   delay: 15
