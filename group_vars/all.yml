@@ -84,7 +84,7 @@ orgca: { switch: "on", image: "hyperledger/fabric-ca", tag: "1.4", replicas: -1,
 ######################################### Orderer #############################################
 orderer: { switch: "on", image: "hyperledger/fabric-orderer", tag: "2.2", replicas: -1, port: 8053,
 caname: "{{orgca.name}}", anchorpeer: "{{peer1.name}}", anchorport: "{{peer1.port}}",
-path: "/root/{{orderer_user}}", type: "solo",
+path: "/root/{{orderer_user}}",
 name: "{{orderer_user}}", password: "{{orderer_password}}", type: "orderer"
 }
 
@@ -171,6 +171,19 @@ bank_app : {
   replicas: -1,
   port : 3000,
   switch: "on",
+}
+
+rest_api : {
+  git_repository : "https://github.com/bityoga/fabric_as_code_restapi.git",
+  name : 'rest-api-service',
+  replicas: -1,
+  port : 3001,
+  switch: "on",
+  fabric_ca_admin_user_name: "admin1",
+  fabric_ca_admin_password: "admin1pw",
+  rest_api_admin_user_name: "rest_api_admin_user",
+  rest_api_admin_password: "rest_api_admin_password",
+  rest_api_admin_user_role: "client"
 }
 
 

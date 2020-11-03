@@ -1,0 +1,76 @@
+# ---
+# Stop all Rest Api services
+- name: Stop Rest Api  Service - {{ item.name }}
+  become: yes
+  docker_swarm_service:
+    name: "{{item.name}}"
+    state: absent
+    networks:
+      - "{{swarm_network}}"
+  loop:
+    - "{{rest_api}}"
+  when: rest_api.switch == "on" and inventory_hostname in groups.swarm_manager_prime
+
+  # Clean  rest-api files folders , if they exists
+- name: Clean  rest-api files folders , if they exists
+  become: yes
+  file:
+    path: "/root/hlft-store/fabric_as_code_restapi/"
+    state: absent
+  when: rest_api.switch == "on"
+
+  # git clone  rest-api files
+- name: Git clone  rest-api files
+  become: yes
+  shell: git clone {{rest_api.git_repository}} /root/hlft-store/fabric_as_code_restapi
+
+  # Copy orderer tls certificate to Rest Api folder
+- name: Copy orderer certificate to Rest Api folder
+  become: yes
+  shell: cp /root/hlft-store/{{orgca.name}}/{{orderer.name}}/msp/tls/ca.crt /root/hlft-store/fabric_as_code_restapi/fabric_node_sdk_helper/hlft-store/{{orderer.name}}/tls-msp/tlscacerts/ca.crt
+
+  # Copy peer2 tls certificate to Rest Api folder
+- name: Copy peer2 certificate to Rest Api folder
+  become: yes
+  shell: cp /root/hlft-store/{{orgca.name}}/{{peer2.name}}/msp/tls/ca.crt /root/hlft-store/fabric_as_code_restapi/fabric_node_sdk_helper/hlft-store/{{peer2.name}}/tls-msp/tlscacerts/ca.crt
+
+# Template copy Rest Api config.json file
+- name: Template copy Rest Api config.json file
+  become: yes
+  template:
+    src: "rest_api_config.json"
+    dest: "/root/hlft-store/fabric_as_code_restapi/fabric_node_sdk_helper/api_config.json"
+    mode: "0750"
+    force: yes
+  when: rest_api.switch == "on"
+
+# Template copy Rest Api network_config.json file
+- name: Template copy Rest Api network_config.json file
+  become: yes
+  template:
+    src: "rest_api_network_profile.json"
+    dest: "/root/hlft-store/fabric_as_code_restapi/fabric_node_sdk_helper/network_profile.json"
+    mode: "0750"
+    force: yes
+  when: rest_api.switch == "on"
+
+# Template copy Rest Api Dockerfile
+- name: Template copy Rest Api Dockerfile
+  become: yes
+  template:
+    src: "rest_api_Dockerfile"
+    dest: "/root/hlft-store/fabric_as_code_restapi/Dockerfile"
+    mode: "0750"
+    force: yes
+  when: rest_api.switch == "on"
+
+  # Build Docker Image
+- name: Build Docker Image for Rest Api
+  become: yes
+  shell: docker build --tag rest-api /root/hlft-store/fabric_as_code_restapi/
+  ignore_errors: yes
+
+  # Run as docker service with replicas
+- name: Run as docker service with replicas
+  become: yes
+  shell: docker service create --name rest-api-service --replicas 1 -p {{rest_api.port}}:{{rest_api.port}} rest-api:latest

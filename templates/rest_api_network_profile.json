@@ -1,0 +1,84 @@
+{
+  "name": "{{org.name}}-{{org.unit}}",
+  "version": "1.0.0",
+  "client": {
+    "organization": "{{org.name}}",
+    "connection": {
+      "timeout": {
+        "peer": {
+          "endorser": "300"
+        }
+      }
+    }
+  },
+  "channels": {
+    "appchannel": {
+      "orderers": ["{{orderer.name}}"],
+      "peers": {
+        "{{peer2.name}}": {
+          "endorsingPeer": "true",
+          "chaincodeQuery": "true",
+          "ledgerQuery": "true",
+          "eventSource": "true",
+          "discover": "true"
+        },
+        "{{peer1.name}}": {
+          "endorsingPeer": "false",
+          "chaincodeQuery": "false",
+          "ledgerQuery": "true",
+          "eventSource": "false",
+          "discover": "true"
+        }
+      }
+    }
+  },
+  "organizations": {
+    "{{org.name}}": {
+      "mspid": "{{org.name}}MSP",
+      "peers": ["{{peer2.name}}", "{{peer1.name}}"],
+      "certificateAuthorities": ["{{orgca.name}}", "{{tlsca.name}}"]
+    }
+  },
+
+  "orderers": {
+    "{{orderer.name}}": {
+      "url": "grpcs://{{ ansible_default_ipv4.address }}:{{orderer.port}}",
+      "tlsCACerts": {
+        "path": "./hlft-store/{{orderer.name}}/tls-msp/tlscacerts/ca.crt"
+      },
+      "grpcOptions": {
+        "ssl-target-name-override": "{{orderer.name}}"
+      }
+    }
+  },
+
+  "peers": {
+    "{{peer2.name}}": {
+      "url": "grpcs://{{ ansible_default_ipv4.address }}:{{peer2.port}}",
+
+      "tlsCACerts": {
+        "path": "./hlft-store/{{peer2.name}}/tls-msp/tlscacerts/ca.crt"
+      },
+      "grpcOptions": {
+        "ssl-target-name-override": "{{peer2.name}}"
+      }
+    }
+  },
+  "certificateAuthorities": {
+    "{{orgca.name}}": {
+      "caName": "{{orgca.name}}",
+      "url": "https://{{ ansible_default_ipv4.address }}:{{orgca.port}}",
+      "httpOptions": {
+        "verify": false
+      }
+    },
+
+    "{{tlsca.name}}": {
+      "caName": "{{tlsca.name}}",
+      "url": "https://{{ ansible_default_ipv4.address }}:{{tlsca.port}}",
+      "httpOptions": {
+        "verify": false
+      }
+    }
+  }
+}

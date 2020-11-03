@@ -1,0 +1,8 @@
+---
+# ansible-playbook -v 106.deploy_rest_api.yml --flush-cache -u root
+
+- name: Deploy Rest Api service
+  hosts: swarm_manager_prime
+  gather_facts: yes
+  roles:
+    - rest_api
