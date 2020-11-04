@@ -16,7 +16,7 @@
 - name: Clean hlf-explorer config files folders , if they exists
   become: yes
   file:
-    path: "/root/hlf-explorer/*"
+    path: "/root/hlf-explorer/"
     state: absent
   when: hlf_explorer.switch == "on"
 
@@ -34,7 +34,7 @@
 - name: Template copy hlf explorer config json file
   become: yes
   template:
-    src: "hlf-explorer-config.json"
+    src: "hlf_explorer/hlf-explorer-config.json"
     dest: "/root/hlf-explorer/config.json"
     mode: "0750"
     force: yes
@@ -43,7 +43,7 @@
 - name: Template Copy hlf explorer network connection profile json file
   become: yes
   template:
-    src: "hlf-explorer-network.json"
+    src: "hlf_explorer/hlf-explorer-network.json"
     dest: "/root/hlf-explorer/connection-profile/hlf-explorer-network.json"
     mode: "0750"
     force: yes
@@ -52,7 +52,7 @@
 - name: Template Copy hlf explorer docker-compose.yaml file
   become: yes
   template:
-    src: "hlf-explorer-docker-compose.yaml"
+    src: "hlf_explorer/hlf-explorer-docker-compose.yaml"
     dest: "/root/hlf-explorer/hlf-explorer-docker-compose.yaml"
     mode: "0750"
     force: yes
@@ -74,83 +74,6 @@
     remote_src: yes
   with_items: "{{admin_secret_key_file.stdout_lines}}"
   when: hlf_explorer.switch == "on"
-
-#  # Stop hlf explorer containers
-# - name: Stop Hlf-Explorer containers
-#   raw:
-#       'docker-compose -f /root/hlf-explorer/hlf-explorer-docker-compose.yaml down 2>&1'
-#   when: hlf_explorer.switch == "on"
-
-#   # Create & Start hlf explorer containers
-# - name: Start Hlf-Explorer containers
-#   raw:
-#       'docker-compose -f /root/hlf-explorer/hlf-explorer-docker-compose.yaml up -d 2>&1'
-#   when: hlf_explorer.switch == "on"
-
-#  # Stop hlf explorer stack services
-# - name: Remove Hlf-Explorer stack services
-#   raw:
-#       'docker stack rm explorer 2>&1'
-#   when: hlf_explorer.switch == "on" and inventory_hostname in groups.swarm_manager_prime
-
-#   # Stack Deploy hlf explorer services
-# - name: Stack deploy Hlf-Explorer services
-#   raw:
-#       'docker stack deploy --compose-file /root/hlf-explorer/hlf-explorer-docker-compose.yaml explorer 2>&1'
-#   when: hlf_explorer.switch == "on" and inventory_hostname in groups.swarm_manager_prime
-
-#   # Pause for 15 seconds to build app cache.
-# - name : Pause for 20 seconds for containers to start up
-#   pause:
-#     seconds: 20
-
-#   # Remove all hlf-explorer volumes
-# - name: Remove Explorer Volumes - {{item.name}}.{{item.volume}}
-#   become: yes
-#   docker_volume:
-#     name: "{{item.name}}.{{item.volume}}"
-#     state: absent
-#   loop:
-#     - "{{hlf_explorer}}"
-#     - "{{hlf_explorer_db}}"
-#   when: hlf_explorer.switch == "on"
-
-#     # We create relevent folder structure in the mount locally for services
-# - name: Clean pgdata folder, if  they exists
-#   become: yes
-#   file:
-#     path: "/root/hlf-explorer/pgdata"
-#     state: absent
-#   when: hlf_explorer.switch == "on"
-
-# - name: Copy pgdata folder structure
-#   become: yes
-#   copy:
-#     src: "hlf-explorer/pgdata"
-#     dest: "/root/hlf-explorer"
-#     mode: '0750'
-#     force: yes
-#   when: hlf_explorer.switch == "on"
-
-#       # We create relevent folder structure in the mount locally for services
-# - name: Clean wallet folder, if  they exists
-#   become: yes
-#   file:
-#     path: "/root/hlf-explorer/wallet"
-#     state: absent
-#   when: hlf_explorer.switch == "on"
-
-# - name: Copy wallet folder structure
-#   become: yes
-#   copy:
-#     src: "hlf-explorer/wallet"
-#     dest: "/root/hlf-explorer"
-#     mode: '0750'
-#     force: yes
-#   when: hlf_explorer.switch == "on"
-
-# Create & Start hlf_explorer_db service
-# Containers are placed in the managers
 
 - name: Remove {{hlf_explorer_db.volume}} volume
   become: yes
@@ -258,14 +181,3 @@
 
     force_update: yes
   when: hlf_explorer.switch == "on" and inventory_hostname in groups.swarm_manager_prime
-# # Pause for 15 seconds to build app cache.
-# - name : Pause for 20 seconds for containers to start up
-#   pause:
-#     seconds: 20
-
-#    # Stop hlf explorer containers
-# - name: Execute createdb.sh script in hhf-explorer db container
-#   ignore_errors: yes
-#   raw:
-#       'docker exec -it $(docker ps -qf "name=^{{hlf_explorer_db.name}}")  "./createdb.sh" 2>&1'
-#   when: hlf_explorer.switch == "on" and inventory_hostname in groups.swarm_manager_prime
