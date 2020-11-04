@@ -34,22 +34,12 @@
   become: yes
   shell: cp /root/hlft-store/{{orgca.name}}/{{peer2.name}}/msp/tls/ca.crt /root/articonf-bank-app/fabric_node_sdk_helper/hlft-store/{{peer2.name}}/tls-msp/tlscacerts/ca.crt
 
-# Template copy bank app network_config.json file
-- name: Template copy bank app network_config.json file
+# Template copy sdk network_config.json file
+- name: Template copy sdk network_config.json file
   become: yes
   template:
-    src: "bank_app_network_profile.json"
+    src: "sdk_network_connection_profile.json"
     dest: "/root/articonf-bank-app/fabric_node_sdk_helper/network_profile.json"
-    mode: "0750"
-    force: yes
-  when: bank_app.switch == "on"
-
-# Template copy bank app Dockerfile
-- name: Template copy bank app Dockerfile
-  become: yes
-  template:
-    src: "bank_app_Dockerfile"
-    dest: "/root/articonf-bank-app/Dockerfile"
     mode: "0750"
     force: yes
   when: bank_app.switch == "on"
@@ -57,10 +47,28 @@
   # Build Docker Image
 - name: Build Docker Image for bank app
   become: yes
-  shell: docker build --tag bank-app /root/articonf-bank-app/
+  shell: cd /root/articonf-bank-app && bash build_docker_image.sh
   ignore_errors: yes
 
   # Run as docker service with replicas
-- name: Run as docker service with replicas
+# - name: Run as docker service with replicas
+#   become: yes
+#   shell: docker service create --name bank-service --replicas 1 -p 3000:3000 bank-app:latest
+
+
+- name: Bank App Docker Service
   become: yes
-  shell: docker service create --name bank-service --replicas 1 -p 3000:3000 bank-app:latest
+  docker_swarm_service:
+    name: "{{bank_app.name}}"
+    hostname: "{{bank_app.name}}"
+    networks:
+      - "{{swarm_network}}"
+    image: "{{bank_app.image}}:{{bank_app.tag}}"
+    mode: replicated
+    replicas: "{{bank_app.replicas}}"
+    publish:
+      - published_port: "{{bank_app.port}}"
+        target_port: "{{bank_app.port}}"
+        protocol: "tcp"
+    force_update: yes
+  when: bank_app.switch == "on" and inventory_hostname in groups.swarm_manager_prime
