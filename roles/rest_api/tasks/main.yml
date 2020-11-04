@@ -54,23 +54,31 @@
     force: yes
   when: rest_api.switch == "on"
 
-# Template copy Rest Api Dockerfile
-- name: Template copy Rest Api Dockerfile
-  become: yes
-  template:
-    src: "rest_api_Dockerfile"
-    dest: "/root/hlft-store/fabric_as_code_restapi/Dockerfile"
-    mode: "0750"
-    force: yes
-  when: rest_api.switch == "on"
-
   # Build Docker Image
 - name: Build Docker Image for Rest Api
   become: yes
-  shell: docker build --tag rest-api /root/hlft-store/fabric_as_code_restapi/
+  shell: cd /root/hlft-store/fabric_as_code_restapi && bash build_docker_image.sh
   ignore_errors: yes
 
   # Run as docker service with replicas
-- name: Run as docker service with replicas
+# - name: Run as docker service with replicas
+#   become: yes
+#   shell: docker service create --name rest-api-service --replicas 1 -p {{rest_api.port}}:{{rest_api.port}} rest-api:latest
+
+# Run as docker service with replicas
+- name: Rest Api Docker Service
   become: yes
-  shell: docker service create --name rest-api-service --replicas 1 -p {{rest_api.port}}:{{rest_api.port}} rest-api:latest
+  docker_swarm_service:
+    name: "{{rest_api.name}}"
+    hostname: "{{rest_api.name}}"
+    networks:
+      - "{{swarm_network}}"
+    image: "{{rest_api.image}}:{{rest_api.tag}}"
+    mode: replicated
+    replicas: "{{rest_api.replicas}}"
+    publish:
+      - published_port: "{{rest_api.port}}"
+        target_port: "{{rest_api.port}}"
+        protocol: "tcp"
+    force_update: yes
+  when: rest_api.switch == "on" and inventory_hostname in groups.swarm_manager_prime

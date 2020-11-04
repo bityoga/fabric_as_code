@@ -167,6 +167,8 @@ portainer_agent : {
 
 bank_app : {
   git_repository : "https://github.com/bityoga/articonf-bank-app.git",
+  image: "bank-app",
+  tag : 'latest',
   name : 'bank-service',
   replicas: -1,
   port : 3000,
@@ -175,6 +177,8 @@ bank_app : {
 
 rest_api : {
   git_repository : "https://github.com/bityoga/fabric_as_code_restapi.git",
+  image: "rest-api",
+  tag : 'latest',
   name : 'rest-api-service',
   replicas: -1,
   port : 3001,
