@@ -227,6 +227,9 @@
       - source: "/root/hlf-explorer/config.json"
         target: "/opt/explorer/app/platform/fabric/config.json"
         type: bind
+      - source: "/root/hlf-explorer/PgService.js"
+        target: "/opt/explorer/app/persistence/postgreSQL/PgService.js"
+        type: bind
       - source: "/root/hlf-explorer/connection-profile"
         target: "/opt/explorer/app/platform/fabric/connection-profile"
         type: bind
