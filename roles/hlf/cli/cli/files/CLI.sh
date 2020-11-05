@@ -1,6 +1,6 @@
 
 #!/bin/bash
-set -x #echo on
+#set -x #echo on
 if [ $INSTALL_BANK_CHAINCODE == "y" ]; then
     rm -rfv /root/CLI/chaincodes/articonf-bank-chaincode || true &&
     git clone https://github.com/bityoga/articonf-bank-chaincode.git /root/CLI/chaincodes/articonf-bank-chaincode || true &&
