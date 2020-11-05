@@ -122,7 +122,7 @@
 - name: Fabric Service - {{ orderer.name }}
   become: yes
   docker_swarm_service:
-    restart_policy: "none"
+    restart_policy: "on-failure"
     name: "{{ orderer.name }}_cli"
     hostname: "{{ orderer.name }}_cli"
     networks:
@@ -156,5 +156,6 @@
   when: orderer.switch == "on"
 
 # Pause for 5 seconds for genesis block to be created.
-- pause:
-    seconds: 5
+- name: Pause for 5 seconds for genesis block to be created.
+  pause:
+      seconds: "5"

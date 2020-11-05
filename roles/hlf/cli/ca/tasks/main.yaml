@@ -26,7 +26,7 @@
 - name: ENROLL Agents for Fabric Service - "{{ item.0.name }}_{{item.1.1.name}}_cli"
   become: yes
   docker_swarm_service:
-    restart_policy: "none"
+    restart_policy: "on-failure"
     name: "{{ item.0.name }}_{{item.1.1.name}}_cli"
     hostname: "{{ item.0.name }}_{{item.1.1.name}}_cli"
     networks:
