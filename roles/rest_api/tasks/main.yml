@@ -39,7 +39,7 @@
   become: yes
   template:
     src: "rest_api_config.json"
-    dest: "/root/hlft-store/fabric_as_code_restapi/fabric_node_sdk_helper/api_config.json"
+    dest: "/root/hlft-store/fabric_as_code_restapi/api_config.json"
     mode: "0750"
     force: yes
   when: rest_api.switch == "on"
