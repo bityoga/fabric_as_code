@@ -24,6 +24,15 @@
   become: yes
   shell: git clone {{rest_api.git_repository}} /root/hlft-store/fabric_as_code_restapi
 
+  # We create wallet directory to store the rest api admin user certificate
+- name: Create wallet directory for rest api
+  become: yes
+  file:
+    path: "/root/hlft-store/fabric_as_code_restapi/wallet"
+    state: directory
+    mode: "0775"
+  when: hlf_explorer.switch == "on"
+
   # Copy orderer tls certificate to Rest Api folder
 - name: Copy orderer certificate to Rest Api folder
   become: yes
@@ -76,6 +85,10 @@
     image: "{{rest_api.image}}:{{rest_api.tag}}"
     mode: replicated
     replicas: "{{rest_api.replicas}}"
+    mounts:
+      - source: "/root/hlft-store/fabric_as_code_restapi/wallet"
+        target: "/app/wallet"
+        type: bind
     publish:
       - published_port: "{{rest_api.port}}"
         target_port: "{{rest_api.port}}"
