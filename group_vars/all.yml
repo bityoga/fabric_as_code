@@ -175,6 +175,7 @@ bank_app : {
   switch: "on",
 }
 
+
 rest_api : {
   git_repository : "https://github.com/bityoga/fabric_as_code_restapi.git",
   image: "rest-api",
@@ -187,7 +188,8 @@ rest_api : {
   fabric_ca_admin_password: "admin1pw",
   rest_api_admin_user_name: "rest_api_admin_user",
   rest_api_admin_password: "rest_api_admin_password",
-  rest_api_admin_user_role: "client"
+  rest_api_admin_user_role: "client",
+  enable_https: "y",
 }
 
 
