@@ -176,6 +176,23 @@ bank_app : {
 }
 
 
+rest_api : {
+  git_repository : "https://github.com/bityoga/fabric_as_code_restapi.git",
+  image: "rest-api",
+  tag : 'latest',
+  name : 'rest-api-service',
+  replicas: -1,
+  port : 3001,
+  switch: "on",
+  fabric_ca_admin_user_name: "admin1",
+  fabric_ca_admin_password: "admin1pw",
+  rest_api_admin_user_name: "rest_api_admin_user",
+  rest_api_admin_password: "rest_api_admin_password",
+  rest_api_admin_user_role: "client",
+  enable_https: "y",
+}
+
+
 ###########################################################################################
 #                                                                                         #
 #                                                                                         #
