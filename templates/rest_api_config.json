@@ -6,5 +6,6 @@
     "fabric_ca_organisation_name":"{{orgca.name}}",
     "rest_api_admin_user_name":"{{rest_api.rest_api_admin_user_name}}",
     "rest_api_admin_password":"{{rest_api.rest_api_admin_password}}",
-    "rest_api_admin_user_role":"{{rest_api.rest_api_admin_user_role}}"
+    "rest_api_admin_user_role":"{{rest_api.rest_api_admin_user_role}}",
+    "enable_https":"{{rest_api.enable_https}}"
 }
