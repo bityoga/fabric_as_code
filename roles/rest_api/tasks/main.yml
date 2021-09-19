@@ -31,7 +31,7 @@
     path: "/root/hlft-store/fabric_as_code_restapi/wallet"
     state: directory
     mode: "0775"
-  when: hlf_explorer.switch == "on"
+  when: rest_api.switch == "on"
 
   # Copy orderer tls certificate to Rest Api folder
 - name: Copy orderer certificate to Rest Api folder
@@ -42,6 +42,23 @@
 - name: Copy peer2 certificate to Rest Api folder
   become: yes
   shell: cp /root/hlft-store/{{orgca.name}}/{{peer2.name}}/msp/tls/ca.crt /root/hlft-store/fabric_as_code_restapi/fabric_node_sdk_helper/hlft-store/{{peer2.name}}/tls-msp/tlscacerts/ca.crt
+
+  # Https support certificates starts here
+  # Copy ORG_ADMIN_CA_CERT_FILE certificate to Rest Api folder
+- name: Copy ORG_ADMIN_CA_CERT_FILE certificate to Rest Api folder
+  become: yes
+  shell: cp /root/hlft-store/{{orgca.name}}/{{admin_user}}/msp/cacerts/orgca-7054.pem /root/hlft-store/fabric_as_code_restapi/fabric_node_sdk_helper/hlft-store/{{orgca.name}}/{{admin_user}}/msp/cacerts/orgca-7054.pem
+
+  # Copy ORG_ADMIN_CERT_FILE certificate to Rest Api folder
+- name: Copy ORG_ADMIN_CERT_FILE certificate to Rest Api folder
+  become: yes
+  shell: cp /root/hlft-store/{{orgca.name}}/{{admin_user}}/msp/signcerts/cert.pem /root/hlft-store/fabric_as_code_restapi/fabric_node_sdk_helper/hlft-store/{{orgca.name}}/{{admin_user}}/msp/signcerts/cert.pem
+
+  # Copy ORG_ADMIN_KEY_FILE certificate to Rest Api folder
+- name: Copy ORG_ADMIN_KEY_FILE  to Rest Api folder
+  become: yes
+  shell: cp -p "`ls -dtr1 "/root/hlft-store/{{orgca.name}}/{{admin_user}}/msp/keystore"/* | tail -1`" "/root/hlft-store/{{orgca.name}}/{{admin_user}}/msp/keystore/server.key"
+# Https support certificates ends here
 
 # Template copy Rest Api config.json file
 - name: Template copy Rest Api config.json file
