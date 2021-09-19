@@ -74,7 +74,7 @@
 - name: Template copy Rest Api network_config.json file
   become: yes
   template:
-    src: "rest_api_network_profile.json"
+    src: "sdk_network_connection_profile.json"
     dest: "/root/hlft-store/fabric_as_code_restapi/fabric_node_sdk_helper/network_profile.json"
     mode: "0750"
     force: yes
