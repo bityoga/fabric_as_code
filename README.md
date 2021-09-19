@@ -332,3 +332,14 @@ Setting up of hyperledger fabric cluster requires the following steps. Creating 
   - The service will be exposed in **port : 3000**.
   - **_App Repository :_** https://github.com/bityoga/articonf-bank-app
   - The playbook clones the github repository and runs the app as a docker service in port 3000
+
+
+## RESTful API Deployment
+
+- Playbook: `106.deploy_rest_api.yml`
+- Execute: `ansible-playbook -v 106.deploy_rest_api.yml --flush-cache -u root`
+  - Deploys the rest api app as a docker service.
+  - The service will be exposed in **port : 3001**.
+  - **_App Repository :_** https://github.com/bityoga/fabric_as_code_restapi
+  - The playbook clones the github repository and runs the app as a docker service in port 3001
+- **Rest API instructions :** https://github.com/bityoga/fabric_as_code_restapi/tree/main/curl_instructions
