@@ -39,7 +39,11 @@
     mounts:     
       - source: "/root/hlft-store"
         target: "/root/CLI"
-        type: bind      
+        type: bind
+    publish:
+      - published_port: "{{cli.port}}"
+        target_port: "3003"
+        protocol: "tcp"
     env: 
       - "GOPATH=/opt/gopath"
       - "CORE_VM_ENDPOINT=unix:///var/run/docker.sock"

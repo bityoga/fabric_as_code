@@ -277,7 +277,17 @@ Setting up of hyperledger fabric cluster requires the following steps. Creating 
     CORE_PEER_ADDRESS=$CORE_PEER_ADDRESS CORE_PEER_MSPCONFIGPATH=/root/CLI/${ORGCA_HOST}/${PEER_HOST}/msp CORE_PEER_TLS_ROOTCERT_FILE=$CORE_PEER_TLS_ROOTCERT_FILE peer chaincode query -C appchannel -n testcc -c '{"Args":["query","a"]}'
     ```
 
-- Playbook: `104.deploy_hlf_explorer`
+  ## TIC Dashboard
+
+  - The CLI service also starts a TIC dashboard service ([Refer TIC Dashboard Project](https://github.com/bityoga/tic_dashboard))
+  - THE TIC dashboard service is exposed through port number specified in `gorup_vars/all.yml` as shown below (**Default port is : 3003**):
+    ```bash
+    ######################################### CLI #############################################
+    cli: { switch: "on", image: "hyperledger/fabric-tools", tag: "2.2",port : 3003,}
+    ```
+  - The TIC Dashboard provides services for smart-contract (or) Chaincode management though GUI.
+
+* Playbook: `104.deploy_hlf_explorer`
 
   - Execute: `ansible-playbook -v 104.deploy_hlf_explorer.yml --flush-cache -u root`
   - Deploys the hyperledger explorer services to docker swarm.
@@ -332,7 +342,6 @@ Setting up of hyperledger fabric cluster requires the following steps. Creating 
   - The service will be exposed in **port : 3000**.
   - **_App Repository :_** https://github.com/bityoga/articonf-bank-app
   - The playbook clones the github repository and runs the app as a docker service in port 3000
-
 
 ## RESTful API Deployment
 
