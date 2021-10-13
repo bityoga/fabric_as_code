@@ -329,7 +329,7 @@ Setting up of hyperledger fabric cluster requires the following steps. Creating 
 
   #### **TO DISABLE AUTO INSTALL OF CHAINCODE**
 
-  - Set "INSTALL*BANK_CHAINCODE" in *"group*vars/all.yml"* to **'n'**
+  - Set "INSTALL_BANK_CHAINCODE" in _"group_vars/all.yml"_ to **'n'**
   - By default it is set to **'y'**
 
 - **_Sample Bank App Chaincode Repository :_** https://github.com/bityoga/articonf-bank-chaincode.git
