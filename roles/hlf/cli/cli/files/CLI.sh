@@ -14,9 +14,9 @@ if [ $INSTALL_BANK_CHAINCODE == "y" ]; then
     # 3) Git clone tic_dashboard code to "/root/CLI"
     git clone https://github.com/bityoga/tic_dashboard.git /root/CLI/tic_dashboard || true &&
     # 4) Run npm install under "/root/CLI/tic_dashboard"
-    npm --prefix /root/CLI/chaincodes/tic_dashboard install /root/CLI/tic_dashboard  || true &&
+    npm --prefix /root/CLI/tic_dashboard install /root/CLI/tic_dashboard  || true &&
     # 5) Start tic_dashboard app
-    node /root/CLI/chaincodes/tic_dashboard/app.js  || true &
+    node /root/CLI/tic_dashboard/app.js  || true &
     #### TIC DASHBOARD NODE APP DEPLOYMENT ENDS HERE ####
     while true; do sleep 2; done;
 else
