@@ -104,7 +104,7 @@ leader: "{{peer1_user}}"
 }
 
 ######################################### CLI #############################################
-cli: { switch: "on", image: "hyperledger/fabric-tools", tag: "2.2"}
+cli: { switch: "on", image: "hyperledger/fabric-tools", tag: "2.2",port : 3003,}
 ######################################### DBs #############################################
 sqlite: {type: "sqlite3", source: "fabric-ca-server.db"}
 
