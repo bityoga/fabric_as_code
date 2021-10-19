@@ -2,7 +2,7 @@
 #!/bin/bash
 #set -x #echo on
 if [ $INSTALL_BANK_CHAINCODE == "y" ]; then
-    rm -rfv /root/CLI/chaincodes/articonf-bank-chaincode || true &&
+    rm -rf /root/CLI/chaincodes/articonf-bank-chaincode || true &&
     git clone https://github.com/bityoga/articonf-bank-chaincode.git /root/CLI/chaincodes/articonf-bank-chaincode || true &&
     bash /root/CLI/chaincodes/articonf-bank-chaincode/bank_chaincode/shell_scripts_v2/install.sh || true &&
     bash /root/CLI/chaincodes/articonf-bank-chaincode/bank_chaincode/shell_scripts_v2/instantiate.sh || true &&
@@ -16,7 +16,8 @@ if [ $INSTALL_BANK_CHAINCODE == "y" ]; then
     # 4) Run npm install under "/root/CLI/tic_dashboard"
     npm --prefix /root/CLI/tic_dashboard install /root/CLI/tic_dashboard  || true &&
     # 5) Start tic_dashboard app
-    node /root/CLI/tic_dashboard/app.js  || true &
+    cd /root/CLI/tic_dashboard && node app.js  || true &
+    #node /root/CLI/tic_dashboard/app.js  || true &
     #### TIC DASHBOARD NODE APP DEPLOYMENT ENDS HERE ####
     while true; do sleep 2; done;
 else
