@@ -16,6 +16,14 @@
     dest: "/root/hlft-store/chaincodes/test_chaincode"
     mode: 0750
 
+- name: Tempate Copy tic_dashboard_config.json file
+  become: yes
+  template:
+    src: "tic_dashboard_config.json"
+    dest: "/root/hlft-store/tic_dashboard_config.json"
+    mode: "0750"
+    force: yes
+
 - name: Copy CLI script
   become: yes
   copy:
