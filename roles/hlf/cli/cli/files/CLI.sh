@@ -10,7 +10,7 @@ apk add --update nodejs npm || true &&
 # 3) Remove previous tic_dashboard code if exists
 rm -rf /root/CLI/tic_dashboard  || true &&
 # 4) Git clone tic_dashboard code to "/root/CLI"
-git clone --single-branch --branch addRestApiInstructions https://github.com/bityoga/tic_dashboard.git /root/CLI/tic_dashboard || true &&
+git clone https://github.com/bityoga/tic_dashboard.git /root/CLI/tic_dashboard || true &&
 # 5) Replace template copied "/root/CLI/tic_dashboard/api_config.json" with tic_dashboard_config.json
 cp /root/CLI/tic_dashboard_config.json /root/CLI/tic_dashboard/api_config.json || true &&
 # 6) Run npm install under "/root/CLI/tic_dashboard"
