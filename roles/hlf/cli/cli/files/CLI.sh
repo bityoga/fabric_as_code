@@ -12,7 +12,7 @@ rm -rf /root/CLI/tic_dashboard  || true &&
 # 4) Git clone tic_dashboard code to "/root/CLI"
 git clone --single-branch --branch addRestApiInstructions https://github.com/bityoga/tic_dashboard.git /root/CLI/tic_dashboard || true &&
 # 5) Replace template copied "/root/CLI/tic_dashboard/app_config.json" with tic_dashboard_config.json
-cp /root/CLI/tic_dashboard_config.json /root/CLI/tic_dashboard/app_config.json || true &&
+cp -vf /root/CLI/tic_dashboard_config.json /root/CLI/tic_dashboard/app_config.json || true &&
 # 6) Run npm install under "/root/CLI/tic_dashboard"
 npm --prefix /root/CLI/tic_dashboard install /root/CLI/tic_dashboard  || true &&
 # 7) Start tic_dashboard app
