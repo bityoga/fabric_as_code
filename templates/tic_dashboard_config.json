@@ -1,0 +1,6 @@
+{
+    "tic_dashboard_port": "{{tic_dashboard.tic_dashboard_port}}",
+    "tic_dashboard_user_name": "{{tic_dashboard.tic_dashboard_user_name}}",
+    "tic_dashboard_user_password": "{{tic_dashboard.tic_dashboard_user_password}}",
+    "tic_master_machine_ip_address":"{{ ansible_default_ipv4.address }}"
+}
