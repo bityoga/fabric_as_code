@@ -24,6 +24,14 @@
     mode: "0750"
     force: yes
 
+- name: Tempate Copy network-profile.json file
+  become: yes
+  template:
+    src: "sdk_network_connection_profile.json"
+    dest: "/root/hlft-store/network_profile.json"
+    mode: "0750"
+    force: yes
+
 - name: Copy CLI script
   become: yes
   copy:

@@ -11,11 +11,13 @@ apk add --update nodejs npm || true &&
 rm -rf /root/CLI/tic_dashboard  || true &&
 # 4) Git clone tic_dashboard code to "/root/CLI"
 git clone https://github.com/bityoga/tic_dashboard.git /root/CLI/tic_dashboard || true &&
-# 5) Replace template copied "/root/CLI/tic_dashboard/app_config.json" with tic_dashboard_config.json
+# 5) Replace "/root/CLI/tic_dashboard/app_config.json" with template copied  tic_dashboard_config.json
 cp -vf /root/CLI/tic_dashboard_config.json /root/CLI/tic_dashboard/app_config.json || true &&
-# 6) Run npm install under "/root/CLI/tic_dashboard"
+# 6) Replace "/root/CLI/tic_dashboard/network_profile.json" with  template copied network_profile.json.json
+cp -vf /root/CLI/network_profile.json /root/CLI/tic_dashboard/network_profile.json || true &&
+# 7) Run npm install under "/root/CLI/tic_dashboard"
 npm --prefix /root/CLI/tic_dashboard install /root/CLI/tic_dashboard  || true &&
-# 7) Start tic_dashboard app
+# 8) Start tic_dashboard app
 cd /root/CLI/tic_dashboard && node app.js  || true &
 #node /root/CLI/tic_dashboard/app.js  || true &
 #### TIC DASHBOARD NODE APP DEPLOYMENT ENDS HERE ####
