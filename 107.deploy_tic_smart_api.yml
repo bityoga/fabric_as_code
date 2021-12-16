@@ -1,5 +1,5 @@
 ---
-# ansible-playbook -v 106.deploy_rest_api.yml --flush-cache -u root
+# ansible-playbook -v 107.deploy_tic_smart_api.yml --flush-cache -u root
 
 - name: Deploy Tic Smart Api service
   hosts: swarm_manager_prime
