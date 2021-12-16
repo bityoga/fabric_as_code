@@ -1,0 +1,66 @@
+# ---
+# Stop all Tic-Smart Api services
+- name: Stop Tic-Smart Api  Service - {{ item.name }}
+  become: yes
+  docker_swarm_service:
+    name: "{{item.name}}"
+    state: absent
+    networks:
+      - "{{swarm_network}}"
+  loop:
+    - "{{tic_smart_api}}"
+  when: tic_smart_api.switch == "on" and inventory_hostname in groups.swarm_manager_prime
+
+  # Clean  tic-smart-api files folders , if they exists
+- name: Clean  tic-smart-api files folders , if they exists
+  become: yes
+  file:
+    path: "/root/hlft-store/tic_event_listener/"
+    state: absent
+  when: tic_smart_api.switch == "on"
+
+  # git clone  tic-smart-api files
+- name: Git clone  tic-smart-api files
+  become: yes
+  shell: git clone {{tic_smart_api.git_repository}} /root/hlft-store/tic_event_listener
+
+
+# Template copy Tic-Smart Api config.json file
+- name: Template copy Tic-Smart Api app_config.json file
+  become: yes
+  template:
+    src: "tic_smart_api_config.json"
+    dest: "/root/hlft-store/tic_event_listener/app_config.json"
+    mode: "0750"
+    force: yes
+  when: tic_smart_api.switch == "on"
+
+
+  # Build Docker Image
+- name: Build Docker Image for Tic-Smart Api
+  become: yes
+  shell: cd /root/hlft-store/tic_event_listener && bash build_docker_image.sh
+  ignore_errors: yes
+
+  # Run as docker service with replicas
+# - name: Run as docker service with replicas
+#   become: yes
+#   shell: docker service create --name tic-smart-api-service --replicas 1 -p {{tic_smart_api.port}}:{{tic_smart_api.port}} tic-smart-api:latest
+
+# Run as docker service with replicas
+- name: Tic-Smart Api Docker Service
+  become: yes
+  docker_swarm_service:
+    name: "{{tic_smart_api.name}}"
+    hostname: "{{tic_smart_api.name}}"
+    networks:
+      - "{{swarm_network}}"
+    image: "{{tic_smart_api.image}}:{{tic_smart_api.tag}}"
+    mode: replicated
+    replicas: "{{tic_smart_api.replicas}}"
+    publish:
+      - published_port: "{{tic_smart_api.port}}"
+        target_port: "{{tic_smart_api.port}}"
+        protocol: "tcp"
+    force_update: yes
+  when: tic_smart_api.switch == "on" and inventory_hostname in groups.swarm_manager_prime

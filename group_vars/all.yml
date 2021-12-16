@@ -192,6 +192,23 @@ rest_api : {
   enable_https: "y",
 }
 
+tic_smart_api : {
+  git_repository : "https://github.com/bityoga/tic_event_listener.git",
+  image: "tic-smart-api",
+  tag : 'latest',
+  name : 'tic-smart-api-service',
+  replicas: -1,
+  port : 3004,
+  tic_smart_api_app_admin_user_name: "admin",
+  tic_smart_api_app_admin_user_password: "adminpw",
+  ARTICONF_SMART_API_AUTHENTICATION_ACCESS_ACCESS_URL: "https://articonf1.itec.aau.at:30401",
+  smart_rest_api_authentication_user_name: "regular@itec.aau.at",
+  smart_rest_api_authentication_user_password: "2bViezK0Tst2LzsTIXix",
+  ARTICONF_SMART_API_USECASE_ACCESS_URL: "https://articonf1.itec.aau.at:30420",
+  ARTICONF_SMART_API_BLOCKCHAIN_TRACE_RETRIEVAL_ACCESS_URL: "https://articonf1.itec.aau.at:30001",
+  switch: "on",
+}
+
 tic_dashboard : {
   tic_dashboard_port : 3003,
   tic_dashboard_user_name : "admin",
