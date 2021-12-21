@@ -53,7 +53,7 @@
       "tlsCACerts": {
         "path": "/tmp/crypto/tlsca/peer1/tls-msp/tlscacerts/tls-tlsca-7054.pem"
       },
-      "url": "grpcs://{{ ansible_default_ipv4.address }}:{{peer1.port}}",
+      "url": "grpcs://{{ ansible_ssh_host }}:{{peer1.port}}",
       "grpcOptions": {
         "ssl-target-name-override": "{{peer1.name}}"
       }
@@ -62,7 +62,7 @@
       "tlsCACerts": {
         "path": "/tmp/crypto/tlsca/peer2/tls-msp/tlscacerts/tls-tlsca-7054.pem"
       },
-      "url": "grpcs://{{ ansible_default_ipv4.address }}:{{peer2.port}}",
+      "url": "grpcs://{{ ansible_ssh_host }}:{{peer2.port}}",
       "grpcOptions": {
         "ssl-target-name-override": "{{peer2.name}}"
       }
