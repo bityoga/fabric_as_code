@@ -41,7 +41,9 @@
 - name: Fabric Service - {{ item.name }}
   become: yes
   docker_swarm_service:
-    restart_policy: "on-failure"
+    #restart_policy: "on-failure"
+    restart_config:
+      condition : "on-failure"
     name: "{{item.name}}_cli"
     hostname: "{{item.name}}_cli"
     networks:
