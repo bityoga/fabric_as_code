@@ -42,7 +42,7 @@
 
   "orderers": {
     "{{orderer.name}}": {
-      "url": "grpcs://{{ ansible_default_ipv4.address }}:{{orderer.port}}",
+      "url": "grpcs://{{ ansible_ssh_host }}:{{orderer.port}}",
       "tlsCACerts": {
         "path": "./hlft-store/{{orderer.name}}/tls-msp/tlscacerts/ca.crt"
       },
@@ -54,7 +54,7 @@
 
   "peers": {
     "{{peer2.name}}": {
-      "url": "grpcs://{{ ansible_default_ipv4.address }}:{{peer2.port}}",
+      "url": "grpcs://{{ ansible_ssh_host }}:{{peer2.port}}",
 
       "tlsCACerts": {
         "path": "./hlft-store/{{peer2.name}}/tls-msp/tlscacerts/ca.crt"
@@ -67,7 +67,7 @@
   "certificateAuthorities": {
     "{{orgca.name}}": {
       "caName": "{{orgca.name}}",
-      "url": "https://{{ ansible_default_ipv4.address }}:{{orgca.port}}",
+      "url": "https://{{ ansible_ssh_host }}:{{orgca.port}}",
       "httpOptions": {
         "verify": false
       }
@@ -75,7 +75,7 @@
 
     "{{tlsca.name}}": {
       "caName": "{{tlsca.name}}",
-      "url": "https://{{ ansible_default_ipv4.address }}:{{tlsca.port}}",
+      "url": "https://{{ ansible_ssh_host }}:{{tlsca.port}}",
       "httpOptions": {
         "verify": false
       }

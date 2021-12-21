@@ -2,7 +2,7 @@
     "tic_smart_api_app_port": "{{ tic_smart_api.port }}",
     "tic_smart_api_app_admin_user_name": "{{ tic_smart_api.tic_smart_api_app_admin_user_name }}",
     "tic_smart_api_app_admin_user_password": "{{ tic_smart_api.tic_smart_api_app_admin_user_password }}",
-    "HYPERLEDGER_EXPLORER_ACCESS_URL": "http://{{ ansible_default_ipv4.address }}:{{ hlf_explorer.port }}",
+    "HYPERLEDGER_EXPLORER_ACCESS_URL": "http://{{ ansible_ssh_host }}:{{ hlf_explorer.port }}",
     "hyperledger_explorer_rest_api_authentication_user_name": "{{ hlf_explorer.admin_user }}",
     "hyperledger_explorer_rest_api_authentication_user_password": "{{ hlf_explorer.admin_password }}",
     "ARTICONF_SMART_API_AUTHENTICATION_ACCESS_ACCESS_URL": "{{ tic_smart_api.ARTICONF_SMART_API_AUTHENTICATION_ACCESS_ACCESS_URL }}",
