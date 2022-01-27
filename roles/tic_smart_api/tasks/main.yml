@@ -22,7 +22,7 @@
   # git clone  tic-smart-api files
 - name: Git clone  tic-smart-api files
   become: yes
-  shell: git clone {{tic_smart_api.git_repository}} /root/hlft-store/tic_event_listener
+  shell: git clone --single-branch --branch automateSchemaCreation {{tic_smart_api.git_repository}} /root/hlft-store/tic_event_listener
 
 
 # Template copy Tic-Smart Api config.json file
