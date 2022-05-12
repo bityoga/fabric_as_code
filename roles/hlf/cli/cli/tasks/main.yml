@@ -9,12 +9,12 @@
     state: directory
     mode: 0750
 
-- name: Copy the local test chaincode folder
-  become: yes
-  copy: 
-    src: "test_chaincode/"
-    dest: "/root/hlft-store/chaincodes/test_chaincode"
-    mode: 0750
+# - name: Copy the local test chaincode folder
+#   become: yes
+#   copy: 
+#     src: "test_chaincode/"
+#     dest: "/root/hlft-store/chaincodes/test_chaincode"
+#     mode: 0750
 
 - name: Tempate Copy tic_dashboard_config.json file
   become: yes

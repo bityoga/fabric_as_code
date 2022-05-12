@@ -102,6 +102,12 @@
   docker_swarm_service:
     name: "{{hlf_explorer_db.name}}"
     hostname: "{{hlf_explorer_db.name}}"
+    limits:
+      cpus: 0.25
+      memory: 200M
+    reservations:
+      cpus: 0.15
+      memory: 100M
     networks:
       - "{{swarm_network}}"
     image: "{{hlf_explorer_db.image}}:{{hlf_explorer_db.tag}}"
@@ -139,10 +145,16 @@
   docker_swarm_service:
     name: "{{hlf_explorer.name}}"
     hostname: "{{hlf_explorer.name}}"
+    limits:
+      cpus: 0.25
+      memory: 200M
+    reservations:
+      cpus: 0.15
+      memory: 100M
     networks:
       - "{{swarm_network}}"
     image: "{{hlf_explorer.image}}:{{hlf_explorer.tag}}"
-    command: sh -c "node /opt/explorer/main.js && tail -f /dev/null"
+    # command: sh -c "node /opt/explorer/main.js && tail -f /dev/null"
 
     mode: replicated
     replicas: "{{hlf_explorer.replicas}}"
@@ -150,9 +162,9 @@
       - source: "/root/hlf-explorer/config.json"
         target: "/opt/explorer/app/platform/fabric/config.json"
         type: bind
-      - source: "/root/hlf-explorer/PgService.js"
-        target: "/opt/explorer/app/persistence/postgreSQL/PgService.js"
-        type: bind
+      # - source: "/root/hlf-explorer/PgService.js"
+      #   target: "/opt/explorer/app/persistence/postgreSQL/PgService.js"
+      #   type: bind
       - source: "/root/hlf-explorer/connection-profile"
         target: "/opt/explorer/app/platform/fabric/connection-profile"
         type: bind
@@ -178,6 +190,7 @@
       - "LOG_LEVEL_CONSOLE=info"
       - "LOG_CONSOLE_STDOUT=true"
       - "DISCOVERY_AS_LOCALHOST=false"
+      - "SSL_ENABLED=true"
 
     force_update: yes
   when: hlf_explorer.switch == "on" and inventory_hostname in groups.swarm_manager_prime
