@@ -1,4 +1,49 @@
-# ---   
+# ---
+  # Clean  portainer files folders , if they exists
+- name: Clean  portainer files folders , if they exists
+  become: yes
+  file:
+    path: "/root/hlft-store/portainer"
+    state: absent
+  when: portainer.switch == "on"
+
+# We create portainer directory to store the portainer data and certificates required by portainer services
+- name: Create portainer directory for portainer
+  become: yes
+  file:
+    path: "/root/hlft-store/portainer"
+    state: directory
+    mode: "0775"
+  when: rest_api.switch == "on"
+
+# We create portainer directory to store the portainer certficates
+- name: Create portainer directory for portainer
+  become: yes
+  file:
+    path: "/root/hlft-store/portainer/sslCertificates"
+    state: directory
+    mode: "0775"
+  when: rest_api.switch == "on"
+
+# We create portainer directory to store the portainer data
+- name: Create portainer directory for portainer
+  become: yes
+  file:
+    path: "/root/hlft-store/portainer/data"
+    state: directory
+    mode: "0775"
+  when: rest_api.switch == "on"
+
+# Copy the portainer certificates
+- name: Copy scripts
+  become: yes
+  copy:
+    src: "portainerCerts"
+    dest: "/root/hlft-store/portainer/sslCertificates"
+    mode: "0500"
+    force: yes
+  loop: "{{ caservices }}"
+
   # Stop Portainer service
 - name: Stop Portainer Service - {{ item.name }}
   become: yes
@@ -40,18 +85,34 @@
       - source: "/var/run/docker.sock"
         target: "/var/run/docker.sock"
         type: bind 
-      # - source: "/root/portainer/data"
-      #   target: "/data"
-      #   type: bind  
+      - source: "/root/hlft-store/portainer/data"
+        target: "/data"
+        type: bind
+      - source: "/root/hlft-store/portainer/sslCertificates"
+        target: "/certs"
+        type: bind  
      
     publish:
       - published_port: "{{item.port}}"
         target_port: "9000"
-        protocol: "tcp"
+        #protocol: "tcp"
       # - published_port: "8000"
       #   target_port: "8000"
       #   protocol: "tcp"
-      
+    command: -H tcp://tasks.agent:9001 --tlsskipverify --ssl --sslcert /certs/portainerCerts/portainer.crt --sslkey /certs/portainerCerts/portainer.key
+    # command: 
+    #   - --ssl
+    #   - --sslcert
+    #   - /certs/portainerCerts/portainer.crt
+    #   - --sslkey
+    #   - /certs/portainerCerts/portainer.key
+      # - --tlsverify
+      # - --tlscacert
+      # - /docker-certs/ca.pem
+      # - --tlscert 
+      # - /docker-certs/server-cert.pem 
+      # - --tlskey 
+      # - /docker-certs/server-key.pem
     placement:      
       constraints:
         - node.role == manager
@@ -91,7 +152,7 @@
       # - published_port: "8000"
       #   target_port: "8000"
       #   protocol: "tcp"
-      
+
     placement:      
       constraints:
         - node.platform.os == linux
