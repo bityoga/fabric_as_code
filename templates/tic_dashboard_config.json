@@ -2,5 +2,10 @@
     "tic_dashboard_port": "{{tic_dashboard.tic_dashboard_port}}",
     "tic_dashboard_user_name": "{{tic_dashboard.tic_dashboard_user_name}}",
     "tic_dashboard_user_password": "{{tic_dashboard.tic_dashboard_user_password}}",
-    "tic_master_machine_ip_address":"{{ ansible_ssh_host }}"
+    "tic_master_machine_ip_address":"{{ ansible_ssh_host }}",
+    "ARTICONF_SMART_API_AUTHENTICATION_ACCESS_ACCESS_URL": "{{tic_dashboard.ARTICONF_SMART_API_AUTHENTICATION_ACCESS_ACCESS_URL}}",
+    "smart_rest_api_authentication_user_name": "{{tic_dashboard.smart_rest_api_authentication_user_name}}",
+    "smart_rest_api_authentication_user_password": "{{tic_dashboard.smart_rest_api_authentication_user_password}}",
+    "ARTICONF_SMART_API_USECASE_ACCESS_URL": "{{tic_dashboard.ARTICONF_SMART_API_USECASE_ACCESS_URL}}",
+    "ARTICONF_SMART_API_BLOCKCHAIN_TRACE_RETRIEVAL_ACCESS_URL": "{{tic_dashboard.ARTICONF_SMART_API_BLOCKCHAIN_TRACE_RETRIEVAL_ACCESS_URL}}"
 }
