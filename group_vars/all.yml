@@ -213,6 +213,11 @@ tic_dashboard : {
   tic_dashboard_port : 3003,
   tic_dashboard_user_name : "admin",
   tic_dashboard_user_password : "adminpw",
+  ARTICONF_SMART_API_AUTHENTICATION_ACCESS_ACCESS_URL: "https://articonf1.itec.aau.at:30401",
+  smart_rest_api_authentication_user_name: "regular@itec.aau.at",
+  smart_rest_api_authentication_user_password: "2bViezK0Tst2LzsTIXix",
+  ARTICONF_SMART_API_USECASE_ACCESS_URL: "https://articonf1.itec.aau.at:30420",
+  ARTICONF_SMART_API_BLOCKCHAIN_TRACE_RETRIEVAL_ACCESS_URL: "https://articonf1.itec.aau.at:30001"
 }
 
 ###########################################################################################
