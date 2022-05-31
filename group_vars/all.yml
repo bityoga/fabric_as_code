@@ -27,29 +27,29 @@ org:
 
 # Creds of various agents
 admin_user: "admin1"
-admin_password: "admin1pw"
+admin_password: "cLTVxcbXumZGJBWjL7cyXhpfMKgMrqfJ"
 
 tlsca_user: "tlsca"
-tlsca_password: "tlscapw"
+tlsca_password: "RraM2PRjmAAfkeeqYA5MaeHAZc22XFDa"
 
 orgca_user: "orgca"
-orgca_password: "orgcapw"  
+orgca_password: "8tp8WrXU4wcKEzKKz5rsyUTZ9TjarBE4"  
 
 orderer_user: "orderer"
-orderer_password: "ordererpw"
+orderer_password: "gydcxWGCLwN4NLd3LUmwz4VGeAXd9xzj"
 
 peer1_user: "peer1"
-peer1_password: "peer1pw"
+peer1_password: "FxTbCUZY3ddwDRBxWLGDWTnffJ992nJT"
 
 peer2_user: "peer2"
-peer2_password: "peer2pw"
+peer2_password: "pKhvh5xynjzwr4rfjDskPpBTj2m3cCsY"
 
 couchdb_user: "couchdb"
-couchdb_password: "couchdbpw"
+couchdb_password: "Ue8vjsLnkeUZ5q9632k83aKfLHZGhTCR"
 
 
 hlf_explorer_db_user: "hppoc"
-hlf_explorer_db_password: "password"
+hlf_explorer_db_password: "Ue8vjsLnkeUZ5q9632k83aKfLHZGhTCR"
 
 
 hlf_explorer_admin_user: "admin"
@@ -184,10 +184,10 @@ rest_api : {
   replicas: -1,
   port : 3001,
   switch: "on",
-  fabric_ca_admin_user_name: "admin1",
-  fabric_ca_admin_password: "admin1pw",
-  rest_api_admin_user_name: "rest_api_admin_user",
-  rest_api_admin_password: "rest_api_admin_password",
+  fabric_ca_admin_user_name: "{{admin_user}}",
+  fabric_ca_admin_password: "{{admin_password}}",
+  rest_api_admin_user_name: "restApiAdminUser",
+  rest_api_admin_password: "6C7ptK2p5RkjLU4xrK65WVUDBfK7mV3K",
   rest_api_admin_user_role: "client",
   enable_https: "y",
 }
@@ -199,8 +199,8 @@ tic_smart_api : {
   name : 'tic-smart-api-service',
   replicas: -1,
   port : 3004,
-  tic_smart_api_app_admin_user_name: "admin",
-  tic_smart_api_app_admin_user_password: "adminpw",
+  tic_smart_api_app_admin_user_name: "{{admin_user}}",
+  tic_smart_api_app_admin_user_password: "{{admin_password}}",
   ARTICONF_SMART_API_AUTHENTICATION_ACCESS_ACCESS_URL: "https://articonf1.itec.aau.at:30401",
   smart_rest_api_authentication_user_name: "regular@itec.aau.at",
   smart_rest_api_authentication_user_password: "2bViezK0Tst2LzsTIXix",
@@ -212,7 +212,7 @@ tic_smart_api : {
 tic_dashboard : {
   tic_dashboard_port : 3003,
   tic_dashboard_user_name : "admin",
-  tic_dashboard_user_password : "adminpw",
+  tic_dashboard_user_password : "VRsARwxmKSx2Hm6DcLEaKGrK6aEqYHtd",
 }
 
 
